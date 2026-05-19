@@ -1,0 +1,2089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1A1A1A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Hephaestus — Demolition Crew App</title>
+<link rel="icon" type="image/svg+xml" href="logo-mark.svg">
+<link rel="apple-touch-icon" href="logo-mark.svg">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<style>
+  :root {
+    --bg: #F5F2EB;
+    --surface: #FFFFFF;
+    --surface-2: #FAF7F0;
+    --ink: #1A1A1A;
+    --ink-2: #4A4540;
+    --ink-3: #8A857E;
+    --border: #E8E2D5;
+    --border-2: #D5CFC2;
+    --amber: #F5A623;
+    --amber-deep: #D89220;
+    --amber-bg: #FDF1D9;
+    --hazard: #D85A30;
+    --hazard-bg: #FAECE7;
+    --hazard-deep: #993C1D;
+    --success: #3B6D11;
+    --success-bg: #EAF3DE;
+    --info: #185FA5;
+    --info-bg: #E6F1FB;
+    --slate: #1C1C1C;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; overscroll-behavior: none; }
+  body {
+    font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+    background: #2A2724;
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .frame-wrap {
+    width: 100%;
+    height: 100vh;
+    max-width: 100%;
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+  }
+  @media (min-width: 600px) {
+    body { padding: 20px; background: #1A1815; }
+    .frame-wrap {
+      width: 420px;
+      height: 880px;
+      max-height: calc(100vh - 40px);
+      border-radius: 36px;
+      border: 8px solid #0E0D0C;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.5), 0 10px 30px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+  }
+  .app {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .screen {
+    position: absolute;
+    inset: 0;
+    background: var(--bg);
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 76px;
+    transform: translateX(100%);
+    transition: transform 280ms cubic-bezier(0.32, 0.72, 0, 1);
+    will-change: transform;
+  }
+  .screen.active { transform: translateX(0); }
+  .screen[data-screen="login"] { padding-bottom: 0; }
+
+  /* === LOGIN === */
+  .login {
+    background:
+      linear-gradient(180deg, rgba(26,26,26,0.88) 0%, rgba(26,26,26,0.96) 60%, rgba(26,26,26,1) 100%),
+      url('https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=900&q=70') center/cover;
+    height: 100%;
+    padding: 0;
+    color: #F5F2EB;
+    display: flex;
+    flex-direction: column;
+  }
+  .login-top {
+    padding: 60px 32px 0;
+    text-align: center;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .login-mark {
+    width: 96px;
+    height: 96px;
+    margin-bottom: 24px;
+    filter: drop-shadow(0 6px 24px rgba(245, 166, 35, 0.3));
+  }
+  .wordmark {
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    font-size: 38px;
+    letter-spacing: 0.14em;
+    line-height: 1;
+    color: #F5F2EB;
+    margin: 0;
+  }
+  .wordmark-greek {
+    font-family: 'Cinzel', serif;
+    font-style: italic;
+    font-size: 14px;
+    letter-spacing: 0.18em;
+    color: var(--amber);
+    margin-top: 10px;
+    opacity: 0.9;
+  }
+  .wordmark-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(245, 242, 235, 0.5);
+    margin-top: 18px;
+  }
+  .forge-line {
+    font-family: 'Cinzel', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: rgba(245, 242, 235, 0.65);
+    margin-top: 32px;
+    line-height: 1.7;
+    max-width: 280px;
+  }
+  .login-form { padding: 0 24px 40px; }
+  .field { margin-bottom: 14px; }
+  .field-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(245, 242, 235, 0.5);
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .field-input {
+    width: 100%;
+    padding: 14px 16px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    color: #F5F2EB;
+    font-family: inherit;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .field-input:focus {
+    border-color: var(--amber);
+    background: rgba(255,255,255,0.12);
+  }
+  .field-input::placeholder { color: rgba(245, 242, 235, 0.3); }
+
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 16px;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.08s, background 0.15s;
+    letter-spacing: 0.02em;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary { background: var(--amber); color: var(--slate); }
+  .btn-primary:hover { background: var(--amber-deep); }
+  .btn-ghost {
+    background: transparent;
+    color: rgba(245, 242, 235, 0.7);
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+  .btn-secondary {
+    background: var(--surface);
+    color: var(--ink);
+    border: 1px solid var(--border);
+  }
+  .btn-danger { background: var(--hazard); color: white; }
+  .login-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 24px; }
+  .demo-banner {
+    background: rgba(245, 166, 35, 0.15);
+    color: var(--amber);
+    border: 1px solid rgba(245, 166, 35, 0.3);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    text-align: center;
+    margin-bottom: 16px;
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+
+  /* === APP HEADER === */
+  .app-header {
+    background: var(--slate);
+    color: var(--bg);
+    padding: 12px 18px 11px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  .app-header-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .app-header-mark {
+    width: 28px;
+    height: 28px;
+  }
+  .app-header-title {
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    font-size: 16px;
+    letter-spacing: 0.18em;
+  }
+  .app-header-back {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--bg);
+    background: transparent;
+    border: none;
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 4px 0;
+  }
+  .app-header-icon {
+    background: transparent;
+    border: none;
+    color: var(--bg);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .demo-pill {
+    display: inline-block;
+    background: var(--amber);
+    color: var(--slate);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    padding: 2px 6px;
+    border-radius: 3px;
+    vertical-align: middle;
+    margin-left: 6px;
+  }
+
+  /* === CONTENT === */
+  .content { padding: 16px; }
+  .section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink-3);
+    margin: 0 0 10px;
+    font-weight: 500;
+  }
+  .card {
+    background: var(--surface);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .card-pad { padding: 16px; }
+
+  /* === JOB HERO === */
+  .job-hero {
+    background: var(--slate);
+    color: var(--bg);
+    border-radius: 16px;
+    padding: 18px;
+    margin-bottom: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .job-hero::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    width: 120px;
+    height: 120px;
+    background: radial-gradient(circle, rgba(245,166,35,0.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .job-hero-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--amber);
+    margin-bottom: 8px;
+  }
+  .job-hero-title {
+    font-size: 19px;
+    font-weight: 600;
+    margin: 0 0 4px;
+    line-height: 1.25;
+  }
+  .job-hero-addr {
+    font-size: 13px;
+    color: rgba(245,242,235,0.7);
+    margin: 0 0 14px;
+  }
+  .clock-status {
+    background: rgba(123, 164, 40, 0.18);
+    border: 1px solid rgba(123, 164, 40, 0.35);
+    padding: 12px 14px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .clock-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #9FE1CB;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.3); }
+  }
+  .clock-status-text { flex: 1; }
+  .clock-status-title { font-size: 13px; font-weight: 600; color: #C0DD97; margin: 0; }
+  .clock-status-sub { font-size: 11px; color: rgba(192, 221, 151, 0.85); margin-top: 2px; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.05em; }
+
+  /* === PHOTO PROGRESS === */
+  .photo-strip { margin-bottom: 14px; }
+  .photo-strip-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+  }
+  .photo-strip-title { font-size: 14px; font-weight: 600; margin: 0; }
+  .photo-strip-progress {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-3);
+  }
+  .photo-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+  .photo-cell {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    transition: transform 0.1s;
+  }
+  .photo-cell:active { transform: scale(0.96); }
+  .photo-cell.done::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.5));
+  }
+  .photo-cell-check {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: var(--success);
+    color: white;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    z-index: 2;
+  }
+  .photo-cell.empty {
+    background: var(--surface);
+    border: 1.5px dashed var(--border-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-3);
+  }
+  .photo-cell.next {
+    background: var(--amber-bg);
+    border: 1.5px solid var(--amber);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--amber-deep);
+    animation: nudge 2s infinite;
+  }
+  @keyframes nudge {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+  }
+
+  /* === ACTIONS GRID === */
+  .actions-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .action-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 12px;
+    text-align: left;
+    cursor: pointer;
+    transition: transform 0.08s, border-color 0.15s;
+    font-family: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .action-btn:active { transform: scale(0.98); }
+  .action-btn:hover { border-color: var(--border-2); }
+  .action-btn-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--amber-bg);
+    color: var(--amber-deep);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+  .action-btn-icon.hazard { background: var(--hazard-bg); color: var(--hazard-deep); }
+  .action-btn-icon.info { background: var(--info-bg); color: var(--info); }
+  .action-btn-icon.success { background: var(--success-bg); color: var(--success); }
+  .action-btn-title { font-size: 14px; font-weight: 600; color: var(--ink); }
+  .action-btn-sub { font-size: 11px; color: var(--ink-3); }
+
+  /* === COST ROLL-UP === */
+  .cost-card {
+    background: var(--slate);
+    color: var(--bg);
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+  .cost-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 14px;
+  }
+  .cost-card-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: rgba(245,242,235,0.5);
+  }
+  .cost-card-margin {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: #C0DD97;
+    font-weight: 500;
+  }
+  .cost-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .cost-line-label {
+    font-size: 11px;
+    color: rgba(245,242,235,0.5);
+    margin-bottom: 2px;
+  }
+  .cost-line-value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 17px;
+    font-weight: 500;
+  }
+  .cost-total {
+    border-top: 1px solid rgba(245,242,235,0.15);
+    margin-top: 14px;
+    padding-top: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .cost-total-label { font-size: 12px; color: rgba(245,242,235,0.6); }
+  .cost-total-value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--amber);
+  }
+
+  /* === LIST ITEMS === */
+  .list-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: transform 0.08s;
+  }
+  .list-item:active { transform: scale(0.98); }
+  .list-item-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--bg);
+    color: var(--ink-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .list-item-body { flex: 1; min-width: 0; }
+  .list-item-title { font-size: 14px; font-weight: 600; margin: 0; }
+  .list-item-sub {
+    font-size: 12px;
+    color: var(--ink-3);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .list-item-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-2);
+    font-weight: 500;
+  }
+
+  /* === BOTTOM NAV === */
+  .bottom-nav {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    padding: 10px 0 max(10px, env(safe-area-inset-bottom));
+    z-index: 20;
+  }
+  .nav-item {
+    background: none;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    cursor: pointer;
+    color: var(--ink-3);
+    font-family: inherit;
+    padding: 4px;
+    transition: color 0.15s;
+  }
+  .nav-item.active { color: var(--ink); }
+  .nav-item i { font-size: 22px; }
+  .nav-item span { font-size: 10px; font-weight: 500; letter-spacing: 0.02em; }
+
+  /* === TABS === */
+  .tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    padding: 0 12px;
+    position: sticky;
+    top: 51px;
+    z-index: 5;
+  }
+  .tab {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 14px 0;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ink-3);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .tab.active {
+    color: var(--ink);
+    border-bottom-color: var(--amber);
+  }
+
+  /* === MAP === */
+  .map-container {
+    position: relative;
+    height: 320px;
+    background: linear-gradient(135deg, #E8E2D5 0%, #D5CFC2 100%);
+    overflow: hidden;
+  }
+  .map-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(74,69,64,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(74,69,64,0.06) 1px, transparent 1px);
+    background-size: 30px 30px;
+  }
+  .map-road { position: absolute; background: rgba(255,255,255,0.6); }
+  .map-pin {
+    position: absolute;
+    transform: translate(-50%, -100%);
+    cursor: pointer;
+    z-index: 2;
+  }
+  .map-pin-body {
+    background: var(--slate);
+    color: var(--bg);
+    padding: 6px 10px;
+    border-radius: 18px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .map-pin-body::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%) rotate(45deg);
+    width: 8px;
+    height: 8px;
+    background: var(--slate);
+  }
+  .map-pin-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--amber);
+  }
+  .map-pin.active .map-pin-body { background: var(--amber); color: var(--slate); }
+  .map-pin.active .map-pin-body::after { background: var(--amber); }
+  .map-pin.active .map-pin-dot { background: var(--slate); }
+  .map-pin.complete .map-pin-dot { background: #C0DD97; }
+  .map-pin.scheduled .map-pin-dot { background: rgba(245,242,235,0.5); }
+
+  .map-self {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--info);
+    border: 3px solid white;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 2px 8px rgba(24, 95, 165, 0.4);
+  }
+  .map-self::after {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    background: rgba(24, 95, 165, 0.2);
+    animation: pulse-ring 2s infinite;
+  }
+  @keyframes pulse-ring {
+    0% { transform: scale(0.8); opacity: 1; }
+    100% { transform: scale(2); opacity: 0; }
+  }
+
+  /* === MODAL === */
+  .modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(26,26,26,0.5);
+    z-index: 30;
+    display: flex;
+    align-items: flex-end;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .modal-overlay.show { opacity: 1; pointer-events: auto; }
+  .modal {
+    background: var(--bg);
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+    max-height: 90%;
+    padding: 8px 0 max(24px, env(safe-area-inset-bottom));
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    overflow-y: auto;
+  }
+  .modal-overlay.show .modal { transform: translateY(0); }
+  .modal-handle {
+    width: 40px;
+    height: 4px;
+    background: var(--border-2);
+    border-radius: 2px;
+    margin: 4px auto 16px;
+  }
+  .modal-content { padding: 0 20px; }
+  .modal-title { font-size: 18px; font-weight: 600; margin: 0 0 4px; }
+  .modal-sub { font-size: 13px; color: var(--ink-3); margin: 0 0 20px; }
+
+  /* === FORM === */
+  .form-field { margin-bottom: 14px; }
+  .form-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-2);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .form-input, .form-select {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 15px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .form-input:focus, .form-select:focus { border-color: var(--amber); }
+  .form-row { display: grid; grid-template-columns: 2fr 1fr; gap: 10px; }
+  .form-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .form-chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 18px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--ink-2);
+    transition: all 0.15s;
+  }
+  .form-chip.selected {
+    background: var(--ink);
+    color: var(--bg);
+    border-color: var(--ink);
+  }
+
+  /* === ME / PROFILE === */
+  .profile-head {
+    background: var(--slate);
+    color: var(--bg);
+    padding: 24px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--amber);
+    color: var(--slate);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 22px;
+    font-family: 'Cinzel', serif;
+  }
+  .profile-name { font-size: 18px; font-weight: 600; margin: 0; }
+  .profile-role { font-size: 12px; color: rgba(245,242,235,0.6); font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.05em; }
+  .menu-list { background: var(--surface); margin: 14px; border-radius: 14px; border: 1px solid var(--border); overflow: hidden; }
+  .menu-item {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .menu-item:last-child { border-bottom: none; }
+  .menu-item:hover, .menu-item:active { background: var(--surface-2); }
+  .menu-item i:first-child { color: var(--ink-2); font-size: 20px; }
+  .menu-item-label { flex: 1; font-size: 14px; }
+  .menu-item-arrow { color: var(--ink-3); font-size: 16px; }
+
+  /* === TIMESHEET === */
+  .ts-day {
+    background: var(--surface);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .ts-day-head {
+    padding: 12px 16px;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .ts-day-date { font-size: 13px; font-weight: 600; }
+  .ts-day-total { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--ink-2); font-weight: 500; }
+  .ts-row { padding: 12px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+  .ts-row:last-child { border-bottom: none; }
+  .ts-row-time { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--ink-3); min-width: 80px; }
+  .ts-row-job { flex: 1; font-size: 13px; }
+  .ts-row-hrs { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 500; }
+
+  /* === TOAST === */
+  .toast {
+    position: absolute;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: var(--slate);
+    color: var(--bg);
+    padding: 10px 16px;
+    border-radius: 24px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 50;
+    transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast i { color: var(--amber); font-size: 16px; }
+
+  .screen::-webkit-scrollbar { width: 0; }
+
+  /* Job detail */
+  .job-photo-hero {
+    height: 200px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+  .job-photo-hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.6));
+  }
+  .job-photo-hero-info {
+    position: absolute;
+    bottom: 14px;
+    left: 16px;
+    right: 16px;
+    color: white;
+    z-index: 2;
+  }
+  .job-photo-hero-status {
+    display: inline-block;
+    background: var(--amber);
+    color: var(--slate);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+  }
+  .job-photo-hero-title { font-size: 18px; font-weight: 600; margin: 0; }
+  .job-photo-hero-addr { font-size: 12px; opacity: 0.85; margin: 2px 0 0; font-family: 'IBM Plex Mono', monospace; letter-spacing: 0.03em; }
+
+  .tip-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+  .tip-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+  }
+  .tip-card-facility { font-size: 14px; font-weight: 600; }
+  .tip-card-cost { font-family: 'IBM Plex Mono', monospace; font-weight: 600; color: var(--hazard-deep); }
+  .tip-card-detail { display: flex; gap: 14px; font-size: 12px; color: var(--ink-3); font-family: 'IBM Plex Mono', monospace; }
+  .tip-card-detail span { display: flex; align-items: center; gap: 4px; }
+
+  .measurement-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+  .measurement-row:last-child { border-bottom: none; }
+  .measurement-label { color: var(--ink-2); }
+  .measurement-value { font-family: 'IBM Plex Mono', monospace; font-weight: 500; }
+
+  .hazard-banner {
+    background: var(--hazard-bg);
+    border: 1px solid rgba(216, 90, 48, 0.3);
+    color: var(--hazard-deep);
+    padding: 10px 14px;
+    border-radius: 10px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+  }
+  .hazard-banner i { font-size: 18px; }
+
+  .photo-modal-img {
+    width: 100%;
+    height: 280px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 12px;
+    margin-bottom: 14px;
+  }
+  .photo-meta {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+  }
+  .photo-meta-row { display: flex; justify-content: space-between; padding: 3px 0; color: var(--ink-2); }
+  .photo-meta-row b { color: var(--ink); font-weight: 500; }
+
+  /* === SPLASH SCREEN === */
+  .splash-overlay {
+    position: absolute;
+    inset: 0;
+    background: #1A1A1A;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 22px;
+    animation: splash-out 0.6s ease 2.6s forwards;
+  }
+  .splash-svg {
+    width: 140px;
+    height: 140px;
+    overflow: visible;
+  }
+  /* Anvil rises */
+  .s-anvil {
+    transform-origin: center;
+    transform: translateY(60px);
+    opacity: 0;
+    animation: anvil-rise 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s forwards;
+  }
+  @keyframes anvil-rise {
+    to { transform: translateY(0); opacity: 1; }
+  }
+  /* Hammer drops */
+  .s-hammer {
+    transform-origin: center;
+    transform: translateY(-80px) rotate(-12deg);
+    opacity: 0;
+    animation: hammer-drop 0.55s cubic-bezier(0.5, 0, 0.5, 1.5) 0.7s forwards,
+               hammer-strike 0.3s ease-out 1.25s 1;
+  }
+  @keyframes hammer-drop {
+    to { transform: translateY(0) rotate(0); opacity: 1; }
+  }
+  @keyframes hammer-strike {
+    0%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-6px); }
+  }
+  /* Flames ignite */
+  .s-flame {
+    transform-origin: center bottom;
+    transform: scale(0);
+    opacity: 0;
+  }
+  .s-flame-c { animation: flame-ignite 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 1.4s forwards, flicker 1.6s ease-in-out 2s infinite; }
+  .s-flame-l { animation: flame-ignite 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 1.6s forwards, flicker 1.4s ease-in-out 2.1s infinite; }
+  .s-flame-r { animation: flame-ignite 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 1.7s forwards, flicker 1.5s ease-in-out 2.15s infinite; }
+  .s-flame-i { animation: flame-ignite 0.5s ease 1.5s forwards, flicker 1.6s ease-in-out 2s infinite; }
+  @keyframes flame-ignite {
+    to { transform: scale(1); opacity: 1; }
+  }
+  @keyframes flicker {
+    0%, 100% { transform: scale(1, 1); opacity: 1; }
+    25% { transform: scale(0.95, 1.08); opacity: 0.92; }
+    50% { transform: scale(1.04, 0.96); opacity: 1; }
+    75% { transform: scale(0.97, 1.05); opacity: 0.95; }
+  }
+  /* Ring draws */
+  .s-ring {
+    stroke-dasharray: 580;
+    stroke-dashoffset: 580;
+    transform-origin: center;
+    transform: rotate(-90deg);
+    animation: ring-draw 1s ease-out 1.6s forwards;
+  }
+  @keyframes ring-draw {
+    to { stroke-dashoffset: 0; }
+  }
+  /* Outer dark circle */
+  .s-bg-circle {
+    opacity: 0;
+    animation: fade-in 0.4s ease 0.1s forwards;
+  }
+  @keyframes fade-in {
+    to { opacity: 1; }
+  }
+  .splash-word {
+    font-family: 'Cinzel', serif;
+    font-weight: 600;
+    font-size: 28px;
+    letter-spacing: 0.18em;
+    color: #F5F2EB;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: word-rise 0.6s ease 1.9s forwards;
+  }
+  .splash-greek {
+    font-family: 'Cinzel', serif;
+    font-style: italic;
+    font-size: 13px;
+    letter-spacing: 0.2em;
+    color: #F5A623;
+    opacity: 0;
+    margin-top: -14px;
+    animation: fade-in 0.5s ease 2.2s forwards;
+  }
+  @keyframes word-rise {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes splash-out {
+    to { opacity: 0; pointer-events: none; visibility: hidden; }
+  }
+
+  /* === THINKING / LOADER === */
+  .thinking-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(26, 26, 26, 0.55);
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+  .thinking-overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .thinking-mark {
+    width: 64px;
+    height: 64px;
+    animation: forge-pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes forge-pulse {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(245, 166, 35, 0)); }
+    50% { transform: scale(1.05); filter: drop-shadow(0 0 12px rgba(245, 166, 35, 0.6)); }
+  }
+  /* The "live" flicker that the symbol's flames inherit */
+  .heph-live-flame {
+    transform-origin: center bottom;
+    animation: live-flicker 1.6s ease-in-out infinite;
+  }
+  .heph-live-flame-2 { animation-delay: 0.3s; animation-duration: 1.4s; }
+  .heph-live-flame-3 { animation-delay: 0.6s; animation-duration: 1.5s; }
+  @keyframes live-flicker {
+    0%, 100% { transform: scale(1, 1); opacity: 1; }
+    33% { transform: scale(0.96, 1.06); opacity: 0.9; }
+    66% { transform: scale(1.03, 0.97); opacity: 1; }
+  }
+  .thinking-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: #F5A623;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<!-- Reusable inline SVG mark — referenced by <use> below to keep file compact -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="heph-mark" viewBox="0 0 200 200">
+      <circle cx="100" cy="100" r="98" fill="#1A1A1A"/>
+      <circle cx="100" cy="100" r="92" fill="none" stroke="#F5A623" stroke-width="1.5" opacity="0.5"/>
+      <path class="heph-live-flame" d="M 100 30 C 92 42, 92 52, 100 62 C 108 52, 108 42, 100 30 Z" fill="#F5A623"/>
+      <path class="heph-live-flame" d="M 100 38 C 96 46, 96 52, 100 58 C 104 52, 104 46, 100 38 Z" fill="#FCEBCD"/>
+      <path class="heph-live-flame heph-live-flame-2" d="M 82 48 C 77 56, 77 62, 82 68 C 87 62, 87 56, 82 48 Z" fill="#F5A623" opacity="0.85"/>
+      <path class="heph-live-flame heph-live-flame-3" d="M 118 48 C 113 56, 113 62, 118 68 C 123 62, 123 56, 118 48 Z" fill="#F5A623" opacity="0.85"/>
+      <rect x="68" y="76" width="64" height="20" rx="2" fill="#F5F2EB"/>
+      <rect x="124" y="72" width="14" height="28" rx="2" fill="#F5F2EB"/>
+      <rect x="62" y="78" width="8" height="16" rx="1.5" fill="#F5F2EB"/>
+      <rect x="96" y="96" width="8" height="36" rx="1" fill="#F5F2EB"/>
+      <rect x="50" y="138" width="100" height="8" rx="1" fill="#F5F2EB"/>
+      <path d="M 50 138 L 38 142 L 50 146 Z" fill="#F5F2EB"/>
+      <path d="M 64 146 L 136 146 L 128 162 L 72 162 Z" fill="#F5F2EB"/>
+      <rect x="62" y="162" width="76" height="10" rx="1" fill="#F5F2EB"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="frame-wrap">
+
+  <!-- === SPLASH SCREEN === -->
+  <div class="splash-overlay" id="splash">
+    <svg class="splash-svg" viewBox="-20 -20 240 240" xmlns="http://www.w3.org/2000/svg">
+      <!-- Background dark circle -->
+      <circle class="s-bg-circle" cx="100" cy="100" r="98" fill="#252220"/>
+      <!-- Inner amber ring (draws) -->
+      <circle class="s-ring" cx="100" cy="100" r="92" fill="none" stroke="#F5A623" stroke-width="1.5" opacity="0.6"/>
+
+      <!-- Anvil group (rises from below) -->
+      <g class="s-anvil">
+        <rect x="50" y="138" width="100" height="8" rx="1" fill="#F5F2EB"/>
+        <path d="M 50 138 L 38 142 L 50 146 Z" fill="#F5F2EB"/>
+        <path d="M 64 146 L 136 146 L 128 162 L 72 162 Z" fill="#F5F2EB"/>
+        <rect x="62" y="162" width="76" height="10" rx="1" fill="#F5F2EB"/>
+      </g>
+
+      <!-- Hammer group (drops from above) -->
+      <g class="s-hammer">
+        <rect x="68" y="76" width="64" height="20" rx="2" fill="#F5F2EB"/>
+        <rect x="124" y="72" width="14" height="28" rx="2" fill="#F5F2EB"/>
+        <rect x="62" y="78" width="8" height="16" rx="1.5" fill="#F5F2EB"/>
+        <rect x="96" y="96" width="8" height="36" rx="1" fill="#F5F2EB"/>
+      </g>
+
+      <!-- Flames (ignite in sequence) -->
+      <path class="s-flame s-flame-c" d="M 100 30 C 92 42, 92 52, 100 62 C 108 52, 108 42, 100 30 Z" fill="#F5A623"/>
+      <path class="s-flame s-flame-i" d="M 100 38 C 96 46, 96 52, 100 58 C 104 52, 104 46, 100 38 Z" fill="#FCEBCD"/>
+      <path class="s-flame s-flame-l" d="M 82 48 C 77 56, 77 62, 82 68 C 87 62, 87 56, 82 48 Z" fill="#F5A623" opacity="0.85"/>
+      <path class="s-flame s-flame-r" d="M 118 48 C 113 56, 113 62, 118 68 C 123 62, 123 56, 118 48 Z" fill="#F5A623" opacity="0.85"/>
+    </svg>
+    <div class="splash-word">HEPHAESTUS</div>
+    <div class="splash-greek">ἭΦΑΙΣΤΟΣ</div>
+  </div>
+
+  <!-- === THINKING / LOADER OVERLAY === -->
+  <div class="thinking-overlay" id="thinking">
+    <svg class="thinking-mark"><use href="#heph-mark"/></svg>
+    <div class="thinking-label" id="thinkingLabel">Working...</div>
+  </div>
+
+  <div class="app">
+
+    <!-- === LOGIN === -->
+    <div class="screen login active" data-screen="login">
+      <div class="login-top">
+        <svg class="login-mark"><use href="#heph-mark"/></svg>
+        <h1 class="wordmark">HEPHAESTUS</h1>
+        <div class="wordmark-greek">ἭΦΑΙΣΤΟΣ</div>
+        <div class="wordmark-sub">DEMOLITION OPS · v0.1</div>
+        <p class="forge-line">"Forged in fire.<br>Built for breaking stone."</p>
+      </div>
+      <div class="login-form">
+        <div class="demo-banner">
+          <i class="ti ti-flame"></i> CLIENT PREVIEW · DEMO BUILD
+        </div>
+        <div class="field">
+          <div class="field-label">Email</div>
+          <input type="email" class="field-input" value="crew@yourcompany.com.au" placeholder="you@company.com.au">
+        </div>
+        <div class="field">
+          <div class="field-label">Password</div>
+          <input type="password" class="field-input" value="••••••••" placeholder="Password">
+        </div>
+        <div class="login-actions">
+          <button class="btn btn-primary" onclick="goTo('today')">
+            <i class="ti ti-login-2"></i> Sign in
+          </button>
+          <button class="btn btn-ghost" onclick="goTo('today')">Try the demo →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- === TODAY === -->
+    <div class="screen" data-screen="today">
+      <div class="app-header">
+        <div class="app-header-brand">
+          <svg class="app-header-mark"><use href="#heph-mark"/></svg>
+          <span class="app-header-title">HEPHAESTUS</span>
+          <span class="demo-pill">DEMO</span>
+        </div>
+        <button class="app-header-icon" onclick="showToast('No notifications', 'ti-bell')">
+          <i class="ti ti-bell"></i>
+        </button>
+      </div>
+
+      <div class="content">
+        <div class="section-label">Today · Tue 19 May</div>
+
+        <div class="job-hero">
+          <div class="job-hero-label">Current job</div>
+          <h2 class="job-hero-title">Full house strip-out</h2>
+          <p class="job-hero-addr">42 Marrickville Rd, Marrickville NSW</p>
+          <div class="clock-status">
+            <div class="clock-status-dot"></div>
+            <div class="clock-status-text">
+              <div class="clock-status-title">Clocked in · 7:02 AM</div>
+              <div class="clock-status-sub">GPS verified · 18m from site</div>
+            </div>
+            <i class="ti ti-shield-check" style="color:#C0DD97; font-size:20px;"></i>
+          </div>
+        </div>
+
+        <div class="photo-strip">
+          <div class="photo-strip-head">
+            <h3 class="photo-strip-title">Pre-work photos</h3>
+            <div class="photo-strip-progress" id="photoProgress">5 of 8 required</div>
+          </div>
+          <div class="photo-grid" id="photoGrid"></div>
+        </div>
+
+        <div class="actions-grid">
+          <button class="action-btn" onclick="openModal('measureModal')">
+            <div class="action-btn-icon info"><i class="ti ti-ruler-measure"></i></div>
+            <div>
+              <div class="action-btn-title">Measure</div>
+              <div class="action-btn-sub">Walls, rooms, slab</div>
+            </div>
+          </button>
+          <button class="action-btn" onclick="openModal('tipModal')">
+            <div class="action-btn-icon"><i class="ti ti-truck"></i></div>
+            <div>
+              <div class="action-btn-title">Log tip run</div>
+              <div class="action-btn-sub">Allocate cost to job</div>
+            </div>
+          </button>
+          <button class="action-btn" onclick="showToast('Opening Google Maps...', 'ti-map-pin')">
+            <div class="action-btn-icon success"><i class="ti ti-map-pin"></i></div>
+            <div>
+              <div class="action-btn-title">Directions</div>
+              <div class="action-btn-sub">From depot</div>
+            </div>
+          </button>
+          <button class="action-btn" onclick="openModal('hazardModal')">
+            <div class="action-btn-icon hazard"><i class="ti ti-alert-triangle"></i></div>
+            <div>
+              <div class="action-btn-title">Flag hazard</div>
+              <div class="action-btn-sub">Asbestos, services</div>
+            </div>
+          </button>
+        </div>
+
+        <div class="cost-card">
+          <div class="cost-card-head">
+            <div class="cost-card-title">Job to date</div>
+            <div class="cost-card-margin">↗ 62% margin</div>
+          </div>
+          <div class="cost-grid">
+            <div>
+              <div class="cost-line-label">Labour · 12.5h</div>
+              <div class="cost-line-value">$1,240</div>
+            </div>
+            <div>
+              <div class="cost-line-label">Tip costs · 2 runs</div>
+              <div class="cost-line-value">$680</div>
+            </div>
+            <div>
+              <div class="cost-line-label">Travel · 38km</div>
+              <div class="cost-line-value">$95</div>
+            </div>
+            <div>
+              <div class="cost-line-label">Consumables</div>
+              <div class="cost-line-value">$120</div>
+            </div>
+          </div>
+          <div class="cost-total">
+            <div class="cost-total-label">Costs vs $5,800 quote</div>
+            <div class="cost-total-value">$2,135</div>
+          </div>
+        </div>
+
+        <button class="btn btn-secondary" onclick="goTo('jobDetail')" style="margin-bottom:14px;">
+          <i class="ti ti-arrow-right"></i> Open full job
+        </button>
+      </div>
+    </div>
+
+    <!-- === JOB DETAIL === -->
+    <div class="screen" data-screen="jobDetail">
+      <div class="app-header">
+        <button class="app-header-back" onclick="goTo('today')">
+          <i class="ti ti-chevron-left"></i> Back
+        </button>
+        <span class="app-header-title" style="font-size:13px;">JOB #HPS-1042</span>
+        <button class="app-header-icon" onclick="showToast('Sharing job summary...', 'ti-share')">
+          <i class="ti ti-share"></i>
+        </button>
+      </div>
+
+      <div class="job-photo-hero" style="background-image: url('https://picsum.photos/seed/marrickville1/800/400');">
+        <div class="job-photo-hero-info">
+          <div class="job-photo-hero-status">IN PROGRESS · DAY 2 OF 4</div>
+          <h2 class="job-photo-hero-title">Full house strip-out</h2>
+          <p class="job-photo-hero-addr">42 Marrickville Rd, Marrickville NSW · -33.911, 151.156</p>
+        </div>
+      </div>
+
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab(this, 'tab-photos')">Photos</button>
+        <button class="tab" onclick="switchTab(this, 'tab-specs')">Specs</button>
+        <button class="tab" onclick="switchTab(this, 'tab-tips')">Tip runs</button>
+        <button class="tab" onclick="switchTab(this, 'tab-costs')">Costs</button>
+      </div>
+
+      <div class="content">
+        <div id="tab-photos" class="tab-panel">
+          <div class="section-label">Pre-work · 5 of 8</div>
+          <div class="photo-grid" style="margin-bottom:18px;" id="jobPhotoGrid"></div>
+          <div class="section-label">During work · 3 photos</div>
+          <div class="photo-grid" style="margin-bottom:18px;">
+            <div class="photo-cell done" style="background-image:url('https://picsum.photos/seed/dur1/200');" onclick="openPhotoView('dur1','Kitchen mid-strip','Tue 19 May · 10:42 AM')"></div>
+            <div class="photo-cell done" style="background-image:url('https://picsum.photos/seed/dur2/200');" onclick="openPhotoView('dur2','Bathroom tiles removed','Tue 19 May · 11:15 AM')"></div>
+            <div class="photo-cell done" style="background-image:url('https://picsum.photos/seed/dur3/200');" onclick="openPhotoView('dur3','Carport demolished','Tue 19 May · 1:30 PM')"></div>
+            <div class="photo-cell empty"><i class="ti ti-plus"></i></div>
+          </div>
+        </div>
+
+        <div id="tab-specs" class="tab-panel" style="display:none;">
+          <div class="hazard-banner">
+            <i class="ti ti-alert-octagon"></i>
+            <div><b>Asbestos suspected</b> in laundry ceiling sheets · sampled & sent for testing</div>
+          </div>
+          <div class="card card-pad" style="margin-bottom:14px;">
+            <div class="section-label" style="margin-bottom:8px;">Measurements</div>
+            <div class="measurement-row"><span class="measurement-label">Total floor area</span><span class="measurement-value">142 m²</span></div>
+            <div class="measurement-row"><span class="measurement-label">Internal walls to remove</span><span class="measurement-value">38 m²</span></div>
+            <div class="measurement-row"><span class="measurement-label">Concrete slab (rear)</span><span class="measurement-value">24 m²</span></div>
+            <div class="measurement-row"><span class="measurement-label">Estimated waste volume</span><span class="measurement-value">11.5 m³</span></div>
+            <div class="measurement-row"><span class="measurement-label">Estimated waste weight</span><span class="measurement-value">9.2 t</span></div>
+          </div>
+          <div class="card card-pad">
+            <div class="section-label" style="margin-bottom:8px;">Scope</div>
+            <p style="font-size:14px; line-height:1.6; color:var(--ink-2); margin:0;">
+              Full internal strip-out incl. kitchen, two bathrooms, all flooring (carpet/tile/timber), internal non-loadbearing walls. Remove rear concrete slab and carport. Retain external walls, roof, and front facade. Salvage timber floorboards from front rooms.
+            </p>
+          </div>
+        </div>
+
+        <div id="tab-tips" class="tab-panel" style="display:none;">
+          <div class="section-label">2 tip runs · $680 allocated</div>
+          <div class="tip-card">
+            <div class="tip-card-head">
+              <div class="tip-card-facility">Bingo Industries · Auburn</div>
+              <div class="tip-card-cost">$420</div>
+            </div>
+            <div class="tip-card-detail">
+              <span><i class="ti ti-weight"></i> 3.2t</span>
+              <span><i class="ti ti-trash"></i> Mixed C&D</span>
+              <span><i class="ti ti-clock"></i> 11:48 AM</span>
+            </div>
+          </div>
+          <div class="tip-card">
+            <div class="tip-card-head">
+              <div class="tip-card-facility">Veolia · Erskine Park</div>
+              <div class="tip-card-cost">$260</div>
+            </div>
+            <div class="tip-card-detail">
+              <span><i class="ti ti-weight"></i> 2.0t</span>
+              <span><i class="ti ti-trash"></i> Concrete (clean)</span>
+              <span><i class="ti ti-clock"></i> 2:15 PM</span>
+            </div>
+          </div>
+          <button class="btn btn-secondary" onclick="openModal('tipModal')" style="margin-top:10px;">
+            <i class="ti ti-plus"></i> Log new tip run
+          </button>
+        </div>
+
+        <div id="tab-costs" class="tab-panel" style="display:none;">
+          <div class="cost-card">
+            <div class="cost-card-head">
+              <div class="cost-card-title">Costs to date</div>
+              <div class="cost-card-margin">↗ 62% margin</div>
+            </div>
+            <div class="cost-grid">
+              <div>
+                <div class="cost-line-label">Labour · 12.5h</div>
+                <div class="cost-line-value">$1,240</div>
+              </div>
+              <div>
+                <div class="cost-line-label">Tip costs · 2 runs</div>
+                <div class="cost-line-value">$680</div>
+              </div>
+              <div>
+                <div class="cost-line-label">Travel · 38km</div>
+                <div class="cost-line-value">$95</div>
+              </div>
+              <div>
+                <div class="cost-line-label">Consumables</div>
+                <div class="cost-line-value">$120</div>
+              </div>
+            </div>
+            <div class="cost-total">
+              <div class="cost-total-label">Costs vs $5,800 quote</div>
+              <div class="cost-total-value">$2,135</div>
+            </div>
+          </div>
+          <div class="section-label">Travel breakdown</div>
+          <div class="card card-pad" style="margin-bottom:14px;">
+            <div class="measurement-row"><span class="measurement-label">Depot → Site</span><span class="measurement-value">19 km</span></div>
+            <div class="measurement-row"><span class="measurement-label">Site → Bingo Auburn</span><span class="measurement-value">14 km</span></div>
+            <div class="measurement-row"><span class="measurement-label">Site → Veolia Erskine Pk</span><span class="measurement-value">31 km</span></div>
+            <div class="measurement-row"><span class="measurement-label">Rate</span><span class="measurement-value">$2.50/km</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- === MAP === -->
+    <div class="screen" data-screen="map">
+      <div class="app-header">
+        <div class="app-header-brand">
+          <svg class="app-header-mark"><use href="#heph-mark"/></svg>
+          <span class="app-header-title">JOB MAP</span>
+        </div>
+        <button class="app-header-icon" onclick="showToast('Filtering by crew...', 'ti-filter')">
+          <i class="ti ti-filter"></i>
+        </button>
+      </div>
+
+      <div class="map-container">
+        <div class="map-grid"></div>
+        <div class="map-road" style="top:40%; left:0; right:0; height:8px;"></div>
+        <div class="map-road" style="top:0; bottom:0; left:55%; width:6px;"></div>
+        <div class="map-road" style="top:70%; left:0; right:0; height:5px; opacity:0.6;"></div>
+        <div class="map-road" style="top:0; bottom:0; left:20%; width:4px; opacity:0.6;"></div>
+
+        <div class="map-self" style="top:42%; left:54%;"></div>
+
+        <div class="map-pin active" style="top:38%; left:54%;" onclick="goTo('jobDetail')">
+          <div class="map-pin-body">
+            <div class="map-pin-dot"></div>
+            Marrickville · LIVE
+          </div>
+        </div>
+        <div class="map-pin scheduled" style="top:25%; left:30%;" onclick="showToast('Burwood · scheduled tomorrow', 'ti-calendar')">
+          <div class="map-pin-body">
+            <div class="map-pin-dot"></div>
+            Burwood · WED
+          </div>
+        </div>
+        <div class="map-pin complete" style="top:62%; left:72%;" onclick="showToast('Mascot · completed Friday', 'ti-check')">
+          <div class="map-pin-body">
+            <div class="map-pin-dot"></div>
+            Mascot · DONE
+          </div>
+        </div>
+        <div class="map-pin scheduled" style="top:75%; left:38%;" onclick="showToast('Hurstville · quoted, awaiting confirm', 'ti-clock')">
+          <div class="map-pin-body">
+            <div class="map-pin-dot"></div>
+            Hurstville · QUOTE
+          </div>
+        </div>
+      </div>
+
+      <div class="content">
+        <div class="section-label">4 jobs in radius</div>
+
+        <div class="list-item" onclick="goTo('jobDetail')">
+          <div class="list-item-icon" style="background:var(--amber-bg); color:var(--amber-deep);"><i class="ti ti-hammer"></i></div>
+          <div class="list-item-body">
+            <div class="list-item-title">42 Marrickville Rd · LIVE</div>
+            <div class="list-item-sub">Full strip-out · day 2 of 4 · 2 crew on site</div>
+          </div>
+          <div class="list-item-meta">2.1km</div>
+        </div>
+
+        <div class="list-item" onclick="showToast('Job: Burwood', 'ti-hammer')">
+          <div class="list-item-icon"><i class="ti ti-calendar"></i></div>
+          <div class="list-item-body">
+            <div class="list-item-title">88 Burwood Rd · Wed 20 May</div>
+            <div class="list-item-sub">Garage + back fence · 1 day · quoted $2,400</div>
+          </div>
+          <div class="list-item-meta">8.5km</div>
+        </div>
+
+        <div class="list-item" onclick="showToast('Job: Mascot', 'ti-check')">
+          <div class="list-item-icon" style="background:var(--success-bg); color:var(--success);"><i class="ti ti-circle-check"></i></div>
+          <div class="list-item-body">
+            <div class="list-item-title">14 Robey St · COMPLETED</div>
+            <div class="list-item-sub">Awaiting client sign-off · invoiced $4,200</div>
+          </div>
+          <div class="list-item-meta">12km</div>
+        </div>
+
+        <div class="list-item" onclick="showToast('Job: Hurstville quote', 'ti-file-text')">
+          <div class="list-item-icon"><i class="ti ti-file-text"></i></div>
+          <div class="list-item-body">
+            <div class="list-item-title">203 King Georges Rd · QUOTED</div>
+            <div class="list-item-sub">Pool & shed demo · awaiting acceptance</div>
+          </div>
+          <div class="list-item-meta">15km</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- === TIMESHEET === -->
+    <div class="screen" data-screen="timesheet">
+      <div class="app-header">
+        <div class="app-header-brand">
+          <svg class="app-header-mark"><use href="#heph-mark"/></svg>
+          <span class="app-header-title">HOURS</span>
+        </div>
+        <button class="app-header-icon" onclick="showToast('Exporting this week...', 'ti-download')">
+          <i class="ti ti-download"></i>
+        </button>
+      </div>
+      <div class="content">
+        <div class="section-label">This week · 32.5 hrs</div>
+
+        <div class="ts-day">
+          <div class="ts-day-head">
+            <div class="ts-day-date">Tue 19 May · today</div>
+            <div class="ts-day-total">7.0 hrs · in progress</div>
+          </div>
+          <div class="ts-row">
+            <div class="ts-row-time">07:02 — now</div>
+            <div class="ts-row-job">Marrickville strip-out</div>
+            <div class="ts-row-hrs">7.0h</div>
+          </div>
+        </div>
+
+        <div class="ts-day">
+          <div class="ts-day-head">
+            <div class="ts-day-date">Mon 18 May</div>
+            <div class="ts-day-total">8.5 hrs</div>
+          </div>
+          <div class="ts-row">
+            <div class="ts-row-time">07:15 — 16:00</div>
+            <div class="ts-row-job">Marrickville strip-out</div>
+            <div class="ts-row-hrs">8.5h</div>
+          </div>
+        </div>
+
+        <div class="ts-day">
+          <div class="ts-day-head">
+            <div class="ts-day-date">Fri 16 May</div>
+            <div class="ts-day-total">9.0 hrs</div>
+          </div>
+          <div class="ts-row">
+            <div class="ts-row-time">06:45 — 12:30</div>
+            <div class="ts-row-job">Mascot pool demo</div>
+            <div class="ts-row-hrs">5.5h</div>
+          </div>
+          <div class="ts-row">
+            <div class="ts-row-time">13:15 — 16:45</div>
+            <div class="ts-row-job">Mascot pool demo</div>
+            <div class="ts-row-hrs">3.5h</div>
+          </div>
+        </div>
+
+        <div class="ts-day">
+          <div class="ts-day-head">
+            <div class="ts-day-date">Thu 15 May</div>
+            <div class="ts-day-total">8.0 hrs</div>
+          </div>
+          <div class="ts-row">
+            <div class="ts-row-time">07:00 — 15:30</div>
+            <div class="ts-row-job">Mascot pool demo</div>
+            <div class="ts-row-hrs">8.0h</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- === ME === -->
+    <div class="screen" data-screen="me">
+      <div class="app-header">
+        <div class="app-header-brand">
+          <svg class="app-header-mark"><use href="#heph-mark"/></svg>
+          <span class="app-header-title">ACCOUNT</span>
+        </div>
+        <button class="app-header-icon" onclick="goTo('login')">
+          <i class="ti ti-logout"></i>
+        </button>
+      </div>
+      <div class="profile-head">
+        <div class="avatar">YP</div>
+        <div>
+          <h2 class="profile-name">Yianni Papadopoulos</h2>
+          <div class="profile-role">CREW LEAD · ID #4218</div>
+        </div>
+      </div>
+      <div class="menu-list">
+        <div class="menu-item" onclick="showToast('Profile settings', 'ti-user')">
+          <i class="ti ti-user"></i>
+          <span class="menu-item-label">Personal details</span>
+          <i class="ti ti-chevron-right menu-item-arrow"></i>
+        </div>
+        <div class="menu-item" onclick="showToast('Certifications: White Card, Asbestos B', 'ti-certificate')">
+          <i class="ti ti-certificate"></i>
+          <span class="menu-item-label">Licences & tickets</span>
+          <i class="ti ti-chevron-right menu-item-arrow"></i>
+        </div>
+        <div class="menu-item" onclick="showToast('2 vehicles assigned', 'ti-truck')">
+          <i class="ti ti-truck"></i>
+          <span class="menu-item-label">Vehicles & equipment</span>
+          <i class="ti ti-chevron-right menu-item-arrow"></i>
+        </div>
+        <div class="menu-item" onclick="showToast('Pay rate: $42/hr base', 'ti-currency-dollar')">
+          <i class="ti ti-currency-dollar"></i>
+          <span class="menu-item-label">Pay & invoicing</span>
+          <i class="ti ti-chevron-right menu-item-arrow"></i>
+        </div>
+      </div>
+      <div class="menu-list">
+        <div class="menu-item" onclick="showToast('Sending feedback to dev team...', 'ti-message')">
+          <i class="ti ti-message-circle"></i>
+          <span class="menu-item-label">Send feedback</span>
+          <i class="ti ti-chevron-right menu-item-arrow"></i>
+        </div>
+        <div class="menu-item" onclick="showToast('Hephaestus v0.1 · build #042', 'ti-flame')">
+          <i class="ti ti-info-circle"></i>
+          <span class="menu-item-label">About Hephaestus</span>
+          <i class="ti ti-chevron-right menu-item-arrow"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- === BOTTOM NAV === -->
+    <nav class="bottom-nav" id="bottomNav">
+      <button class="nav-item active" data-nav="today" onclick="goTo('today')">
+        <i class="ti ti-briefcase"></i>
+        <span>Job</span>
+      </button>
+      <button class="nav-item" data-nav="map" onclick="goTo('map')">
+        <i class="ti ti-map"></i>
+        <span>Map</span>
+      </button>
+      <button class="nav-item" data-nav="timesheet" onclick="goTo('timesheet')">
+        <i class="ti ti-clock"></i>
+        <span>Hours</span>
+      </button>
+      <button class="nav-item" data-nav="me" onclick="goTo('me')">
+        <i class="ti ti-user"></i>
+        <span>Me</span>
+      </button>
+    </nav>
+
+    <div class="toast" id="toast"><i class="ti ti-check"></i><span id="toastMsg">OK</span></div>
+
+    <!-- Photo capture modal -->
+    <div class="modal-overlay" id="photoModal" onclick="if(event.target===this)closeModal('photoModal')">
+      <div class="modal">
+        <div class="modal-handle"></div>
+        <div class="modal-content">
+          <h2 class="modal-title">Capture photo</h2>
+          <p class="modal-sub">GPS will tag this photo to job #HPS-1042</p>
+          <div class="photo-modal-img" style="background-image: url('https://picsum.photos/seed/capturedraft/600/400');"></div>
+          <div class="photo-meta">
+            <div class="photo-meta-row"><span>GPS</span><b>-33.91144, 151.15623</b></div>
+            <div class="photo-meta-row"><span>Accuracy</span><b>±4m</b></div>
+            <div class="photo-meta-row"><span>Time</span><b>Tue 19 May · 2:38 PM</b></div>
+            <div class="photo-meta-row"><span>Worker</span><b>Yianni Papadopoulos</b></div>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Category</label>
+            <div class="form-chips">
+              <button class="form-chip selected" onclick="selectChip(this)">Front elevation</button>
+              <button class="form-chip" onclick="selectChip(this)">Rear</button>
+              <button class="form-chip" onclick="selectChip(this)">Side</button>
+              <button class="form-chip" onclick="selectChip(this)">Interior</button>
+              <button class="form-chip" onclick="selectChip(this)">Hazard</button>
+            </div>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Caption (optional)</label>
+            <input type="text" class="form-input" placeholder="e.g. Loadbearing wall on left side">
+          </div>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:10px;">
+            <button class="btn btn-secondary" onclick="closeModal('photoModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="savePhoto()">
+              <i class="ti ti-device-floppy"></i> Save photo
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Photo view modal -->
+    <div class="modal-overlay" id="photoViewModal" onclick="if(event.target===this)closeModal('photoViewModal')">
+      <div class="modal">
+        <div class="modal-handle"></div>
+        <div class="modal-content">
+          <h2 class="modal-title" id="pvTitle">Photo</h2>
+          <p class="modal-sub" id="pvSub">—</p>
+          <div class="photo-modal-img" id="pvImg" style="height:320px;"></div>
+          <div class="photo-meta">
+            <div class="photo-meta-row"><span>GPS</span><b>-33.91144, 151.15623</b></div>
+            <div class="photo-meta-row"><span>Accuracy</span><b>±3m</b></div>
+            <div class="photo-meta-row"><span>Worker</span><b>Yianni Papadopoulos</b></div>
+            <div class="photo-meta-row"><span>Job</span><b>#HPS-1042 Marrickville strip-out</b></div>
+          </div>
+          <button class="btn btn-secondary" onclick="closeModal('photoViewModal')">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tip run modal -->
+    <div class="modal-overlay" id="tipModal" onclick="if(event.target===this)closeModal('tipModal')">
+      <div class="modal">
+        <div class="modal-handle"></div>
+        <div class="modal-content">
+          <h2 class="modal-title">Log tip run</h2>
+          <p class="modal-sub">Cost will allocate to Marrickville strip-out</p>
+
+          <div class="form-field">
+            <label class="form-label">Tip facility</label>
+            <select class="form-select">
+              <option>Bingo Industries · Auburn (14km)</option>
+              <option>Veolia · Erskine Park (31km)</option>
+              <option>Cleanaway · Banksmeadow (18km)</option>
+              <option>Dial-a-Dump · Eastern Creek (24km)</option>
+            </select>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Material category</label>
+            <div class="form-chips">
+              <button class="form-chip selected" onclick="selectChip(this)">Mixed C&D</button>
+              <button class="form-chip" onclick="selectChip(this)">Concrete (clean)</button>
+              <button class="form-chip" onclick="selectChip(this)">Brick</button>
+              <button class="form-chip" onclick="selectChip(this)">Timber</button>
+              <button class="form-chip" onclick="selectChip(this)">Metal</button>
+              <button class="form-chip" onclick="selectChip(this)">Asbestos</button>
+              <button class="form-chip" onclick="selectChip(this)">Green</button>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-label">Weight</label>
+              <input type="number" class="form-input" value="3.2" placeholder="0.0">
+            </div>
+            <div class="form-field">
+              <label class="form-label">Unit</label>
+              <select class="form-select">
+                <option>tonne</option>
+                <option>m³</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Docket number</label>
+            <input type="text" class="form-input" value="BNG-2026-04812">
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Weighbridge ticket photo</label>
+            <div style="display:flex; gap:8px; align-items:center; padding:14px; background:var(--surface); border:1px dashed var(--border-2); border-radius:10px;">
+              <i class="ti ti-camera" style="font-size:24px; color:var(--ink-3);"></i>
+              <span style="font-size:13px; color:var(--ink-3);">Tap to photograph docket</span>
+            </div>
+          </div>
+
+          <div style="background:var(--amber-bg); border:1px solid rgba(245,166,35,0.3); border-radius:10px; padding:12px 14px; margin:6px 0 16px;">
+            <div style="font-size:11px; color:var(--ink-3); margin-bottom:4px; font-family:'IBM Plex Mono',monospace; letter-spacing:0.1em;">CALCULATED COST</div>
+            <div style="display:flex; justify-content:space-between; align-items:baseline;">
+              <div style="font-size:13px;">3.2t × $131.25/t (Mixed C&D · Bingo)</div>
+              <div style="font-family:'IBM Plex Mono',monospace; font-size:18px; font-weight:600;">$420</div>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+            <button class="btn btn-secondary" onclick="closeModal('tipModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="saveTip()">
+              <i class="ti ti-check"></i> Log $420 to job
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Measure modal -->
+    <div class="modal-overlay" id="measureModal" onclick="if(event.target===this)closeModal('measureModal')">
+      <div class="modal">
+        <div class="modal-handle"></div>
+        <div class="modal-content">
+          <h2 class="modal-title">Add measurement</h2>
+          <p class="modal-sub">Will update waste volume estimate</p>
+
+          <div class="form-field">
+            <label class="form-label">What are you measuring?</label>
+            <div class="form-chips">
+              <button class="form-chip selected" onclick="selectChip(this)">Wall section</button>
+              <button class="form-chip" onclick="selectChip(this)">Floor area</button>
+              <button class="form-chip" onclick="selectChip(this)">Slab</button>
+              <button class="form-chip" onclick="selectChip(this)">Carport</button>
+              <button class="form-chip" onclick="selectChip(this)">Roof</button>
+            </div>
+          </div>
+
+          <div class="form-row" style="grid-template-columns: 1fr 1fr 1fr;">
+            <div class="form-field">
+              <label class="form-label">Length</label>
+              <input type="number" class="form-input" value="3.8" placeholder="m">
+            </div>
+            <div class="form-field">
+              <label class="form-label">Width</label>
+              <input type="number" class="form-input" value="2.4" placeholder="m">
+            </div>
+            <div class="form-field">
+              <label class="form-label">Depth</label>
+              <input type="number" class="form-input" value="0.15" placeholder="m">
+            </div>
+          </div>
+
+          <div style="background:var(--info-bg); border:1px solid rgba(24,95,165,0.2); border-radius:10px; padding:12px 14px; margin:6px 0 16px; display:flex; justify-content:space-between; align-items:baseline;">
+            <div style="font-size:13px; color:var(--info);">Volume · 1.37 m³ · ~2.4t</div>
+            <i class="ti ti-calculator" style="color:var(--info); font-size:18px;"></i>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+            <button class="btn btn-secondary" onclick="closeModal('measureModal')">Cancel</button>
+            <button class="btn btn-primary" onclick="saveMeasurement()">
+              <i class="ti ti-device-floppy"></i> Save measurement
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hazard modal -->
+    <div class="modal-overlay" id="hazardModal" onclick="if(event.target===this)closeModal('hazardModal')">
+      <div class="modal">
+        <div class="modal-handle"></div>
+        <div class="modal-content">
+          <h2 class="modal-title">Flag a hazard</h2>
+          <p class="modal-sub">Alerts admin · pauses related work</p>
+
+          <div class="form-field">
+            <label class="form-label">Hazard type</label>
+            <div class="form-chips">
+              <button class="form-chip" onclick="selectChip(this)">Asbestos suspected</button>
+              <button class="form-chip selected" onclick="selectChip(this)">Live service</button>
+              <button class="form-chip" onclick="selectChip(this)">Structural</button>
+              <button class="form-chip" onclick="selectChip(this)">Lead paint</button>
+              <button class="form-chip" onclick="selectChip(this)">Unknown chemical</button>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Description</label>
+            <input type="text" class="form-input" value="Live electrical found in wall cavity, north room">
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Photo</label>
+            <div style="display:flex; gap:8px; align-items:center; padding:14px; background:var(--surface); border:1px dashed var(--border-2); border-radius:10px;">
+              <i class="ti ti-camera" style="font-size:24px; color:var(--ink-3);"></i>
+              <span style="font-size:13px; color:var(--ink-3);">Photograph the hazard</span>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+            <button class="btn btn-secondary" onclick="closeModal('hazardModal')">Cancel</button>
+            <button class="btn btn-danger" onclick="saveHazard()">
+              <i class="ti ti-alert-triangle"></i> Flag & alert
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const state = {
+    photos: [
+      { seed: 'front1', label: 'Front elevation', taken: true },
+      { seed: 'rear1', label: 'Rear', taken: true },
+      { seed: 'side1', label: 'Left side', taken: true },
+      { seed: 'side2', label: 'Right side', taken: true },
+      { seed: 'inside1', label: 'Kitchen', taken: true },
+      { seed: null, label: 'Bathroom 1', taken: false, next: true },
+      { seed: null, label: 'Bathroom 2', taken: false },
+      { seed: null, label: 'Living', taken: false }
+    ],
+    currentScreen: 'login'
+  };
+
+  function goTo(screenName) {
+    const current = document.querySelector('.screen.active');
+    const next = document.querySelector(`[data-screen="${screenName}"]`);
+    if (!next || current === next) return;
+
+    if (current) current.classList.remove('active');
+    next.classList.add('active');
+    state.currentScreen = screenName;
+    next.scrollTop = 0;
+
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const navBtn = document.querySelector(`[data-nav="${screenName}"]`);
+    if (navBtn) navBtn.classList.add('active');
+
+    const nav = document.getElementById('bottomNav');
+    nav.style.display = screenName === 'login' ? 'none' : 'grid';
+  }
+
+  function renderPhotoGrid(targetId) {
+    const grid = document.getElementById(targetId);
+    if (!grid) return;
+    grid.innerHTML = '';
+    state.photos.forEach((p, i) => {
+      const cell = document.createElement('div');
+      if (p.taken) {
+        cell.className = 'photo-cell done';
+        cell.style.backgroundImage = `url('https://picsum.photos/seed/${p.seed}/200')`;
+        cell.innerHTML = '<div class="photo-cell-check">✓</div>';
+        cell.onclick = () => openPhotoView(p.seed, p.label, 'Tue 19 May · 7:1' + i + ' AM');
+      } else if (p.next) {
+        cell.className = 'photo-cell next';
+        cell.innerHTML = '<i class="ti ti-camera"></i>';
+        cell.onclick = () => openModal('photoModal');
+      } else {
+        cell.className = 'photo-cell empty';
+        cell.innerHTML = '<i class="ti ti-plus"></i>';
+        cell.onclick = () => openModal('photoModal');
+      }
+      grid.appendChild(cell);
+    });
+  }
+
+  function switchTab(tabBtn, panelId) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tabBtn.classList.add('active');
+    document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+    document.getElementById(panelId).style.display = 'block';
+  }
+
+  function openModal(id) { document.getElementById(id).classList.add('show'); }
+  function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+  function openPhotoView(seed, title, time) {
+    document.getElementById('pvTitle').textContent = title;
+    document.getElementById('pvSub').textContent = time;
+    document.getElementById('pvImg').style.backgroundImage = `url('https://picsum.photos/seed/${seed}/600/400')`;
+    openModal('photoViewModal');
+  }
+
+  function selectChip(chip) {
+    const siblings = chip.parentElement.children;
+    Array.from(siblings).forEach(s => s.classList.remove('selected'));
+    chip.classList.add('selected');
+  }
+
+  let toastTimer;
+  function showToast(msg, icon = 'ti-check') {
+    const toast = document.getElementById('toast');
+    toast.querySelector('#toastMsg').textContent = msg;
+    toast.querySelector('i').className = 'ti ' + icon;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 2400);
+  }
+
+  function withThinking(label, duration, callback) {
+    const overlay = document.getElementById('thinking');
+    document.getElementById('thinkingLabel').textContent = label;
+    overlay.classList.add('show');
+    setTimeout(() => {
+      overlay.classList.remove('show');
+      callback();
+    }, duration);
+  }
+
+  function savePhoto() {
+    closeModal('photoModal');
+    withThinking('Tagging GPS · uploading', 900, () => {
+      const next = state.photos.find(p => !p.taken);
+      if (next) {
+        next.taken = true;
+        next.seed = 'newshot' + Date.now();
+        next.next = false;
+        const newNext = state.photos.find(p => !p.taken);
+        if (newNext) newNext.next = true;
+      }
+      const taken = state.photos.filter(p => p.taken).length;
+      document.getElementById('photoProgress').textContent = `${taken} of 8 required`;
+      renderPhotoGrid('photoGrid');
+      renderPhotoGrid('jobPhotoGrid');
+      showToast('Photo saved & GPS-tagged', 'ti-camera-check');
+    });
+  }
+
+  function saveTip() {
+    closeModal('tipModal');
+    withThinking('Allocating cost to job', 900, () => {
+      showToast('Tip run logged · $420 added to job', 'ti-truck');
+    });
+  }
+
+  function saveMeasurement() {
+    closeModal('measureModal');
+    withThinking('Calculating volume', 700, () => {
+      showToast('Measurement saved · 1.37 m³', 'ti-ruler-measure');
+    });
+  }
+
+  function saveHazard() {
+    closeModal('hazardModal');
+    withThinking('Alerting admin', 800, () => {
+      showToast('Hazard flagged · admin alerted', 'ti-alert-triangle');
+    });
+  }
+
+  // Init
+  document.getElementById('bottomNav').style.display = 'none';
+  renderPhotoGrid('photoGrid');
+  renderPhotoGrid('jobPhotoGrid');
+</script>
+
+</body>
+</html>

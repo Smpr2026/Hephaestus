@@ -1,0 +1,18 @@
+{
+  "name": "Hephaestus — Demolition Ops",
+  "short_name": "Hephaestus",
+  "description": "Worker-facing demolition crew app for clock-in, photos, measurements, tip runs and job mapping. Named for the Greek god of fire and the forge.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1A1A1A",
+  "theme_color": "#1A1A1A",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "logo-mark.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

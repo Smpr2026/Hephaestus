@@ -1,0 +1,44 @@
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .live-flame { transform-origin: center bottom; animation: live-flicker 1.6s ease-in-out infinite; }
+      .live-flame-2 { animation-delay: 0.3s; animation-duration: 1.4s; }
+      .live-flame-3 { animation-delay: 0.6s; animation-duration: 1.5s; }
+      .live-flame-i { animation-delay: 0.15s; }
+      .ring-glow { animation: ring-breathe 3s ease-in-out infinite; transform-origin: center; }
+      @keyframes live-flicker {
+        0%, 100% { transform: scale(1, 1); opacity: 1; }
+        33% { transform: scale(0.96, 1.06); opacity: 0.9; }
+        66% { transform: scale(1.03, 0.97); opacity: 1; }
+      }
+      @keyframes ring-breathe {
+        0%, 100% { opacity: 0.5; }
+        50% { opacity: 0.8; }
+      }
+    </style>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="98" fill="#1A1A1A"/>
+
+  <!-- Inner ring (subtle breathing glow) -->
+  <circle class="ring-glow" cx="100" cy="100" r="92" fill="none" stroke="#F5A623" stroke-width="1.5" opacity="0.5"/>
+
+  <!-- Flames (continuous flicker) -->
+  <path class="live-flame" d="M 100 30 C 92 42, 92 52, 100 62 C 108 52, 108 42, 100 30 Z" fill="#F5A623"/>
+  <path class="live-flame live-flame-i" d="M 100 38 C 96 46, 96 52, 100 58 C 104 52, 104 46, 100 38 Z" fill="#FCEBCD"/>
+  <path class="live-flame live-flame-2" d="M 82 48 C 77 56, 77 62, 82 68 C 87 62, 87 56, 82 48 Z" fill="#F5A623" opacity="0.85"/>
+  <path class="live-flame live-flame-3" d="M 118 48 C 113 56, 113 62, 118 68 C 123 62, 123 56, 118 48 Z" fill="#F5A623" opacity="0.85"/>
+
+  <!-- Hammer -->
+  <rect x="68" y="76" width="64" height="20" rx="2" fill="#F5F2EB"/>
+  <rect x="124" y="72" width="14" height="28" rx="2" fill="#F5F2EB"/>
+  <rect x="62" y="78" width="8" height="16" rx="1.5" fill="#F5F2EB"/>
+  <rect x="96" y="96" width="8" height="36" rx="1" fill="#F5F2EB"/>
+
+  <!-- Anvil -->
+  <rect x="50" y="138" width="100" height="8" rx="1" fill="#F5F2EB"/>
+  <path d="M 50 138 L 38 142 L 50 146 Z" fill="#F5F2EB"/>
+  <path d="M 64 146 L 136 146 L 128 162 L 72 162 Z" fill="#F5F2EB"/>
+  <rect x="62" y="162" width="76" height="10" rx="1" fill="#F5F2EB"/>
+</svg>

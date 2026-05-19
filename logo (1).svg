@@ -1,0 +1,46 @@
+<svg viewBox="0 0 400 480" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .word { font-family: 'Cinzel', 'Trajan Pro', 'Times New Roman', serif; font-weight: 600; }
+      .micro { font-family: 'Courier New', 'Courier', monospace; font-weight: 500; letter-spacing: 0.35em; }
+    </style>
+  </defs>
+
+  <!-- Mark, centered at top, 200x200 -->
+  <g transform="translate(100, 30)">
+    <!-- Background circle -->
+    <circle cx="100" cy="100" r="98" fill="#1A1A1A"/>
+    <!-- Inner ring -->
+    <circle cx="100" cy="100" r="92" fill="none" stroke="#F5A623" stroke-width="1.5" opacity="0.5"/>
+
+    <!-- Flames -->
+    <path d="M 100 30 C 92 42, 92 52, 100 62 C 108 52, 108 42, 100 30 Z" fill="#F5A623"/>
+    <path d="M 100 38 C 96 46, 96 52, 100 58 C 104 52, 104 46, 100 38 Z" fill="#FCEBCD"/>
+    <path d="M 82 48 C 77 56, 77 62, 82 68 C 87 62, 87 56, 82 48 Z" fill="#F5A623" opacity="0.85"/>
+    <path d="M 118 48 C 113 56, 113 62, 118 68 C 123 62, 123 56, 118 48 Z" fill="#F5A623" opacity="0.85"/>
+
+    <!-- Hammer -->
+    <rect x="68" y="76" width="64" height="20" rx="2" fill="#F5F2EB"/>
+    <rect x="124" y="72" width="14" height="28" rx="2" fill="#F5F2EB"/>
+    <rect x="62" y="78" width="8" height="16" rx="1.5" fill="#F5F2EB"/>
+    <rect x="96" y="96" width="8" height="36" rx="1" fill="#F5F2EB"/>
+
+    <!-- Anvil -->
+    <rect x="50" y="138" width="100" height="8" rx="1" fill="#F5F2EB"/>
+    <path d="M 50 138 L 38 142 L 50 146 Z" fill="#F5F2EB"/>
+    <path d="M 64 146 L 136 146 L 128 162 L 72 162 Z" fill="#F5F2EB"/>
+    <rect x="62" y="162" width="76" height="10" rx="1" fill="#F5F2EB"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="200" y="290" text-anchor="middle" class="word" font-size="42" letter-spacing="6" fill="#1A1A1A">HEPHAESTUS</text>
+
+  <!-- Greek inscription -->
+  <text x="200" y="325" text-anchor="middle" class="word" font-size="18" letter-spacing="4" fill="#F5A623" font-style="italic">ἭΦΑΙΣΤΟΣ</text>
+
+  <!-- Divider rule -->
+  <line x1="140" y1="350" x2="260" y2="350" stroke="#1A1A1A" stroke-width="0.8" opacity="0.4"/>
+
+  <!-- Tagline -->
+  <text x="200" y="380" text-anchor="middle" class="micro" font-size="11" fill="#1A1A1A" opacity="0.7">DEMOLITION  ·  FORGED IN FIRE</text>
+</svg>
