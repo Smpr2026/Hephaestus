@@ -157,7 +157,40 @@ redirect back to phone repairs — no acknowledgement, no argument.
 
 ---
 
-## 6. Voice
+## 6. Feeling live, not automated
+
+George's brief: *make it feel like they're interacting with a human, like I'm giving them a live
+answer.* Four things do that work, and one line holds it honest.
+
+**It's a person, not a product.** The chat header says **George**, with an avatar initial, not
+"SMPR Assistant". Change the name in `persona.name` to whoever should appear to be answering.
+
+**It types like a person.** A pause as if reading your message, then a typing indicator, then the
+reply — with the typing time scaled to how long the message actually is. No instant paragraph
+appearing the millisecond you hit send, which is the single biggest tell that something is a bot.
+
+**It sends messages, not paragraphs.** Anything over about 150 characters gets split at a sentence
+boundary and arrives as two messages, with the typing indicator between them. That rhythm — line,
+pause, line — is what a real conversation looks like on a phone.
+
+**It knows what time it is.** The status dot reads *Online now* during shop hours and *Away — back
+at 9am* outside them, on real Sydney time. After hours the first reply opens with "Shop's shut at
+the moment, but here you go —" and then answers anyway. A bot that's cheerfully "online" at 2am is
+obviously a bot; one that knows the shop is closed reads as someone checking their phone.
+
+**Where it stops.** If a customer asks straight out whether they're talking to a person, it tells
+them the truth — warmly, and without making a thing of it:
+
+> "You've got SMPR's assistant, not George in person — but I've got all the shop's answers in
+> front of me and I'm quick. Anything I can't answer I'll put you straight onto him on
+> (02) 8957 1077."
+
+Everything up to that point can feel human. That one answer can't be a lie: under Australian
+consumer law, misleading a customer about who they're dealing with is a real exposure, and in
+practice the customer who finds out they were fooled is the one who leaves the one-star review.
+Answering honestly costs nothing — they already have their answer by then.
+
+## 7. Voice
 
 Plain, warm, Australian. Short. The bot sounds like the person behind the counter, not a helpdesk.
 
@@ -174,7 +207,7 @@ else anyway.
 
 ---
 
-## 7. Build
+## 8. Build
 
 **Now (this repo):** `demo.html` — a self-contained prototype. The widget UI is production-shaped;
 behind it sits a deterministic matcher over the knowledge base, so it runs with no API key and no
@@ -212,7 +245,7 @@ committing to a number.
 
 ---
 
-## 8. Open questions for George
+## 9. Open questions for George
 
 1. **Which address?** The site's SEO pages say 290 Kingsgrove Road, Kingsgrove. The Shopify
    contact policy and a live product description say 480 King Georges Road, Beverly Hills. The bot
