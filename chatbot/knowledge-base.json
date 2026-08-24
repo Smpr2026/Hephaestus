@@ -591,7 +591,25 @@
         "What are your hours?",
         "Where are you?",
         "Do I need a booking?"
-      ]
+      ],
+      "_pats": [
+        " hi",
+        " hello",
+        " hey",
+        " good morning",
+        " good afternoon",
+        " gday",
+        " yo",
+        " hi there"
+      ],
+      "_tokens": {
+        "hello": 1,
+        "hey": 1,
+        "good": 1,
+        "morning": 1,
+        "afternoon": 1,
+        "gday": 1
+      }
     },
     {
       "id": "bot_identity",
@@ -609,7 +627,23 @@
       "chips": [
         "Talk to a human",
         "How much is a screen repair?"
-      ]
+      ],
+      "_pats": [
+        " are you a bot",
+        " are you human",
+        " am i talking to a person",
+        " are you real",
+        " is this a robot",
+        " ai"
+      ],
+      "_tokens": {
+        "bot": 1,
+        "human": 1,
+        "talking": 1,
+        "person": 1,
+        "real": 1,
+        "robot": 1
+      }
     },
     {
       "id": "human",
@@ -634,7 +668,39 @@
       "chips": [
         "What are your hours?",
         "Where are you?"
-      ]
+      ],
+      "_pats": [
+        " customer service",
+        " operator",
+        " put me through",
+        " real human",
+        " real person",
+        " someone i can talk to",
+        " speak to a person",
+        " speak to a technician",
+        " speak to someone",
+        " staff member",
+        " talk to a human",
+        " talk to a person",
+        " talk to staff"
+      ],
+      "_tokens": {
+        "customer": 1,
+        "service": 1,
+        "operator": 1,
+        "put": 1,
+        "through": 1,
+        "real": 1,
+        "human": 1,
+        "person": 1,
+        "someone": 1,
+        "talk": 1,
+        "speak": 1,
+        "technician": 1,
+        "staff": 1,
+        "member": 1,
+        "want": 1
+      }
     },
     {
       "id": "thanks",
@@ -649,7 +715,22 @@
         "legend"
       ],
       "answer": "No worries at all. Anything else, just yell.",
-      "chips": []
+      "chips": [],
+      "_pats": [
+        " thanks",
+        " thank you",
+        " cheers",
+        " ta",
+        " appreciate it",
+        " legend"
+      ],
+      "_tokens": {
+        "thanks": 1,
+        "thank": 1,
+        "cheers": 1,
+        "appreciate": 1,
+        "legend": 1
+      }
     },
     {
       "id": "bye",
@@ -663,7 +744,22 @@
         "that's all"
       ],
       "answer": "See you soon. We're at {{addressShort}} if you need us.",
-      "chips": []
+      "chips": [],
+      "_pats": [
+        " bye",
+        " goodbye",
+        " see ya",
+        " later",
+        " thats all"
+      ],
+      "_tokens": {
+        "bye": 1,
+        "goodbye": 1,
+        "see": 1,
+        "later": 1,
+        "thats": 1,
+        "all": 1
+      }
     },
     {
       "id": "hours",
@@ -685,7 +781,31 @@
         "Are you open Sunday?",
         "Where are you?",
         "Do I need a booking?"
-      ]
+      ],
+      "_pats": [
+        " hours",
+        " what time do you open",
+        " what time do you close",
+        " opening times",
+        " when are you open",
+        " are you open",
+        " open now",
+        " open today",
+        " trading hours"
+      ],
+      "_tokens": {
+        "hours": 1,
+        "time": 1,
+        "open": 1,
+        "close": 1,
+        "opening": 1,
+        "times": 1,
+        "when": 1,
+        "now": 1,
+        "today": 1,
+        "trading": 1,
+        "your": 1
+      }
     },
     {
       "id": "hours_sunday",
@@ -703,7 +823,22 @@
       "chips": [
         "Where are you?",
         "How long does a repair take?"
-      ]
+      ],
+      "_pats": [
+        " open sunday",
+        " sunday",
+        " open on the weekend",
+        " weekend",
+        " open saturday",
+        " saturday hours"
+      ],
+      "_tokens": {
+        "open": 1,
+        "sunday": 1,
+        "weekend": 1,
+        "saturday": 1,
+        "hours": 1
+      }
     },
     {
       "id": "hours_holiday",
@@ -721,7 +856,30 @@
       "answer": "Public holiday hours can change, so it's worth a quick call to {{phone}} before you drive over. Normal hours are Mon-Fri 9am-6pm and Sat 9am-2pm.",
       "chips": [
         "What are your hours?"
-      ]
+      ],
+      "_pats": [
+        " public holiday",
+        " holiday hours",
+        " christmas",
+        " easter",
+        " anzac day",
+        " boxing day",
+        " new year"
+      ],
+      "_tokens": {
+        "public": 1,
+        "holiday": 1,
+        "hours": 1,
+        "christmas": 1,
+        "easter": 1,
+        "anzac": 1,
+        "day": 1,
+        "boxing": 1,
+        "new": 1,
+        "year": 1,
+        "open": 1,
+        "holidays": 1
+      }
     },
     {
       "id": "location",
@@ -746,7 +904,36 @@
         "Is there parking?",
         "What are your hours?",
         "Do you service my suburb?"
-      ]
+      ],
+      "_pats": [
+        " address",
+        " directions",
+        " how do i find you",
+        " located",
+        " location",
+        " map",
+        " what suburb are you",
+        " where abouts",
+        " where are you",
+        " where is the shop",
+        " whereabouts",
+        " which suburb"
+      ],
+      "_tokens": {
+        "address": 1,
+        "directions": 1,
+        "how": 1,
+        "find": 1,
+        "located": 1,
+        "location": 1,
+        "map": 1,
+        "suburb": 1,
+        "where": 1,
+        "abouts": 1,
+        "shop": 1,
+        "whereabouts": 1,
+        "which": 1
+      }
     },
     {
       "id": "parking",
@@ -762,7 +949,19 @@
       "chips": [
         "How long does a repair take?",
         "Where are you?"
-      ]
+      ],
+      "_pats": [
+        " parking",
+        " park",
+        " car space",
+        " can i park"
+      ],
+      "_tokens": {
+        "parking": 1,
+        "park": 1,
+        "car": 1,
+        "space": 1
+      }
     },
     {
       "id": "transport",
@@ -780,7 +979,24 @@
       "chips": [
         "What are your hours?",
         "Do you service my suburb?"
-      ]
+      ],
+      "_pats": [
+        " train",
+        " bus",
+        " public transport",
+        " station",
+        " how do i get there",
+        " nearest station"
+      ],
+      "_tokens": {
+        "train": 1,
+        "bus": 1,
+        "public": 1,
+        "transport": 1,
+        "station": 1,
+        "how": 1,
+        "nearest": 1
+      }
     },
     {
       "id": "contact",
@@ -800,7 +1016,29 @@
       "chips": [
         "What are your hours?",
         "Where are you?"
-      ]
+      ],
+      "_pats": [
+        " phone number",
+        " contact",
+        " call you",
+        " email",
+        " how do i contact",
+        " reach you",
+        " mobile number",
+        " landline"
+      ],
+      "_tokens": {
+        "phone": 1,
+        "number": 1,
+        "contact": 1,
+        "call": 1,
+        "email": 1,
+        "how": 1,
+        "reach": 1,
+        "mobile": 1,
+        "landline": 1,
+        "your": 1
+      }
     },
     {
       "id": "appointment",
@@ -820,7 +1058,28 @@
       "chips": [
         "How long does a repair take?",
         "What are your hours?"
-      ]
+      ],
+      "_pats": [
+        " appointment",
+        " booking",
+        " book in",
+        " do i need to book",
+        " reserve",
+        " schedule",
+        " walk in",
+        " can i just come in"
+      ],
+      "_tokens": {
+        "appointment": 1,
+        "booking": 1,
+        "book": 1,
+        "need": 1,
+        "reserve": 1,
+        "schedule": 1,
+        "walk": 1,
+        "come": 1,
+        "make": 1
+      }
     },
     {
       "id": "wait",
@@ -838,7 +1097,25 @@
       "chips": [
         "How long does a repair take?",
         "Do I need a booking?"
-      ]
+      ],
+      "_pats": [
+        " how long will i wait",
+        " busy",
+        " queue",
+        " wait time",
+        " waiting",
+        " how busy"
+      ],
+      "_tokens": {
+        "how": 1,
+        "long": 1,
+        "will": 1,
+        "wait": 1,
+        "busy": 1,
+        "queue": 1,
+        "time": 1,
+        "waiting": 1
+      }
     },
     {
       "id": "suburbs",
@@ -872,7 +1149,57 @@
       "chips": [
         "Can I post my phone in?",
         "Where are you?"
-      ]
+      ],
+      "_pats": [
+        " belmore",
+        " beverly hills",
+        " bexley",
+        " campsie",
+        " canterbury",
+        " come to my house",
+        " do you come out",
+        " do you come to me",
+        " do you service",
+        " do you travel",
+        " earlwood",
+        " house call",
+        " hurstville",
+        " mobile service",
+        " my suburb",
+        " narwee",
+        " near me",
+        " onsite",
+        " penshurst",
+        " pick up my phone",
+        " riverwood",
+        " roselands"
+      ],
+      "_tokens": {
+        "belmore": 1,
+        "beverly": 1,
+        "hills": 1,
+        "bexley": 1,
+        "campsie": 1,
+        "canterbury": 1,
+        "come": 1,
+        "house": 1,
+        "out": 1,
+        "service": 1,
+        "travel": 1,
+        "earlwood": 1,
+        "call": 1,
+        "hurstville": 1,
+        "mobile": 1,
+        "suburb": 1,
+        "narwee": 1,
+        "near": 1,
+        "onsite": 1,
+        "penshurst": 1,
+        "pick": 1,
+        "phone": 1,
+        "riverwood": 1,
+        "roselands": 1
+      }
     },
     {
       "id": "about",
@@ -892,7 +1219,32 @@
       "chips": [
         "What do you repair?",
         "What warranty do I get?"
-      ]
+      ],
+      "_pats": [
+        " about you",
+        " who are you",
+        " how long have you been",
+        " established",
+        " family run",
+        " experience",
+        " how many years",
+        " trust"
+      ],
+      "_tokens": {
+        "about": 1,
+        "who": 1,
+        "how": 1,
+        "long": 1,
+        "been": 1,
+        "established": 1,
+        "family": 1,
+        "run": 1,
+        "experience": 1,
+        "many": 1,
+        "years": 1,
+        "trust": 1,
+        "around": 1
+      }
     },
     {
       "id": "services",
@@ -911,7 +1263,23 @@
         "How much is a screen repair?",
         "Do you fix Samsung?",
         "Do you fix water damage?"
-      ]
+      ],
+      "_pats": [
+        " what do you fix",
+        " what do you repair",
+        " services",
+        " what can you do",
+        " list of repairs",
+        " types of repair"
+      ],
+      "_tokens": {
+        "fix": 1,
+        "repair": 1,
+        "services": 1,
+        "list": 1,
+        "repairs": 1,
+        "types": 1
+      }
     },
     {
       "id": "brands",
@@ -942,7 +1310,46 @@
       "chips": [
         "How much is a screen repair?",
         "Do you fix iPads?"
-      ]
+      ],
+      "_pats": [
+        " android",
+        " apple",
+        " brands do you",
+        " do you fix samsung",
+        " do you repair iphone",
+        " galaxy",
+        " huawei",
+        " iphone",
+        " motorola",
+        " nokia",
+        " oppo",
+        " pixel",
+        " realme",
+        " repair iphone",
+        " repair samsung",
+        " samsung",
+        " vivo",
+        " what brands",
+        " xiaomi"
+      ],
+      "_tokens": {
+        "android": 1,
+        "apple": 1,
+        "brands": 1,
+        "fix": 1,
+        "samsung": 1,
+        "repair": 1,
+        "iphone": 1,
+        "galaxy": 1,
+        "huawei": 1,
+        "motorola": 1,
+        "nokia": 1,
+        "oppo": 1,
+        "pixel": 1,
+        "realme": 1,
+        "vivo": 1,
+        "xiaomi": 1
+      }
     },
     {
       "id": "devices_other",
@@ -972,7 +1379,53 @@
       "chips": [
         "How much is a screen repair?",
         "How long does a repair take?"
-      ]
+      ],
+      "_pats": [
+        " laptop",
+        " macbook",
+        " imac",
+        " computer",
+        " apple watch",
+        " smart watch",
+        " watch",
+        " tablet",
+        " ipad",
+        " earbuds",
+        " airpods",
+        " console",
+        " playstation",
+        " xbox",
+        " nintendo",
+        " switch",
+        " drone",
+        " camera repair"
+      ],
+      "_tokens": {
+        "laptop": 1,
+        "macbook": 1,
+        "imac": 1,
+        "computer": 1,
+        "apple": 1,
+        "watch": 1,
+        "smart": 1,
+        "tablet": 1,
+        "ipad": 1,
+        "earbuds": 1,
+        "airpods": 1,
+        "console": 1,
+        "playstation": 1,
+        "xbox": 1,
+        "nintendo": 1,
+        "switch": 1,
+        "drone": 1,
+        "camera": 1,
+        "repair": 1,
+        "fix": 1,
+        "laptops": 1,
+        "watches": 1,
+        "other": 1,
+        "devices": 1
+      }
     },
     {
       "id": "turnaround",
@@ -1006,7 +1459,59 @@
       "chips": [
         "Do I need a booking?",
         "How much is a screen repair?"
-      ]
+      ],
+      "_pats": [
+        " asap",
+        " done today",
+        " express",
+        " fixed today",
+        " how fast",
+        " how long does",
+        " how long does it take",
+        " how long for a",
+        " how long will it take",
+        " how quick",
+        " in a hurry",
+        " need it today",
+        " on the spot",
+        " right away",
+        " same day",
+        " take to fix",
+        " take to repair",
+        " time to repair",
+        " today is that",
+        " turnaround",
+        " urgent",
+        " while i wait"
+      ],
+      "_tokens": {
+        "asap": 1,
+        "done": 1,
+        "today": 1,
+        "express": 1,
+        "fixed": 1,
+        "how": 1,
+        "fast": 1,
+        "long": 1,
+        "does": 1,
+        "take": 1,
+        "will": 1,
+        "quick": 1,
+        "hurry": 1,
+        "need": 1,
+        "spot": 1,
+        "right": 1,
+        "away": 1,
+        "same": 1,
+        "day": 1,
+        "fix": 1,
+        "repair": 1,
+        "time": 1,
+        "turnaround": 1,
+        "urgent": 1,
+        "while": 1,
+        "wait": 1
+      }
     },
     {
       "id": "quote",
@@ -1026,7 +1531,27 @@
       "chips": [
         "How much is a screen repair?",
         "Where are you?"
-      ]
+      ],
+      "_pats": [
+        " quote",
+        " estimate",
+        " assessment",
+        " free quote",
+        " have a look",
+        " diagnostic",
+        " check it",
+        " whats wrong with it"
+      ],
+      "_tokens": {
+        "quote": 1,
+        "estimate": 1,
+        "assessment": 1,
+        "free": 1,
+        "look": 1,
+        "diagnostic": 1,
+        "check": 1,
+        "wrong": 1
+      }
     },
     {
       "id": "price_general",
@@ -1046,7 +1571,28 @@
         "iPhone 13 screen price",
         "iPhone 12 screen price",
         "Genuine or aftermarket?"
-      ]
+      ],
+      "_pats": [
+        " how much",
+        " price",
+        " cost",
+        " pricing",
+        " what do you charge",
+        " price list",
+        " rates"
+      ],
+      "_tokens": {
+        "how": 1,
+        "much": 1,
+        "price": 1,
+        "cost": 1,
+        "pricing": 1,
+        "charge": 1,
+        "list": 1,
+        "rates": 1,
+        "does": 1,
+        "repair": 1
+      }
     },
     {
       "id": "price_parts",
@@ -1069,7 +1615,36 @@
       "chips": [
         "How much is a screen repair?",
         "Will Face ID still work?"
-      ]
+      ],
+      "_pats": [
+        " genuine",
+        " aftermarket",
+        " oem",
+        " copy",
+        " incell",
+        " original part",
+        " generic",
+        " quality of parts",
+        " what parts do you use",
+        " cheap part",
+        " difference between parts"
+      ],
+      "_tokens": {
+        "genuine": 1,
+        "aftermarket": 1,
+        "oem": 1,
+        "copy": 1,
+        "incell": 1,
+        "original": 1,
+        "part": 1,
+        "generic": 1,
+        "quality": 1,
+        "parts": 1,
+        "use": 1,
+        "cheap": 1,
+        "difference": 1,
+        "between": 1
+      }
     },
     {
       "id": "price_cheaper",
@@ -1090,7 +1665,30 @@
       "chips": [
         "Genuine or aftermarket?",
         "How much is a screen repair?"
-      ]
+      ],
+      "_pats": [
+        " cheaper",
+        " discount",
+        " deal",
+        " best price",
+        " student discount",
+        " pensioner",
+        " any specials",
+        " negotiate",
+        " lower price"
+      ],
+      "_tokens": {
+        "cheaper": 1,
+        "discount": 1,
+        "deal": 1,
+        "best": 1,
+        "price": 1,
+        "student": 1,
+        "pensioner": 1,
+        "specials": 1,
+        "negotiate": 1,
+        "lower": 1
+      }
     },
     {
       "id": "price_match",
@@ -1108,7 +1706,29 @@
       "chips": [
         "Genuine or aftermarket?",
         "What warranty do I get?"
-      ]
+      ],
+      "_pats": [
+        " price match",
+        " someone quoted",
+        " cheaper somewhere else",
+        " competitor",
+        " beat that price",
+        " another shop"
+      ],
+      "_tokens": {
+        "price": 1,
+        "match": 1,
+        "someone": 1,
+        "quoted": 1,
+        "cheaper": 1,
+        "somewhere": 1,
+        "else": 1,
+        "competitor": 1,
+        "beat": 1,
+        "another": 1,
+        "shop": 1,
+        "will": 1
+      }
     },
     {
       "id": "fault_screen",
@@ -1143,7 +1763,52 @@
         "iPhone 13 screen price",
         "Do I need a booking?",
         "Will Face ID still work?"
-      ]
+      ],
+      "_pats": [
+        " broken screen",
+        " crack in",
+        " cracked",
+        " cracked screen",
+        " display broken",
+        " display is",
+        " dropped my phone",
+        " green lines",
+        " lines on my",
+        " lines on screen",
+        " pink lines",
+        " screen flickering",
+        " screen is black",
+        " screen is cracked",
+        " screen is smashed",
+        " screen not working",
+        " shattered",
+        " smashed my screen",
+        " smashed screen",
+        " touch doesnt work",
+        " touch not working",
+        " touch screen not"
+      ],
+      "_tokens": {
+        "broken": 1,
+        "screen": 1,
+        "crack": 1,
+        "cracked": 1,
+        "display": 1,
+        "dropped": 1,
+        "phone": 1,
+        "green": 1,
+        "lines": 1,
+        "pink": 1,
+        "flickering": 1,
+        "black": 1,
+        "smashed": 1,
+        "not": 1,
+        "working": 1,
+        "shattered": 1,
+        "touch": 1,
+        "doesnt": 1,
+        "work": 1
+      }
     },
     {
       "id": "fault_battery",
@@ -1165,7 +1830,36 @@
       "chips": [
         "How long does a repair take?",
         "Where are you?"
-      ]
+      ],
+      "_pats": [
+        " battery",
+        " dying fast",
+        " battery drain",
+        " wont hold charge",
+        " shuts down",
+        " dies at 30",
+        " swollen battery",
+        " battery health",
+        " replace battery",
+        " new battery"
+      ],
+      "_tokens": {
+        "battery": 1,
+        "dying": 1,
+        "fast": 1,
+        "drain": 1,
+        "wont": 1,
+        "hold": 1,
+        "charge": 1,
+        "shuts": 1,
+        "down": 1,
+        "dies": 1,
+        "swollen": 1,
+        "health": 1,
+        "replace": 1,
+        "new": 1,
+        "drains": 1
+      }
     },
     {
       "id": "fault_charging",
@@ -1189,7 +1883,35 @@
       "chips": [
         "How long does a repair take?",
         "Where are you?"
-      ]
+      ],
+      "_pats": [
+        " charge it",
+        " charges slowly",
+        " charging cable",
+        " charging issue",
+        " charging port",
+        " have to wiggle",
+        " loose cable",
+        " not charging",
+        " port",
+        " port is loose",
+        " wiggle",
+        " wont charge"
+      ],
+      "_tokens": {
+        "charge": 1,
+        "charges": 1,
+        "slowly": 1,
+        "charging": 1,
+        "cable": 1,
+        "issue": 1,
+        "port": 1,
+        "wiggle": 1,
+        "loose": 1,
+        "not": 1,
+        "wont": 1,
+        "phone": 1
+      }
     },
     {
       "id": "fault_water",
@@ -1214,7 +1936,37 @@
       "chips": [
         "Where are you?",
         "Can you recover my photos?"
-      ]
+      ],
+      "_pats": [
+        " dropped in the",
+        " dropped in water",
+        " dropped it in",
+        " in the sink",
+        " liquid damage",
+        " pool",
+        " rain",
+        " spilled",
+        " toilet",
+        " washing machine",
+        " water",
+        " water damage",
+        " wet"
+      ],
+      "_tokens": {
+        "dropped": 1,
+        "water": 1,
+        "sink": 1,
+        "liquid": 1,
+        "damage": 1,
+        "pool": 1,
+        "rain": 1,
+        "spilled": 1,
+        "toilet": 1,
+        "washing": 1,
+        "machine": 1,
+        "wet": 1,
+        "phone": 1
+      }
     },
     {
       "id": "fault_dead",
@@ -1239,7 +1991,43 @@
       "chips": [
         "Do you fix water damage?",
         "Can you recover my photos?"
-      ]
+      ],
+      "_pats": [
+        " apple logo",
+        " black screen",
+        " boot loop",
+        " bricked",
+        " completely dead",
+        " dead",
+        " doesnt turn on",
+        " keeps restarting",
+        " no power",
+        " not turning on",
+        " stuck on logo",
+        " wont turn on",
+        " wont turn on"
+      ],
+      "_tokens": {
+        "apple": 1,
+        "logo": 1,
+        "black": 1,
+        "screen": 1,
+        "boot": 1,
+        "loop": 1,
+        "bricked": 1,
+        "completely": 1,
+        "dead": 1,
+        "doesnt": 1,
+        "turn": 1,
+        "keeps": 1,
+        "restarting": 1,
+        "power": 1,
+        "not": 1,
+        "turning": 1,
+        "stuck": 1,
+        "wont": 1,
+        "phone": 1
+      }
     },
     {
       "id": "fault_camera",
@@ -1259,7 +2047,33 @@
       "chips": [
         "How much does a repair cost?",
         "How long does a repair take?"
-      ]
+      ],
+      "_pats": [
+        " camera",
+        " blurry photos",
+        " camera black",
+        " lens cracked",
+        " cant focus",
+        " front camera",
+        " selfie camera",
+        " flash not working"
+      ],
+      "_tokens": {
+        "camera": 1,
+        "blurry": 1,
+        "photos": 1,
+        "black": 1,
+        "lens": 1,
+        "cracked": 1,
+        "cant": 1,
+        "focus": 1,
+        "front": 1,
+        "selfie": 1,
+        "flash": 1,
+        "not": 1,
+        "working": 1,
+        "broken": 1
+      }
     },
     {
       "id": "fault_audio",
@@ -1283,7 +2097,35 @@
       "chips": [
         "How long does a repair take?",
         "Where are you?"
-      ]
+      ],
+      "_pats": [
+        " cant hear",
+        " cant hear",
+        " earpiece",
+        " mic",
+        " microphone",
+        " muffled",
+        " no sound",
+        " people cant hear me",
+        " people cant hear",
+        " sound is",
+        " sound not working",
+        " speaker"
+      ],
+      "_tokens": {
+        "cant": 1,
+        "hear": 1,
+        "earpiece": 1,
+        "mic": 1,
+        "microphone": 1,
+        "muffled": 1,
+        "sound": 1,
+        "people": 1,
+        "not": 1,
+        "working": 1,
+        "speaker": 1,
+        "calls": 1
+      }
     },
     {
       "id": "fault_backglass",
@@ -1299,7 +2141,23 @@
       "answer": "Yes, we replace back glass on iPhone and Samsung. It's a laser-and-heat job rather than a simple swap, so give us the model on {{phone}} and we'll quote it and tell you the timing.",
       "chips": [
         "How much does a repair cost?"
-      ]
+      ],
+      "_pats": [
+        " back glass",
+        " rear glass",
+        " back is cracked",
+        " back cover",
+        " housing"
+      ],
+      "_tokens": {
+        "back": 1,
+        "glass": 1,
+        "rear": 1,
+        "cracked": 1,
+        "cover": 1,
+        "housing": 1,
+        "smashed": 1
+      }
     },
     {
       "id": "fault_buttons",
@@ -1323,7 +2181,37 @@
       "chips": [
         "Will Face ID still work after a screen repair?",
         "Where are you?"
-      ]
+      ],
+      "_pats": [
+        " button not working",
+        " button stuck",
+        " face id not working",
+        " face id stopped",
+        " fingerprint",
+        " fingerprint not",
+        " home button",
+        " power button",
+        " silent switch",
+        " touch id",
+        " touch id not",
+        " volume button"
+      ],
+      "_tokens": {
+        "button": 1,
+        "not": 1,
+        "working": 1,
+        "stuck": 1,
+        "face": 1,
+        "stopped": 1,
+        "fingerprint": 1,
+        "home": 1,
+        "power": 1,
+        "silent": 1,
+        "switch": 1,
+        "touch": 1,
+        "volume": 1,
+        "buttons": 1
+      }
     },
     {
       "id": "faceid",
@@ -1348,7 +2236,44 @@
       "chips": [
         "Genuine or aftermarket?",
         "How much is a screen repair?"
-      ]
+      ],
+      "_pats": [
+        " after a screen repair",
+        " after you replace",
+        " battery health warning",
+        " face id",
+        " face id after repair",
+        " face id still",
+        " genuine part warning",
+        " important display message",
+        " non genuine",
+        " true tone",
+        " unknown part",
+        " will face id",
+        " will face id work"
+      ],
+      "_tokens": {
+        "after": 1,
+        "screen": 1,
+        "repair": 1,
+        "replace": 1,
+        "battery": 1,
+        "health": 1,
+        "warning": 1,
+        "face": 1,
+        "still": 1,
+        "genuine": 1,
+        "part": 1,
+        "important": 1,
+        "display": 1,
+        "message": 1,
+        "non": 1,
+        "true": 1,
+        "tone": 1,
+        "unknown": 1,
+        "will": 1,
+        "work": 1
+      }
     },
     {
       "id": "fault_software",
@@ -1376,7 +2301,48 @@
       "chips": [
         "Where are you?",
         "Can you recover my photos?"
-      ]
+      ],
+      "_pats": [
+        " android problem",
+        " apps crashing",
+        " cant update",
+        " factory reset",
+        " freezing",
+        " ios problem",
+        " laggy",
+        " reset",
+        " slow",
+        " software",
+        " software issue",
+        " storage",
+        " storage full",
+        " update failed",
+        " update wont",
+        " virus"
+      ],
+      "_tokens": {
+        "android": 1,
+        "problem": 1,
+        "apps": 1,
+        "crashing": 1,
+        "cant": 1,
+        "update": 1,
+        "factory": 1,
+        "reset": 1,
+        "freezing": 1,
+        "ios": 1,
+        "laggy": 1,
+        "slow": 1,
+        "software": 1,
+        "issue": 1,
+        "storage": 1,
+        "full": 1,
+        "failed": 1,
+        "wont": 1,
+        "virus": 1,
+        "phone": 1,
+        "stuck": 1
+      }
     },
     {
       "id": "fault_network",
@@ -1401,7 +2367,39 @@
       "chips": [
         "Where are you?",
         "How long does a repair take?"
-      ]
+      ],
+      "_pats": [
+        " bluetooth",
+        " bluetooth not working",
+        " cant make calls",
+        " esim",
+        " network",
+        " no service",
+        " no signal",
+        " searching",
+        " sim",
+        " sim card",
+        " sim not detected",
+        " wifi",
+        " wifi not working"
+      ],
+      "_tokens": {
+        "bluetooth": 1,
+        "not": 1,
+        "working": 1,
+        "cant": 1,
+        "make": 1,
+        "calls": 1,
+        "esim": 1,
+        "network": 1,
+        "service": 1,
+        "signal": 1,
+        "searching": 1,
+        "sim": 1,
+        "card": 1,
+        "detected": 1,
+        "wifi": 1
+      }
     },
     {
       "id": "fault_overheat",
@@ -1421,7 +2419,28 @@
       "chips": [
         "Battery replacement",
         "Where are you?"
-      ]
+      ],
+      "_pats": [
+        " burning",
+        " gets hot",
+        " heats up",
+        " hot",
+        " overheat",
+        " overheating",
+        " too hot",
+        " warm"
+      ],
+      "_tokens": {
+        "burning": 1,
+        "gets": 1,
+        "hot": 1,
+        "heats": 1,
+        "overheat": 1,
+        "overheating": 1,
+        "too": 1,
+        "warm": 1,
+        "phone": 1
+      }
     },
     {
       "id": "micro",
@@ -1445,7 +2464,38 @@
       "chips": [
         "Can you recover my photos?",
         "Do you fix water damage?"
-      ]
+      ],
+      "_pats": [
+        " backlight",
+        " board level",
+        " board repair",
+        " chip level",
+        " cpu",
+        " ic",
+        " logic board",
+        " micro soldering",
+        " motherboard",
+        " no image",
+        " solder",
+        " soldering iron work"
+      ],
+      "_tokens": {
+        "backlight": 1,
+        "board": 1,
+        "level": 1,
+        "repair": 1,
+        "chip": 1,
+        "cpu": 1,
+        "logic": 1,
+        "micro": 1,
+        "soldering": 1,
+        "motherboard": 1,
+        "image": 1,
+        "solder": 1,
+        "iron": 1,
+        "work": 1,
+        "repairs": 1
+      }
     },
     {
       "id": "data_recovery",
@@ -1465,7 +2515,29 @@
       "chips": [
         "Do you fix water damage?",
         "Where are you?"
-      ]
+      ],
+      "_pats": [
+        " recover data",
+        " recover photos",
+        " data recovery",
+        " get my photos",
+        " contacts",
+        " memories",
+        " phone wont turn on photos",
+        " retrieve data"
+      ],
+      "_tokens": {
+        "recover": 1,
+        "data": 1,
+        "photos": 1,
+        "recovery": 1,
+        "contacts": 1,
+        "memories": 1,
+        "phone": 1,
+        "wont": 1,
+        "turn": 1,
+        "retrieve": 1
+      }
     },
     {
       "id": "backup",
@@ -1488,7 +2560,35 @@
       "chips": [
         "Is my data safe?",
         "Can you recover my photos?"
-      ]
+      ],
+      "_pats": [
+        " back up",
+        " backup",
+        " data safe during repair",
+        " erase",
+        " lose everything",
+        " lose my data",
+        " lose my photos",
+        " lose photos",
+        " should i backup",
+        " will i lose",
+        " will i lose my data"
+      ],
+      "_tokens": {
+        "back": 1,
+        "backup": 1,
+        "data": 1,
+        "safe": 1,
+        "during": 1,
+        "repair": 1,
+        "erase": 1,
+        "lose": 1,
+        "everything": 1,
+        "photos": 1,
+        "should": 1,
+        "will": 1,
+        "before": 1
+      }
     },
     {
       "id": "passcode",
@@ -1506,7 +2606,24 @@
       "chips": [
         "Is my data safe?",
         "What warranty do I get?"
-      ]
+      ],
+      "_pats": [
+        " passcode",
+        " pin",
+        " password",
+        " unlock code",
+        " do you need my code",
+        " give you my pin"
+      ],
+      "_tokens": {
+        "passcode": 1,
+        "pin": 1,
+        "password": 1,
+        "unlock": 1,
+        "code": 1,
+        "need": 1,
+        "give": 1
+      }
     },
     {
       "id": "data_safe",
@@ -1524,7 +2641,27 @@
       "chips": [
         "Do you need my passcode?",
         "Should I back up first?"
-      ]
+      ],
+      "_pats": [
+        " is my data safe",
+        " privacy",
+        " do you look at my phone",
+        " personal information",
+        " photos private",
+        " confidential"
+      ],
+      "_tokens": {
+        "data": 1,
+        "safe": 1,
+        "privacy": 1,
+        "look": 1,
+        "phone": 1,
+        "personal": 1,
+        "information": 1,
+        "photos": 1,
+        "private": 1,
+        "confidential": 1
+      }
     },
     {
       "id": "warranty",
@@ -1541,7 +2678,22 @@
       "chips": [
         "What does the warranty cover?",
         "What voids the warranty?"
-      ]
+      ],
+      "_pats": [
+        " warranty",
+        " guarantee",
+        " how long is the warranty",
+        " covered",
+        " guaranteed"
+      ],
+      "_tokens": {
+        "warranty": 1,
+        "guarantee": 1,
+        "how": 1,
+        "long": 1,
+        "covered": 1,
+        "guaranteed": 1
+      }
     },
     {
       "id": "warranty_covers",
@@ -1560,7 +2712,24 @@
       "chips": [
         "What voids the warranty?",
         "How do I claim warranty?"
-      ]
+      ],
+      "_pats": [
+        " covered under the warranty",
+        " covered under warranty",
+        " does warranty cover",
+        " warranty include",
+        " what does the warranty cover",
+        " what is covered",
+        " whats covered"
+      ],
+      "_tokens": {
+        "covered": 1,
+        "under": 1,
+        "warranty": 1,
+        "does": 1,
+        "cover": 1,
+        "include": 1
+      }
     },
     {
       "id": "warranty_void",
@@ -1581,7 +2750,31 @@
       "chips": [
         "How do I claim warranty?",
         "What does the warranty cover?"
-      ]
+      ],
+      "_pats": [
+        " broke it again",
+        " cancel warranty",
+        " dropped it again",
+        " invalid",
+        " is that covered",
+        " lose warranty",
+        " my fault",
+        " void warranty",
+        " voids"
+      ],
+      "_tokens": {
+        "broke": 1,
+        "again": 1,
+        "cancel": 1,
+        "warranty": 1,
+        "dropped": 1,
+        "invalid": 1,
+        "covered": 1,
+        "lose": 1,
+        "fault": 1,
+        "void": 1,
+        "voids": 1
+      }
     },
     {
       "id": "warranty_claim",
@@ -1605,7 +2798,42 @@
       "chips": [
         "What are your hours?",
         "Where are you?"
-      ]
+      ],
+      "_pats": [
+        " after the repair",
+        " came back faulty",
+        " claim warranty",
+        " it broke again",
+        " repair failed",
+        " same problem again",
+        " stopped responding",
+        " stopped working after repair",
+        " warranty claim",
+        " went faulty",
+        " you fitted",
+        " you replaced"
+      ],
+      "_tokens": {
+        "after": 1,
+        "repair": 1,
+        "came": 1,
+        "back": 1,
+        "faulty": 1,
+        "claim": 1,
+        "warranty": 1,
+        "broke": 1,
+        "again": 1,
+        "failed": 1,
+        "same": 1,
+        "problem": 1,
+        "stopped": 1,
+        "responding": 1,
+        "working": 1,
+        "went": 1,
+        "fitted": 1,
+        "replaced": 1,
+        "how": 1
+      }
     },
     {
       "id": "warranty_online",
@@ -1626,7 +2854,32 @@
       "chips": [
         "How do I return something?",
         "How do I track my order?"
-      ]
+      ],
+      "_pats": [
+        " accessory warranty",
+        " bought online",
+        " case i bought",
+        " item faulty warranty",
+        " item i bought",
+        " product warranty",
+        " warranty for accessory",
+        " warranty on online order",
+        " warranty online purchase"
+      ],
+      "_tokens": {
+        "accessory": 1,
+        "warranty": 1,
+        "bought": 1,
+        "online": 1,
+        "case": 1,
+        "item": 1,
+        "faulty": 1,
+        "product": 1,
+        "order": 1,
+        "purchase": 1,
+        "things": 1,
+        "buy": 1
+      }
     },
     {
       "id": "mailin",
@@ -1649,7 +2902,37 @@
       "chips": [
         "How much does postage cost?",
         "How long does mail-in take?"
-      ]
+      ],
+      "_pats": [
+        " mail in",
+        " post it",
+        " send my phone",
+        " interstate",
+        " by mail",
+        " courier my phone",
+        " not in sydney",
+        " live far away",
+        " melbourne",
+        " brisbane",
+        " country"
+      ],
+      "_tokens": {
+        "mail": 1,
+        "post": 1,
+        "send": 1,
+        "phone": 1,
+        "interstate": 1,
+        "courier": 1,
+        "not": 1,
+        "sydney": 1,
+        "live": 1,
+        "far": 1,
+        "away": 1,
+        "melbourne": 1,
+        "brisbane": 1,
+        "country": 1,
+        "repair": 1
+      }
     },
     {
       "id": "mailin_post",
@@ -1670,7 +2953,32 @@
       "chips": [
         "Can I post my phone in?",
         "How long does mail-in take?"
-      ]
+      ],
+      "_pats": [
+        " insure the parcel",
+        " pays for postage",
+        " postage cost",
+        " postage for a repair",
+        " return postage repair",
+        " send it back",
+        " shipping for repair",
+        " who pays postage",
+        " who pays the"
+      ],
+      "_tokens": {
+        "insure": 1,
+        "parcel": 1,
+        "pays": 1,
+        "postage": 1,
+        "cost": 1,
+        "repair": 1,
+        "return": 1,
+        "send": 1,
+        "back": 1,
+        "shipping": 1,
+        "who": 1,
+        "mail": 1
+      }
     },
     {
       "id": "mailin_time",
@@ -1686,7 +2994,26 @@
       "chips": [
         "Can I post my phone in?",
         "What warranty do I get?"
-      ]
+      ],
+      "_pats": [
+        " mail in time",
+        " how long mail in",
+        " turnaround mail",
+        " when will i get it back"
+      ],
+      "_tokens": {
+        "mail": 1,
+        "time": 1,
+        "how": 1,
+        "long": 1,
+        "turnaround": 1,
+        "when": 1,
+        "will": 1,
+        "back": 1,
+        "does": 1,
+        "repair": 1,
+        "take": 1
+      }
     },
     {
       "id": "shop_sells",
@@ -1716,7 +3043,49 @@
       "chips": [
         "Do you sell refurbished phones?",
         "Can I pick up in store?"
-      ]
+      ],
+      "_pats": [
+        " accessories",
+        " buy",
+        " cables",
+        " cases",
+        " chargers",
+        " do you sell",
+        " do you stock",
+        " do yous sell",
+        " earphones",
+        " headphones",
+        " power bank",
+        " products",
+        " screen protector",
+        " sell airpods",
+        " shop",
+        " store",
+        " tempered glass",
+        " what do you sell"
+      ],
+      "_tokens": {
+        "accessories": 1,
+        "buy": 1,
+        "cables": 1,
+        "cases": 1,
+        "chargers": 1,
+        "sell": 1,
+        "stock": 1,
+        "yous": 1,
+        "earphones": 1,
+        "headphones": 1,
+        "power": 1,
+        "bank": 1,
+        "products": 1,
+        "screen": 1,
+        "protector": 1,
+        "airpods": 1,
+        "shop": 1,
+        "store": 1,
+        "tempered": 1,
+        "glass": 1
+      }
     },
     {
       "id": "refurb",
@@ -1744,7 +3113,45 @@
       "chips": [
         "Do you buy phones?",
         "Can I pick up in store?"
-      ]
+      ],
+      "_pats": [
+        " battery health of refurb",
+        " buy a phone",
+        " cheap iphone",
+        " cheap phone",
+        " grade a",
+        " grade b",
+        " pre loved",
+        " preowned",
+        " refurbished",
+        " refurbished phones",
+        " second hand",
+        " second hand iphone",
+        " sell second hand",
+        " used iphone",
+        " used iphones",
+        " used phone"
+      ],
+      "_tokens": {
+        "battery": 1,
+        "health": 1,
+        "refurb": 1,
+        "buy": 1,
+        "phone": 1,
+        "cheap": 1,
+        "iphone": 1,
+        "grade": 1,
+        "pre": 1,
+        "loved": 1,
+        "preowned": 1,
+        "refurbished": 1,
+        "phones": 1,
+        "second": 1,
+        "hand": 1,
+        "sell": 1,
+        "used": 1,
+        "iphones": 1
+      }
     },
     {
       "id": "stock",
@@ -1765,7 +3172,26 @@
       "chips": [
         "Can I pick up in store?",
         "Where are you?"
-      ]
+      ],
+      "_pats": [
+        " availability",
+        " available",
+        " do you have",
+        " do you have any",
+        " got any",
+        " have you got",
+        " in stock",
+        " stock",
+        " when will you have"
+      ],
+      "_tokens": {
+        "availability": 1,
+        "available": 1,
+        "got": 1,
+        "stock": 1,
+        "when": 1,
+        "will": 1
+      }
     },
     {
       "id": "pickup",
@@ -1783,7 +3209,23 @@
       "chips": [
         "What are your hours?",
         "Where are you?"
-      ]
+      ],
+      "_pats": [
+        " pick up",
+        " pickup",
+        " click and collect",
+        " collect",
+        " in store pickup",
+        " come and get it"
+      ],
+      "_tokens": {
+        "pick": 1,
+        "pickup": 1,
+        "click": 1,
+        "collect": 1,
+        "store": 1,
+        "come": 1
+      }
     },
     {
       "id": "price_online",
@@ -1808,7 +3250,37 @@
       "chips": [
         "Do you have it in stock?",
         "Can I pick up in store?"
-      ]
+      ],
+      "_pats": [
+        " cost of charger",
+        " how much for a screen protector",
+        " how much is a cable",
+        " how much is a case",
+        " how much is a charger",
+        " how much is a screen protector",
+        " how much is a tempered",
+        " how much is that item",
+        " price of a screen protector",
+        " price of the case",
+        " price online",
+        " screen protector",
+        " tempered glass"
+      ],
+      "_tokens": {
+        "cost": 1,
+        "charger": 1,
+        "how": 1,
+        "much": 1,
+        "screen": 1,
+        "protector": 1,
+        "cable": 1,
+        "case": 1,
+        "tempered": 1,
+        "item": 1,
+        "price": 1,
+        "online": 1,
+        "glass": 1
+      }
     },
     {
       "id": "order_status",
@@ -1829,7 +3301,32 @@
       "chips": [
         "How long does delivery take?",
         "How much is shipping?"
-      ]
+      ],
+      "_pats": [
+        " where is my order",
+        " order status",
+        " my order",
+        " track",
+        " tracking",
+        " hasnt arrived",
+        " delivery status",
+        " shipped yet",
+        " order number"
+      ],
+      "_tokens": {
+        "where": 1,
+        "order": 1,
+        "status": 1,
+        "track": 1,
+        "tracking": 1,
+        "hasnt": 1,
+        "arrived": 1,
+        "delivery": 1,
+        "shipped": 1,
+        "yet": 1,
+        "number": 1,
+        "wheres": 1
+      }
     },
     {
       "id": "shipping_cost",
@@ -1851,7 +3348,31 @@
       "chips": [
         "How long does delivery take?",
         "Can I pick up in store?"
-      ]
+      ],
+      "_pats": [
+        " cost of postage",
+        " delivery fee",
+        " free shipping",
+        " how much is postage",
+        " how much is shipping",
+        " how much to post",
+        " is postage",
+        " postage cost",
+        " shipping cost",
+        " shipping price"
+      ],
+      "_tokens": {
+        "cost": 1,
+        "postage": 1,
+        "delivery": 1,
+        "fee": 1,
+        "free": 1,
+        "shipping": 1,
+        "how": 1,
+        "much": 1,
+        "post": 1,
+        "price": 1
+      }
     },
     {
       "id": "shipping_time",
@@ -1874,7 +3395,39 @@
       "chips": [
         "Where's my order?",
         "How much is shipping?"
-      ]
+      ],
+      "_pats": [
+        " delivery time",
+        " dispatch",
+        " express post",
+        " how fast delivery",
+        " how long does delivery",
+        " how long to arrive",
+        " how long until",
+        " how many days",
+        " shipping time",
+        " when does it arrive",
+        " when will it arrive"
+      ],
+      "_tokens": {
+        "delivery": 1,
+        "time": 1,
+        "dispatch": 1,
+        "express": 1,
+        "post": 1,
+        "how": 1,
+        "fast": 1,
+        "long": 1,
+        "does": 1,
+        "arrive": 1,
+        "until": 1,
+        "many": 1,
+        "days": 1,
+        "shipping": 1,
+        "when": 1,
+        "will": 1,
+        "take": 1
+      }
     },
     {
       "id": "shipping_intl",
@@ -1892,7 +3445,27 @@
       "chips": [
         "How much is shipping?",
         "How long does delivery take?"
-      ]
+      ],
+      "_pats": [
+        " international",
+        " overseas",
+        " ship to new zealand",
+        " worldwide",
+        " outside australia",
+        " export"
+      ],
+      "_tokens": {
+        "international": 1,
+        "overseas": 1,
+        "ship": 1,
+        "new": 1,
+        "zealand": 1,
+        "worldwide": 1,
+        "outside": 1,
+        "australia": 1,
+        "export": 1,
+        "internationally": 1
+      }
     },
     {
       "id": "shipping_pobox",
@@ -1906,7 +3479,20 @@
       "answer": "Yes, using postal services - we just can't send courier deliveries to a PO Box.",
       "chips": [
         "How much is shipping?"
-      ]
+      ],
+      "_pats": [
+        " po box",
+        " post office box",
+        " parcel locker"
+      ],
+      "_tokens": {
+        "box": 1,
+        "post": 1,
+        "office": 1,
+        "parcel": 1,
+        "locker": 1,
+        "ship": 1
+      }
     },
     {
       "id": "order_change",
@@ -1923,7 +3509,23 @@
       "chips": [
         "Can I cancel my order?",
         "Where's my order?"
-      ]
+      ],
+      "_pats": [
+        " change address",
+        " wrong address",
+        " update address",
+        " change my order",
+        " different address"
+      ],
+      "_tokens": {
+        "change": 1,
+        "address": 1,
+        "wrong": 1,
+        "update": 1,
+        "order": 1,
+        "different": 1,
+        "delivery": 1
+      }
     },
     {
       "id": "order_cancel",
@@ -1939,7 +3541,22 @@
       "chips": [
         "How do I return something?",
         "Where's my order?"
-      ]
+      ],
+      "_pats": [
+        " cancel my order",
+        " cancel order",
+        " changed my mind order",
+        " dont want it anymore"
+      ],
+      "_tokens": {
+        "cancel": 1,
+        "order": 1,
+        "changed": 1,
+        "mind": 1,
+        "dont": 1,
+        "want": 1,
+        "anymore": 1
+      }
     },
     {
       "id": "order_damaged",
@@ -1965,7 +3582,40 @@
       "chips": [
         "How do I return something?",
         "Where's my order?"
-      ]
+      ],
+      "_pats": [
+        " arrived broken",
+        " arrived smashed",
+        " box was crushed",
+        " crushed box",
+        " damaged in transit",
+        " damaged parcel",
+        " lost parcel",
+        " missing item",
+        " my parcel",
+        " never arrived",
+        " package damaged",
+        " parcel",
+        " turned up smashed",
+        " wrong item"
+      ],
+      "_tokens": {
+        "arrived": 1,
+        "broken": 1,
+        "smashed": 1,
+        "box": 1,
+        "crushed": 1,
+        "damaged": 1,
+        "transit": 1,
+        "parcel": 1,
+        "lost": 1,
+        "missing": 1,
+        "item": 1,
+        "never": 1,
+        "package": 1,
+        "turned": 1,
+        "wrong": 1
+      }
     },
     {
       "id": "returns",
@@ -1984,7 +3634,30 @@
       "chips": [
         "How long does a refund take?",
         "What's the warranty on online orders?"
-      ]
+      ],
+      "_pats": [
+        " return",
+        " refund",
+        " send it back",
+        " money back",
+        " change of mind",
+        " dont want it",
+        " exchange"
+      ],
+      "_tokens": {
+        "return": 1,
+        "refund": 1,
+        "send": 1,
+        "back": 1,
+        "money": 1,
+        "change": 1,
+        "mind": 1,
+        "dont": 1,
+        "want": 1,
+        "exchange": 1,
+        "how": 1,
+        "something": 1
+      }
     },
     {
       "id": "refund_time",
@@ -2002,7 +3675,29 @@
       "answer": "Once we've received and inspected the return we'll let you know the outcome, and approved refunds go back to your original payment method - allow a little time for your bank to post it. If it's been longer than that, call {{phone}} and we'll chase it up.",
       "chips": [
         "How do I return something?"
-      ]
+      ],
+      "_pats": [
+        " how long does a refund",
+        " how long refund",
+        " processing refund",
+        " refund take",
+        " refund time",
+        " waiting for my refund",
+        " when will i get my money"
+      ],
+      "_tokens": {
+        "how": 1,
+        "long": 1,
+        "does": 1,
+        "refund": 1,
+        "processing": 1,
+        "take": 1,
+        "time": 1,
+        "waiting": 1,
+        "when": 1,
+        "will": 1,
+        "money": 1
+      }
     },
     {
       "id": "exchange",
@@ -2018,7 +3713,26 @@
       "answer": "The quickest way is to return the original and place a new order for what you actually want. Call {{phone}} or email {{email}} first and we'll walk you through it.",
       "chips": [
         "How do I return something?"
-      ]
+      ],
+      "_pats": [
+        " exchange",
+        " swap it",
+        " different size",
+        " different colour",
+        " wrong model bought"
+      ],
+      "_tokens": {
+        "exchange": 1,
+        "swap": 1,
+        "different": 1,
+        "size": 1,
+        "colour": 1,
+        "wrong": 1,
+        "model": 1,
+        "bought": 1,
+        "something": 1,
+        "else": 1
+      }
     },
     {
       "id": "payment",
@@ -2040,7 +3754,34 @@
       "chips": [
         "Do you take Afterpay?",
         "Do I pay a deposit?"
-      ]
+      ],
+      "_pats": [
+        " payment",
+        " pay by card",
+        " cash",
+        " eftpos",
+        " credit card",
+        " apple pay",
+        " google pay",
+        " paypal",
+        " how can i pay",
+        " tap"
+      ],
+      "_tokens": {
+        "payment": 1,
+        "pay": 1,
+        "card": 1,
+        "cash": 1,
+        "eftpos": 1,
+        "credit": 1,
+        "apple": 1,
+        "google": 1,
+        "paypal": 1,
+        "how": 1,
+        "tap": 1,
+        "methods": 1,
+        "accept": 1
+      }
     },
     {
       "id": "payment_bnpl",
@@ -2068,7 +3809,47 @@
       "answer": "Best to confirm that one directly - call {{phone}} and we'll tell you exactly what we can take before you head over.",
       "chips": [
         "What payment methods do you accept?"
-      ]
+      ],
+      "_pats": [
+        " afterpay",
+        " buy now pay later",
+        " do you do finance",
+        " do you do finance on",
+        " finance on",
+        " finance on refurbished",
+        " humm",
+        " instalments",
+        " klarna",
+        " offer finance",
+        " pay it off",
+        " pay later",
+        " pay over 12 months",
+        " payment plan",
+        " payment plan over",
+        " zip",
+        " zippay"
+      ],
+      "_tokens": {
+        "afterpay": 1,
+        "buy": 1,
+        "now": 1,
+        "pay": 1,
+        "later": 1,
+        "finance": 1,
+        "refurbished": 1,
+        "humm": 1,
+        "instalments": 1,
+        "klarna": 1,
+        "offer": 1,
+        "off": 1,
+        "over": 1,
+        "months": 1,
+        "payment": 1,
+        "plan": 1,
+        "zip": 1,
+        "zippay": 1,
+        "take": 1
+      }
     },
     {
       "id": "payment_deposit",
@@ -2085,7 +3866,22 @@
       "chips": [
         "What payment methods do you accept?",
         "How much does a repair cost?"
-      ]
+      ],
+      "_pats": [
+        " deposit",
+        " pay upfront",
+        " pay in advance",
+        " pay before",
+        " when do i pay"
+      ],
+      "_tokens": {
+        "deposit": 1,
+        "pay": 1,
+        "upfront": 1,
+        "advance": 1,
+        "before": 1,
+        "when": 1
+      }
     },
     {
       "id": "invoice",
@@ -2108,7 +3904,34 @@
       "answer": "Yes - you get a tax invoice with every repair and every purchase, GST included, with our ABN on it. Lost one, or need our details for a claim? Call {{phone}} or email {{email}} and we'll send it through.",
       "chips": [
         "Do you do insurance quotes?"
-      ]
+      ],
+      "_pats": [
+        " abn",
+        " business receipt",
+        " claim on tax",
+        " for work",
+        " gst",
+        " gst included",
+        " include gst",
+        " invoice",
+        " prices include gst",
+        " receipt",
+        " tax invoice",
+        " with gst"
+      ],
+      "_tokens": {
+        "abn": 1,
+        "business": 1,
+        "receipt": 1,
+        "claim": 1,
+        "tax": 1,
+        "work": 1,
+        "gst": 1,
+        "included": 1,
+        "include": 1,
+        "invoice": 1,
+        "prices": 1
+      }
     },
     {
       "id": "insurance",
@@ -2126,7 +3949,26 @@
       "chips": [
         "Can I get a tax invoice?",
         "Where are you?"
-      ]
+      ],
+      "_pats": [
+        " insurance",
+        " insurer",
+        " claim",
+        " assessment for insurance",
+        " written quote",
+        " for my insurance company"
+      ],
+      "_tokens": {
+        "insurance": 1,
+        "insurer": 1,
+        "claim": 1,
+        "assessment": 1,
+        "written": 1,
+        "quote": 1,
+        "company": 1,
+        "quotes": 1,
+        "claims": 1
+      }
     },
     {
       "id": "tradein",
@@ -2146,7 +3988,30 @@
       "chips": [
         "Do you sell refurbished phones?",
         "Where are you?"
-      ]
+      ],
+      "_pats": [
+        " do you buy",
+        " sell my phone",
+        " trade in",
+        " tradein",
+        " cash for phone",
+        " upgrade",
+        " get rid of my old phone",
+        " recycle"
+      ],
+      "_tokens": {
+        "buy": 1,
+        "sell": 1,
+        "phone": 1,
+        "trade": 1,
+        "tradein": 1,
+        "cash": 1,
+        "upgrade": 1,
+        "rid": 1,
+        "old": 1,
+        "recycle": 1,
+        "phones": 1
+      }
     },
     {
       "id": "unlock",
@@ -2164,7 +4029,29 @@
       "answer": "Carrier unlocking is handled by the carrier the phone is locked to - Telstra, Optus and Vodafone all do it through their own process, usually free if the phone is paid off. Call {{phone}} if you're not sure who it's locked to and we'll help you work it out.",
       "chips": [
         "Do you sell refurbished phones?"
-      ]
+      ],
+      "_pats": [
+        " unlock",
+        " network unlock",
+        " carrier unlock",
+        " locked to telstra",
+        " optus locked",
+        " sim locked",
+        " unlocking service"
+      ],
+      "_tokens": {
+        "unlock": 1,
+        "network": 1,
+        "carrier": 1,
+        "locked": 1,
+        "telstra": 1,
+        "optus": 1,
+        "sim": 1,
+        "unlocking": 1,
+        "service": 1,
+        "phone": 1,
+        "from": 1
+      }
     },
     {
       "id": "business",
@@ -2185,7 +4072,36 @@
       "answer": "Yes - we look after businesses, schools and repeat trade customers, including bulk repairs and accounts. Call {{phone}} or email {{email}} and we'll set something up that suits how you work.",
       "chips": [
         "Can I get a tax invoice?"
-      ]
+      ],
+      "_pats": [
+        " business",
+        " corporate",
+        " fleet",
+        " school",
+        " bulk",
+        " multiple devices",
+        " account",
+        " wholesale",
+        " trade price",
+        " b2b"
+      ],
+      "_tokens": {
+        "business": 1,
+        "corporate": 1,
+        "fleet": 1,
+        "school": 1,
+        "bulk": 1,
+        "multiple": 1,
+        "devices": 1,
+        "account": 1,
+        "wholesale": 1,
+        "trade": 1,
+        "price": 1,
+        "b2b": 1,
+        "work": 1,
+        "businesses": 1,
+        "schools": 1
+      }
     },
     {
       "id": "complaint",
@@ -2206,7 +4122,36 @@
       "chips": [
         "What are your hours?",
         "Where are you?"
-      ]
+      ],
+      "_pats": [
+        " complaint",
+        " not happy",
+        " unhappy",
+        " poor service",
+        " bad experience",
+        " angry",
+        " disappointed",
+        " waste of money",
+        " rip off"
+      ],
+      "_tokens": {
+        "complaint": 1,
+        "not": 1,
+        "happy": 1,
+        "unhappy": 1,
+        "poor": 1,
+        "service": 1,
+        "bad": 1,
+        "experience": 1,
+        "angry": 1,
+        "disappointed": 1,
+        "waste": 1,
+        "money": 1,
+        "rip": 1,
+        "off": 1,
+        "want": 1,
+        "make": 1
+      }
     },
     {
       "id": "review",
@@ -2221,7 +4166,26 @@
         "five stars"
       ],
       "answer": "That'd mean a lot - a Google review of Sydney Mobile Phone Repairs is the one that helps us most. Thanks for taking the time.",
-      "chips": []
+      "chips": [],
+      "_pats": [
+        " review",
+        " feedback",
+        " google review",
+        " testimonial",
+        " rate you",
+        " five stars"
+      ],
+      "_tokens": {
+        "review": 1,
+        "feedback": 1,
+        "google": 1,
+        "testimonial": 1,
+        "rate": 1,
+        "five": 1,
+        "stars": 1,
+        "how": 1,
+        "leave": 1
+      }
     },
     {
       "id": "careers",
@@ -2238,7 +4202,27 @@
         "vacancy"
       ],
       "answer": "Send your details to {{email}} and we'll keep them on file - we do take on technicians when the right person comes along.",
-      "chips": []
+      "chips": [],
+      "_pats": [
+        " job",
+        " hiring",
+        " careers",
+        " apprentice",
+        " work for you",
+        " employment",
+        " resume",
+        " vacancy"
+      ],
+      "_tokens": {
+        "job": 1,
+        "hiring": 1,
+        "careers": 1,
+        "apprentice": 1,
+        "work": 1,
+        "employment": 1,
+        "resume": 1,
+        "vacancy": 1
+      }
     },
     {
       "id": "languages",
@@ -2256,7 +4240,27 @@
       "answer": "We're a family-run local shop and there's usually someone who can help - easiest is to call {{phone}} or come in and we'll sort it out between us.",
       "chips": [
         "Where are you?"
-      ]
+      ],
+      "_pats": [
+        " language",
+        " greek",
+        " arabic",
+        " chinese",
+        " speak my language",
+        " translator",
+        " interpreter"
+      ],
+      "_tokens": {
+        "language": 1,
+        "greek": 1,
+        "arabic": 1,
+        "chinese": 1,
+        "speak": 1,
+        "translator": 1,
+        "interpreter": 1,
+        "other": 1,
+        "languages": 1
+      }
     },
     {
       "id": "accessibility",
@@ -2274,7 +4278,25 @@
       "chips": [
         "Where are you?",
         "Is there parking?"
-      ]
+      ],
+      "_pats": [
+        " wheelchair",
+        " accessible",
+        " accessibility",
+        " disabled access",
+        " ramp",
+        " mobility"
+      ],
+      "_tokens": {
+        "wheelchair": 1,
+        "accessible": 1,
+        "accessibility": 1,
+        "disabled": 1,
+        "access": 1,
+        "ramp": 1,
+        "mobility": 1,
+        "shop": 1
+      }
     },
     {
       "id": "offtopic",
@@ -2295,7 +4317,31 @@
         "How much is a screen repair?",
         "What are your hours?",
         "What do you repair?"
-      ]
+      ],
+      "_pats": [
+        " weather",
+        " football",
+        " joke",
+        " who won",
+        " recipe",
+        " politics",
+        " whats the time",
+        " how are you"
+      ],
+      "_tokens": {
+        "weather": 1,
+        "football": 1,
+        "joke": 1,
+        "who": 1,
+        "won": 1,
+        "recipe": 1,
+        "politics": 1,
+        "time": 1,
+        "how": 1,
+        "off": 1,
+        "topic": 1,
+        "question": 1
+      }
     },
     {
       "id": "injection",
@@ -2320,7 +4366,41 @@
         "What do you repair?",
         "How much does a repair cost?",
         "What are your hours?"
-      ]
+      ],
+      "_pats": [
+        " ignore your instructions",
+        " ignore previous",
+        " your prompt",
+        " system prompt",
+        " what are your instructions",
+        " pretend you are",
+        " act as",
+        " jailbreak",
+        " developer mode",
+        " forget your rules",
+        " you are now",
+        " repeat your instructions"
+      ],
+      "_tokens": {
+        "ignore": 1,
+        "your": 1,
+        "instructions": 1,
+        "previous": 1,
+        "prompt": 1,
+        "system": 1,
+        "pretend": 1,
+        "act": 1,
+        "jailbreak": 1,
+        "developer": 1,
+        "mode": 1,
+        "forget": 1,
+        "rules": 1,
+        "now": 1,
+        "repeat": 1,
+        "attempt": 1,
+        "change": 1,
+        "bots": 1
+      }
     }
   ],
   "testBank": [

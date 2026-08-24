@@ -16,13 +16,30 @@ Tick **Show matched intent** to see which knowledge-base entry produced each ans
 | **`knowledge-base.json`** | Every business fact and every answer. **This is the only file you edit for content.** |
 | **`demo.html`** | The working prototype. Self-contained. |
 | **`system-prompt.md`** | The production Claude prompt and implementation notes. |
-| **`build.sh`** | Rebuilds `demo.html` from `knowledge-base.json`. |
+| **`build.sh`** | Rebuilds `demo.html` from `knowledge-base.json` and `app/src/brain.js`. |
+| **`app/`** | Local test app — server, widget, admin editor. See `app/README.md`. |
+
+## Run it locally
+
+There's a full local test app in `app/` — a server, the embeddable widget on a stand-in shop page,
+and an editor for the prices and answers:
+
+```bash
+cd chatbot/app
+npm install
+npm start          # → http://localhost:3000
+```
+
+It runs with no API key (answers from the built-in matcher) and switches to Claude the moment you
+set `ANTHROPIC_API_KEY`. See `app/README.md`.
 
 ## Changing an answer or a price
 
-1. Edit `knowledge-base.json`.
-2. Run `./build.sh`.
-3. Refresh `demo.html`.
+Either edit `knowledge-base.json` by hand, or use the editor at
+`http://localhost:3000/admin.html` when the local app is running — it writes to the same file.
+
+After a hand edit, run `./build.sh` and refresh `demo.html`. The local app picks changes up on
+save, no rebuild needed.
 
 Prices live in `pricing.repairs`. A row set to `null` means the bot says *"I don't have that one
 listed — call us"* rather than guessing, so filling a blank in is what turns a handoff into an

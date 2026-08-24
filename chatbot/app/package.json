@@ -1,0 +1,15 @@
+{
+  "name": "smpr-chatbot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Local test harness for the Sydney Mobile Phone Repairs customer chatbot",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.71.0"
+  }
+}
