@@ -15,9 +15,19 @@ Tick **Show matched intent** to see which knowledge-base entry produced each ans
 | **`DESIGN.md`** | The design — coverage map, conversation flow, pricing rules, guardrails, voice, build plan. Start here. |
 | **`knowledge-base.json`** | Every business fact and every answer. **This is the only file you edit for content.** |
 | **`demo.html`** | The working prototype. Self-contained. |
+| **`artifact.html`** | The same prototype shaped for publishing to claude.ai. |
 | **`system-prompt.md`** | The production Claude prompt and implementation notes. |
 | **`build.sh`** | Rebuilds `demo.html` from `knowledge-base.json` and `app/src/brain.js`. |
 | **`app/`** | Local test app — server, widget, admin editor. See `app/README.md`. |
+
+## Run it in the Claude app
+
+Published as a private Artifact — open it from the Claude app or any browser, no install:
+
+**https://claude.ai/code/artifact/aa33d3a7-42b2-4d3f-a183-d83042465051**
+
+It runs the built-in matcher, same as `demo.html`. Live Claude answers need the backend in `app/`.
+Source is `artifact.html`, rebuilt by `build.sh` alongside the demo.
 
 ## Run it locally
 
