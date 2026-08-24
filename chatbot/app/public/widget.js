@@ -130,9 +130,14 @@
       res.products.forEach(function(p){
         var cls = p.stock > 3 ? '' : (p.stock > 0 ? ' low' : ' out');
         var label = p.stock > 3 ? 'In stock' : (p.stock > 0 ? 'Only ' + p.stock + ' left' : 'Out of stock');
-        html += '<a class="smpr-prod" href="' + esc(p.url) + '" target="_blank" rel="noopener">' +
+        html += '<div class="smpr-prod-wrap">' +
+                '<a class="smpr-prod" href="' + esc(p.url) + '" target="_blank" rel="noopener">' +
                 '<span class="smpr-prod-t">' + esc(p.title) + '<span class="smpr-prod-s' + cls + '">' + label + '</span></span>' +
-                '<span class="smpr-prod-p">$' + esc(p.price) + '</span></a>';
+                '<span class="smpr-prod-p">$' + esc(p.price) + '</span></a>' +
+                (p.cart && p.stock > 0
+                  ? '<a class="smpr-prod-cart" href="' + esc(p.cart) + '" target="_blank" rel="noopener">Add to cart</a>'
+                  : '') +
+                '</div>';
       });
       html += '</div>';
     }

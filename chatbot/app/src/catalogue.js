@@ -36,7 +36,7 @@ const QUERY = `
           productType
           availableForSale
           priceRange { minVariantPrice { amount } }
-          variants(first: 1) { edges { node { quantityAvailable } } }
+          variants(first: 1) { edges { node { id quantityAvailable } } }
         }
       }
     }
@@ -55,7 +55,8 @@ function buildQuery(terms) {
 }
 
 function mapNode(node) {
-  const qty = node.variants?.edges?.[0]?.node?.quantityAvailable;
+  const variant = node.variants?.edges?.[0]?.node;
+  const qty = variant?.quantityAvailable;
   return {
     t: node.title,
     h: node.handle,
@@ -63,7 +64,9 @@ function mapNode(node) {
     p: Number(node.priceRange.minVariantPrice.amount),
     // quantityAvailable needs the unauthenticated_read_product_inventory scope;
     // without it Shopify returns null, so fall back to the in-stock flag.
-    s: typeof qty === 'number' ? qty : (node.availableForSale ? 1 : 0)
+    s: typeof qty === 'number' ? qty : (node.availableForSale ? 1 : 0),
+    // numeric id only - the cart permalink does not take the gid:// form
+    v: variant?.id ? String(variant.id).split('/').pop() : null
   };
 }
 

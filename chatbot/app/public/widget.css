@@ -64,3 +64,11 @@
   .smpr-prod-s.out{color:#9CA3AF}
 
 .smpr-blurb{display:block;font-style:normal;font-size:11px;color:#9CA3AF;margin-top:1px}
+
+  .smpr-prod-wrap{display:flex;flex-direction:column;gap:0}
+  .smpr-prod-cart{align-self:stretch;text-align:center;padding:7px 10px;margin-top:-1px;
+    border:1px solid #0A4FA0;border-top:0;border-radius:0 0 9px 9px;
+    background:#0A4FA0;color:#fff;
+    font-size:12px;font-weight:600;text-decoration:none}
+  .smpr-prod-cart:hover{opacity:.9}
+  .smpr-prod-wrap .smpr-prod{border-radius:9px 9px 0 0}

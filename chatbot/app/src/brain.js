@@ -385,7 +385,10 @@ function createBrain(KB) {
           title: item.t,
           price: item.p,
           stock: item.s,
-          url: (KB.catalogue.productUrl || '') + item.h
+          url: (KB.catalogue.productUrl || '') + item.h,
+          // Shopify cart permalink - one tap and it's in their cart, rather
+          // than making them find the button on the product page.
+          cart: item.v && KB.catalogue.cartUrl ? KB.catalogue.cartUrl + item.v + ':1' : null
         };
       }),
       chips: ['Can I pick up in store?', 'What are your hours?'],
