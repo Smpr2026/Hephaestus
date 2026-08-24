@@ -314,7 +314,10 @@
         "legacyRetail": {
           "aftermarket": 160
         },
-        "costs": {}
+        "costs": {
+          "incell": 45.45
+        },
+        "evidence": "George: lower-priced listings are likely Incell. Back-solved from the old $160 listing. Confirm the cost."
       },
       {
         "brand": "Apple",
@@ -344,7 +347,10 @@
         "legacyRetail": {
           "aftermarket": 160
         },
-        "costs": {}
+        "costs": {
+          "incell": 45.45
+        },
+        "evidence": "George: lower-priced listings are likely Incell. Back-solved from the old $160 listing. Confirm the cost."
       },
       {
         "brand": "Apple",
@@ -354,7 +360,10 @@
         "legacyRetail": {
           "aftermarket": 160
         },
-        "costs": {}
+        "costs": {
+          "incell": 45.45
+        },
+        "evidence": "George: lower-priced listings are likely Incell. Back-solved from the old $160 listing. Confirm the cost."
       },
       {
         "brand": "Apple",
