@@ -35,6 +35,23 @@ function configured() {
 function mapResponse(json) {
   if (!json || typeof json !== 'object') return null;
   const num = v => (v === null || v === undefined || v === '' ? null : Number(v));
+
+  // Ticket-derived shape: what the shop has actually charged for this repair.
+  // Preferred when FixDesk aggregates past tickets rather than holding a list.
+  if (json.sampleSize != null || json.ticketCount != null) {
+    const out = {
+      low: num(json.low ?? json.min),
+      high: num(json.high ?? json.max),
+      typical: num(json.typical ?? json.median ?? json.mode),
+      sampleSize: num(json.sampleSize ?? json.ticketCount),
+      since: json.since ?? null,
+      source: 'fixdesk tickets'
+    };
+    if (!out.sampleSize || (out.typical == null && out.low == null)) return null;
+    if ([out.low, out.high, out.typical, out.sampleSize].some(v => Number.isNaN(v))) return null;
+    return out;
+  }
+
   const aftermarket = num(json.aftermarket ?? json.aftermarketPrice ?? json.copy);
   const genuine = num(json.genuine ?? json.genuinePrice ?? json.oem);
   if (aftermarket == null && genuine == null) return null;

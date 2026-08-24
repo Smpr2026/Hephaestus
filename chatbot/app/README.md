@@ -96,6 +96,16 @@ GET {FIXDESK_URL}/api/quotes?model=iPhone%2013&repair=screen
   404 → no price on file
 ```
 
+It also accepts a ticket-derived shape, which is what FixDesk's imported repair tickets give you:
+
+```
+  200 → { "median": 165, "min": 150, "max": 190, "ticketCount": 12, "since": "January" }
+```
+
+Then the bot quotes a range off real jobs rather than a fixed price, and shows the sample size.
+Under three tickets it won't quote at all — it falls through to the price table, then to the phone
+number. An average of one job isn't a price.
+
 If the real route or field names differ, change `mapResponse()` in that file. It's the only place
 the shape is assumed — nothing else needs touching.
 

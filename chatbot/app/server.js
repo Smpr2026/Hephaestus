@@ -66,6 +66,8 @@ async function livePrice(message) {
   if (!q) return null;
   const prices = await quotes.lookup(q.model, q.repair);
   if (!prices) return null;
+  // priceCard returns null when FixDesk gave nothing worth quoting (no price,
+  // or too few tickets to mean anything) - fall through to the knowledge base.
   return brain.priceCard(q.model, q.repair, prices);
 }
 

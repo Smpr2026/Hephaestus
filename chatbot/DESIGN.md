@@ -134,6 +134,18 @@ first and the knowledge base becomes the fallback rather than the source:
   "I don't have that one listed — call (02) 8957 1077"
 ```
 
+FixDesk holds the shop's imported repair tickets, so the honest source isn't a price list at all —
+it's what the shop has actually charged. The bot quotes that differently, and says so:
+
+> Most iPhone 13 screen jobs have come in around **$150–$190** — it depends on the part you go with.
+> *Recent jobs $150–$190 · Most common $165 · Based on 12 jobs since January*
+> *That's what we've actually charged recently, not a fixed price.*
+
+Two rules keep that honest. **Fewer than three tickets and it won't quote at all** — an average of
+one job is not a price, so it falls through to the table and then to the phone number. And it
+never presents a ticket average as a fixed price: the wording is always what jobs *have* cost, with
+the sample size shown, because the customer's device may not match the ones behind that number.
+
 `app/src/quotes.js` is that adapter. It caches for a minute, times out at 2.5 seconds, and returns
 nothing on any failure — a quoting-module outage is logged for the shop and invisible to the
 customer, who simply gets the knowledge-base answer instead. Set `FIXDESK_URL` to turn it on;

@@ -494,17 +494,49 @@ function createBrain(KB) {
     return { model: model, repair: repair || 'screen' };
   }
 
-  // prices: {aftermarket, genuine} from anywhere. Null values render as
-  // "call to confirm" - the bot still never invents a number.
+  // prices comes from anywhere - a price list, or aggregated repair tickets.
+  //   list form:   {aftermarket, genuine}
+  //   ticket form: {low, high, typical, sampleSize, since}
+  // Null values render as "call to confirm". The bot still never invents a
+  // number, and never quotes a ticket average off a handful of jobs.
+  var MIN_TICKETS = 3;
+
+  function ticketCard(model, repair, p) {
+    var label = model + ' ' + (repair === 'screen' ? 'screen replacement' : 'battery replacement');
+    var art = /^[aeiou]/i.test(model) ? 'an ' : 'a ';
+    var range = (p.low != null && p.high != null && p.low !== p.high)
+      ? '$' + p.low + '–$' + p.high
+      : '$' + (p.typical != null ? p.typical : p.low);
+    var rows = [['Recent jobs', range]];
+    if (p.typical != null) rows.push(['Most common', '$' + p.typical]);
+    rows.push(['Based on', p.sampleSize + ' job' + (p.sampleSize === 1 ? '' : 's') +
+                            (p.since ? ' since ' + p.since : '')]);
+    return {
+      text: 'Most ' + model + ' ' + (repair === 'screen' ? 'screen' : 'battery') +
+            ' jobs have come in around ' + range + ' — it depends on the part you go with.',
+      card: {
+        title: label,
+        rows: rows,
+        note: 'That’s what we’ve actually charged recently, not a fixed price. ' +
+              fill(KB.pricing.disclaimerShort) + ' Every repair includes the ' + B.warranty + '.'
+      },
+      contact: false,
+      chips: ['Genuine or aftermarket?', 'Do I need a booking?', 'Where are you?'],
+      intent: 'price:' + model + ':' + repair + ' (tickets, n=' + p.sampleSize + ')'
+    };
+  }
+
   function priceCard(model, repair, prices) {
-    if (!prices || (prices.aftermarket == null && prices.genuine == null)) {
-      return {
-        text: fill(KB.pricing.unknownPriceLine),
-        card: null, contact: true,
-        chips: ['Genuine or aftermarket?', 'How long does a repair take?'],
-        intent: 'price:' + model + ':' + repair + ' (no listed price)'
-      };
+    // ticket-derived pricing, but only once there are enough jobs to mean anything
+    if (prices && prices.sampleSize != null) {
+      if (prices.sampleSize >= MIN_TICKETS && (prices.typical != null || prices.low != null)) {
+        return ticketCard(model, repair, prices);
+      }
+      prices = null;   // too few jobs to quote from - fall through to "call us"
     }
+    // Nothing quotable from this source. Return null rather than an answer, so
+    // the caller can try the next source before telling the customer to ring.
+    if (!prices || (prices.aftermarket == null && prices.genuine == null)) return null;
     var art = /^[aeiou]/i.test(model) ? 'an ' : 'a ';
     return {
       text: 'Here’s our guide price for ' + art + model + ' ' +
