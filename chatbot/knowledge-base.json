@@ -213,288 +213,342 @@
         "brand": "Apple",
         "model": "iPhone 11",
         "repair": "screen",
-        "aftermarket": 145,
-        "genuine": 170,
-        "verified": false
+        "verified": false,
+        "legacyRetail": {
+          "aftermarket": 145,
+          "genuine": 170
+        },
+        "costs": {}
       },
       {
         "brand": "Apple",
         "model": "iPhone 11 Pro",
         "repair": "screen",
-        "aftermarket": 150,
-        "genuine": 210,
-        "verified": false
+        "verified": false,
+        "legacyRetail": {
+          "aftermarket": 150,
+          "genuine": 210
+        },
+        "costs": {}
       },
       {
         "brand": "Apple",
         "model": "iPhone 11 Pro Max",
         "repair": "screen",
-        "aftermarket": 155,
-        "genuine": 230,
-        "verified": false
+        "verified": false,
+        "legacyRetail": {
+          "aftermarket": 155,
+          "genuine": 230
+        },
+        "costs": {}
       },
       {
         "brand": "Apple",
         "model": "iPhone 12",
         "repair": "screen",
-        "aftermarket": 150,
-        "genuine": 320,
-        "verified": false
+        "verified": false,
+        "legacyRetail": {
+          "aftermarket": 150,
+          "genuine": 320
+        },
+        "costs": {}
       },
       {
         "brand": "Apple",
         "model": "iPhone 12 Mini",
         "repair": "screen",
-        "aftermarket": null,
-        "genuine": 275,
-        "verified": false
+        "verified": false,
+        "legacyRetail": {
+          "genuine": 275
+        },
+        "costs": {}
       },
       {
         "brand": "Apple",
         "model": "iPhone 12 Pro",
         "repair": "screen",
-        "aftermarket": 150,
-        "genuine": 320,
-        "verified": false
+        "verified": false,
+        "legacyRetail": {
+          "aftermarket": 150,
+          "genuine": 320
+        },
+        "costs": {}
       },
       {
         "brand": "Apple",
         "model": "iPhone 12 Pro Max",
         "repair": "screen",
-        "aftermarket": 170,
-        "genuine": 470,
-        "verified": false
+        "verified": false,
+        "legacyRetail": {
+          "aftermarket": 170,
+          "genuine": 470
+        },
+        "costs": {}
       },
       {
         "brand": "Apple",
         "model": "iPhone 13",
         "repair": "screen",
-        "aftermarket": 160,
-        "genuine": null,
-        "verified": false
+        "verified": false,
+        "legacyRetail": {
+          "aftermarket": 160
+        },
+        "costs": {}
       },
       {
         "brand": "Apple",
         "model": "iPhone 13 Pro",
         "repair": "screen",
-        "aftermarket": 220,
-        "genuine": null,
-        "verified": false
+        "verified": false,
+        "legacyRetail": {
+          "aftermarket": 220
+        },
+        "costs": {}
       },
       {
         "brand": "Apple",
         "model": "iPhone 13 Pro Max",
         "repair": "screen",
-        "aftermarket": 220,
-        "genuine": null,
-        "verified": false
+        "verified": false,
+        "legacyRetail": {
+          "aftermarket": 220
+        },
+        "costs": {}
       },
       {
         "brand": "Apple",
         "model": "iPhone 14",
         "repair": "screen",
-        "aftermarket": 160,
-        "genuine": null,
-        "verified": false
+        "verified": false,
+        "legacyRetail": {
+          "aftermarket": 160
+        },
+        "costs": {}
       },
       {
         "brand": "Apple",
         "model": "iPhone 14 Plus",
         "repair": "screen",
-        "aftermarket": 160,
-        "genuine": null,
-        "verified": false
+        "verified": false,
+        "legacyRetail": {
+          "aftermarket": 160
+        },
+        "costs": {}
       },
       {
         "brand": "Apple",
         "model": "iPhone 14 Pro",
         "repair": "screen",
-        "aftermarket": 220,
-        "genuine": null,
-        "verified": false
+        "verified": false,
+        "legacyRetail": {
+          "aftermarket": 220
+        },
+        "costs": {}
       },
       {
         "brand": "Apple",
         "model": "iPhone 14 Pro Max",
         "repair": "screen",
-        "aftermarket": 240,
-        "genuine": null,
-        "verified": false
+        "verified": false,
+        "legacyRetail": {
+          "aftermarket": 240
+        },
+        "costs": {}
       },
       {
         "brand": "Apple",
         "model": "iPhone 15",
         "repair": "screen",
-        "aftermarket": 265,
-        "genuine": null,
-        "verified": false
+        "verified": false,
+        "legacyRetail": {
+          "aftermarket": 265
+        },
+        "costs": {}
       },
       {
         "brand": "Apple",
         "model": "iPhone 15 Plus",
         "repair": "screen",
-        "aftermarket": 220,
-        "genuine": null,
-        "verified": false
+        "verified": false,
+        "legacyRetail": {
+          "aftermarket": 220
+        },
+        "costs": {}
       },
       {
         "brand": "Apple",
         "model": "iPhone 15 Pro",
         "repair": "screen",
-        "aftermarket": 225,
-        "genuine": null,
-        "verified": false
+        "verified": false,
+        "legacyRetail": {
+          "aftermarket": 225
+        },
+        "costs": {}
       },
       {
         "brand": "Apple",
         "model": "iPhone 15 Pro Max",
         "repair": "screen",
-        "aftermarket": 270,
-        "genuine": null,
-        "verified": false
+        "verified": true,
+        "legacyRetail": {
+          "aftermarket": 270
+        },
+        "costs": {
+          "soft": 55,
+          "diagnostic": 85
+        }
       },
       {
         "brand": "Apple",
         "model": "iPhone 16",
         "repair": "screen",
-        "aftermarket": null,
-        "genuine": null,
-        "verified": false
+        "verified": false,
+        "costs": {}
       },
       {
         "brand": "Apple",
         "model": "iPhone X",
         "repair": "screen",
-        "aftermarket": null,
-        "genuine": null,
-        "verified": false
+        "verified": false,
+        "costs": {}
       },
       {
         "brand": "Apple",
         "model": "iPhone XR",
         "repair": "screen",
-        "aftermarket": null,
-        "genuine": null,
-        "verified": false
+        "verified": false,
+        "costs": {}
       },
       {
         "brand": "Apple",
         "model": "iPhone XS",
         "repair": "screen",
-        "aftermarket": null,
-        "genuine": null,
-        "verified": false
+        "verified": false,
+        "costs": {}
       },
       {
         "brand": "Apple",
         "model": "iPhone SE",
         "repair": "screen",
-        "aftermarket": null,
-        "genuine": null,
-        "verified": false
+        "verified": false,
+        "costs": {}
       },
       {
         "brand": "Apple",
         "model": "iPhone 11",
         "repair": "battery",
-        "aftermarket": null,
-        "genuine": null,
-        "verified": false
+        "verified": false,
+        "costs": {}
       },
       {
         "brand": "Apple",
         "model": "iPhone 12",
         "repair": "battery",
-        "aftermarket": null,
-        "genuine": null,
-        "verified": false
+        "verified": false,
+        "costs": {}
       },
       {
         "brand": "Apple",
         "model": "iPhone 13",
         "repair": "battery",
-        "aftermarket": null,
-        "genuine": null,
-        "verified": false
+        "verified": false,
+        "costs": {}
       },
       {
         "brand": "Apple",
         "model": "iPhone 14",
         "repair": "battery",
-        "aftermarket": null,
-        "genuine": null,
-        "verified": false
+        "verified": false,
+        "costs": {}
       },
       {
         "brand": "Apple",
         "model": "iPhone 15",
         "repair": "battery",
-        "aftermarket": null,
-        "genuine": null,
-        "verified": false
+        "verified": false,
+        "costs": {}
       },
       {
         "brand": "Samsung",
         "model": "Galaxy S21",
         "repair": "screen",
-        "aftermarket": null,
-        "genuine": null,
-        "verified": false
+        "verified": false,
+        "costs": {}
       },
       {
         "brand": "Samsung",
         "model": "Galaxy S22",
         "repair": "screen",
-        "aftermarket": null,
-        "genuine": null,
-        "verified": false
+        "verified": false,
+        "costs": {}
       },
       {
         "brand": "Samsung",
         "model": "Galaxy S23",
         "repair": "screen",
-        "aftermarket": null,
-        "genuine": null,
-        "verified": false
+        "verified": false,
+        "costs": {}
       },
       {
         "brand": "Samsung",
         "model": "Galaxy S24",
         "repair": "screen",
-        "aftermarket": null,
-        "genuine": null,
-        "verified": false
+        "verified": false,
+        "costs": {}
       },
       {
         "brand": "Samsung",
         "model": "Galaxy A15",
         "repair": "screen",
-        "aftermarket": null,
-        "genuine": null,
-        "verified": false
+        "verified": false,
+        "costs": {}
       },
       {
         "brand": "Samsung",
         "model": "Galaxy A35",
         "repair": "screen",
-        "aftermarket": null,
-        "genuine": null,
-        "verified": false
+        "verified": false,
+        "costs": {}
       },
       {
         "brand": "Samsung",
         "model": "Galaxy A55",
         "repair": "screen",
-        "aftermarket": null,
-        "genuine": null,
-        "verified": false
+        "verified": false,
+        "costs": {}
       }
     ],
     "turnaround": {
       "screen": "Under an hour, while you wait",
       "battery": "Under an hour, while you wait",
       "_note": "Shown on every price card. Override a single row by adding \"time\": \"...\" to it."
-    }
+    },
+    "formula": {
+      "labour": 100,
+      "gstMultiplier": 1.1,
+      "note": "Retail = (part cost ex GST + labour) x GST, then rounded UP to the nearest $5. Never down.",
+      "appliesTo": "screen",
+      "_confirm": "Confirm: (1) is $100 labour the same for batteries, charge ports and cameras, or screens only? (2) what does George mean by 'b three seven'? (3) part costs for every other model, soft and diagnostic.",
+      "roundUpTo": 5
+    },
+    "tiers": [
+      {
+        "id": "soft",
+        "label": "Soft OLED",
+        "blurb": "Budget-friendly aftermarket screen"
+      },
+      {
+        "id": "diagnostic",
+        "label": "Diagnostic",
+        "blurb": "No 'unknown part' message after fitting"
+      },
+      {
+        "id": "genuine",
+        "label": "Genuine OEM",
+        "blurb": "Original Apple part"
+      }
+    ],
+    "legacyNote": "legacyRetail holds the old Shopify listing prices. They are NOT quoted. Working the formula backwards, they imply part costs from $32 (iPhone 11) to $145 (15 Pro Max) - so the older models were listed BELOW what the formula now gives, and the newer ones well above. Delete each one as its real cost is entered."
   },
   "policies": {
     "repairWarranty": "Every repair comes with a 3-month warranty on parts and labour. It covers the part we fitted and the work we did - it doesn't cover new accidental damage, drops or liquid after the repair.",
@@ -1636,24 +1690,38 @@
     {
       "id": "price_parts",
       "category": "Pricing",
-      "q": "What's the difference between genuine and aftermarket parts?",
+      "q": "What's the difference between the screen options?",
       "patterns": [
-        "genuine",
         "aftermarket",
-        "oem",
-        "copy",
-        "incell",
-        "original part",
-        "generic",
-        "quality of parts",
-        "what parts do you use",
         "cheap part",
-        "difference between parts"
+        "copy",
+        "diagnostic one",
+        "diagnostic screen",
+        "difference between",
+        "difference between parts",
+        "generic",
+        "genuine",
+        "incell",
+        "oem",
+        "original part",
+        "quality of parts",
+        "soft oled",
+        "soft screen",
+        "unknown part message",
+        "what is diagnostic",
+        "what is the difference",
+        "what parts do you use",
+        "whats diagnostic",
+        "whats the best one",
+        "whats the difference",
+        "which one should i",
+        "which should i get"
       ],
-      "answer": "Aftermarket (sometimes called copy or incell) is a quality third-party part - it keeps the cost down and suits most people. Genuine OEM is the original Apple or Samsung part: exact factory colour, brightness and feel, at a higher price. Both get the same {{warranty}}. We'll show you the difference in store so you can pick.",
+      "answer": "Three choices. **Soft OLED** is our budget option - looks and feels good, keeps the cost down. **Diagnostic** is a step up: same fit, but your phone won't show the 'unknown part' message in Settings afterwards. **Genuine OEM** is the original Apple part, exact factory match, and the dearest. All three get the same {{warranty}}.",
       "chips": [
-        "How much is a screen repair?",
-        "Will Face ID still work?"
+        "How much is a screen?",
+        "What warranty do I get?",
+        "Do I need a booking?"
       ],
       "_pats": [
         " genuine",

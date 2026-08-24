@@ -404,6 +404,48 @@ function createBrain(KB) {
     return { model: model, repair: repair || 'screen' };
   }
 
+  /* ---------- how a price is worked out ------------------------------------
+   * Retail = (part cost ex GST + labour) x GST. George's arithmetic, so the
+   * shop keeps one number per part and every quote follows from it - no retail
+   * list to go stale.
+   * -------------------------------------------------------------------- */
+
+  function formula() {
+    return KB.pricing.formula || { labour: 100, gstMultiplier: 1.1 };
+  }
+
+  function retailFromCost(cost) {
+    if (cost == null) return null;
+    var f = formula();
+    // Settle the float to cents first. (0 + 100) * 1.1 is 110.00000000000001 in
+    // JS, and a bare ceil() would push an exact $110 up to $115.
+    var value = Math.round((Number(cost) + Number(f.labour)) * Number(f.gstMultiplier) * 100) / 100;
+    // Always up to the next $5, never down - $172 becomes $175, $177 becomes $180.
+    var step = Number(f.roundUpTo || 0);
+    if (step > 0) return Math.ceil(value / step) * step;
+    return value;
+  }
+
+  function money(n) {
+    if (n == null) return null;
+    return '$' + (n % 1 === 0 ? String(n) : n.toFixed(2));
+  }
+
+  function tiers() {
+    return KB.pricing.tiers || [];
+  }
+
+  // {soft: 55, diagnostic: 85} -> the rows a customer sees, cheapest first
+  function tierRows(costs) {
+    if (!costs) return [];
+    return tiers()
+      .filter(function (t) { return costs[t.id] != null; })
+      .map(function (t) {
+        return { id: t.id, label: t.label, blurb: t.blurb, price: retailFromCost(costs[t.id]) };
+      })
+      .sort(function (a, b) { return a.price - b.price; });
+  }
+
   // prices comes from anywhere - a price list, or aggregated repair tickets.
   //   list form:   {aftermarket, genuine}
   //   ticket form: {low, high, typical, sampleSize, since}
@@ -438,6 +480,29 @@ function createBrain(KB) {
   }
 
   function priceCard(model, repair, prices) {
+    // The normal path: part costs the shop has confirmed, run through the formula.
+    var rows = tierRows(prices && prices.costs);
+    if (rows.length) {
+      var art = /^[aeiou]/i.test(model) ? 'an ' : 'a ';
+      var cheapest = rows[0];
+      return {
+        text: 'For ' + art + model + ' ' + (repair === 'screen' ? 'screen' : 'battery') +
+              ', we do ' + rows.length + ' option' + (rows.length === 1 ? '' : 's') +
+              ' — from ' + money(cheapest.price) + ' fitted.',
+        card: {
+          title: model + ' ' + (repair === 'screen' ? 'screen replacement' : 'battery replacement'),
+          rows: rows.map(function (r) { return [r.label, money(r.price), r.blurb]; })
+                    .concat([['Time in store', turnaround(model, repair)]]),
+          note: fill(KB.pricing.disclaimerShort) + ' Every repair includes the ' + B.warranty + '.'
+        },
+        contact: false,
+        chips: repair === 'screen'
+          ? ['What\u2019s the difference?', 'Screen protector for ' + model, 'Do I need a booking?']
+          : ['Genuine or aftermarket?', 'Power bank', 'Do I need a booking?'],
+        intent: 'price:' + model + ':' + repair + (prices.source ? ' (' + prices.source + ')' : '')
+      };
+    }
+
     // ticket-derived pricing, but only once there are enough jobs to mean anything
     if (prices && prices.sampleSize != null) {
       if (prices.sampleSize >= MIN_TICKETS && (prices.typical != null || prices.low != null)) {
@@ -473,7 +538,8 @@ function createBrain(KB) {
   return {
     respond: respond, fill: fill, norm: norm,
     parsePriceQuery: parsePriceQuery, priceCard: priceCard,
-    parseProductQuery: parseProductQuery, productAnswer: productAnswer, searchCatalogue: searchCatalogue
+    parseProductQuery: parseProductQuery, productAnswer: productAnswer, searchCatalogue: searchCatalogue,
+    retailFromCost: retailFromCost, tierRows: tierRows
   };
 }
 

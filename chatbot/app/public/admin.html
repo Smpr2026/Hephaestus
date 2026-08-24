@@ -25,7 +25,8 @@
   table{width:100%;border-collapse:collapse;font-size:13px}
   th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#9CA3AF;padding:10px 14px;border-bottom:1px solid #E5E7EB}
   td{padding:7px 14px;border-bottom:1px solid #F3F4F6}
-  td input[type=number]{width:88px}
+  td input[type=number]{width:82px}
+  td.quoted{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;white-space:nowrap;color:#0A4FA0;font-weight:600}
   input[type=text],input[type=number],textarea{font:inherit;font-size:13px;padding:7px 9px;border:1px solid #E5E7EB;border-radius:7px;width:100%;outline:none}
   input:focus,textarea:focus{border-color:#0A4FA0}
   .blank{background:#FEF3C7}
@@ -63,10 +64,15 @@
 
   <div class="panel" id="tab-prices">
     <div class="hint">
-      Highlighted rows have no price, so the bot tells the customer to call rather than guessing.
-      Fill one in and it starts quoting it. Tick <strong>Checked</strong> once you've confirmed a row is right.
+      Enter what the <strong>part costs you, ex GST</strong>. The retail price is worked out for you:
+      <code>(cost + <span id="labourVal"></span>) &times; <span id="gstVal"></span></code>, rounded <strong>up</strong> to the nearest $5.
+      Highlighted rows have no cost yet, so the bot tells the customer to call rather than guessing.
     </div>
-    <table><thead><tr><th>Model</th><th>Repair</th><th>Aftermarket $</th><th>Genuine $</th><th>Checked</th></tr></thead>
+    <table><thead><tr>
+      <th>Model</th><th>Repair</th>
+      <th>Soft cost</th><th>Diagnostic cost</th><th>Genuine cost</th>
+      <th>Quoted</th><th>Checked</th>
+    </tr></thead>
     <tbody id="priceRows"></tbody></table>
   </div>
 
@@ -108,27 +114,52 @@ async function boot(){
   renderPrices(); renderIntents(); renderBusiness();
 }
 
+const TIERS = ['soft', 'diagnostic', 'genuine'];
+
+function retail(cost){
+  if (cost == null || cost === '') return null;
+  const f = KB.pricing.formula;
+  const raw = (Number(cost) + f.labour) * f.gstMultiplier;
+  return f.roundUpTo ? Math.ceil(raw / f.roundUpTo) * f.roundUpTo : Math.round(raw * 100) / 100;
+}
+function money(n){ return n == null ? '—' : '$' + (n % 1 === 0 ? n : n.toFixed(2)); }
+
+function quotedText(row){
+  const prices = TIERS.map(t => retail(row.costs?.[t])).filter(v => v != null);
+  return prices.length ? prices.map(money).join(' / ') : '—';
+}
+
+function hasCost(row){ return TIERS.some(t => row.costs?.[t] != null); }
+
 function renderPrices(){
+  $('#labourVal').textContent = '$' + KB.pricing.formula.labour;
+  $('#gstVal').textContent = KB.pricing.formula.gstMultiplier;
+
   const tb = $('#priceRows');
   tb.innerHTML = '';
   KB.pricing.repairs.forEach((r, i) => {
-    const blank = r.aftermarket == null && r.genuine == null;
+    r.costs = r.costs || {};
     const tr = document.createElement('tr');
-    if (blank) tr.className = 'blank';
+    if (!hasCost(r)) tr.className = 'blank';
     tr.innerHTML =
       '<td>' + esc(r.model) + '</td><td>' + esc(r.repair) + '</td>' +
-      '<td><input type="number" data-i="' + i + '" data-f="aftermarket" value="' + (r.aftermarket ?? '') + '"></td>' +
-      '<td><input type="number" data-i="' + i + '" data-f="genuine" value="' + (r.genuine ?? '') + '"></td>' +
+      TIERS.map(t => '<td><input type="number" step="0.01" data-i="' + i + '" data-t="' + t +
+                     '" value="' + (r.costs[t] ?? '') + '"></td>').join('') +
+      '<td class="quoted">' + quotedText(r) + '</td>' +
       '<td><input type="checkbox" data-i="' + i + '" data-f="verified"' + (r.verified ? ' checked' : '') + '></td>';
     tb.appendChild(tr);
   });
-  tb.querySelectorAll('input').forEach(inp => inp.addEventListener('change', e => {
-    const { i, f } = e.target.dataset;
+
+  tb.querySelectorAll('input').forEach(inp => inp.addEventListener('input', e => {
+    const { i, t, f } = e.target.dataset;
     const row = KB.pricing.repairs[i];
     if (f === 'verified') row.verified = e.target.checked;
-    else row[f] = e.target.value === '' ? null : Number(e.target.value);
-    e.target.closest('tr').className =
-      (row.aftermarket == null && row.genuine == null) ? 'blank' : '';
+    else if (e.target.value === '') delete row.costs[t];
+    else row.costs[t] = Number(e.target.value);
+
+    const tr = e.target.closest('tr');
+    tr.className = hasCost(row) ? '' : 'blank';
+    tr.querySelector('.quoted').textContent = quotedText(row);
     markDirty();
   }));
 }

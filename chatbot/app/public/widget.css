@@ -62,3 +62,5 @@
   .smpr-prod-s{display:block;font-size:10.5px;margin-top:2px;color:#0F7B43;font-weight:600}
   .smpr-prod-s.low{color:#B45309}
   .smpr-prod-s.out{color:#9CA3AF}
+
+.smpr-blurb{display:block;font-style:normal;font-size:11px;color:#9CA3AF;margin-top:1px}

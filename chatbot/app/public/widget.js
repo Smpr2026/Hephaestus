@@ -117,7 +117,8 @@
       html += '<div class="smpr-card"><div class="smpr-card-h">' + esc(res.card.title) + '</div>';
       res.card.rows.forEach(function (r) {
         var isNum = String(r[1]).charAt(0) === '$';
-        html += '<div class="smpr-card-row"><span>' + esc(r[0]) + '</span>' +
+        html += '<div class="smpr-card-row"><span>' + esc(r[0]) +
+          (r[2] ? '<em class="smpr-blurb">' + esc(r[2]) + '</em>' : '') + '</span>' +
           (isNum ? '<b>' + esc(r[1]) + '</b>' : '<span class="smpr-muted">' + esc(r[1]) + '</span>') + '</div>';
       });
       html += '<div class="smpr-card-note">' + esc(res.card.note) + '</div></div>';

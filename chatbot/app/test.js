@@ -48,7 +48,7 @@ test('a question it has never seen still lands somewhere sensible', () => {
 
 test('never quotes a price the knowledge base does not hold', () => {
   for (const row of KB.pricing.repairs) {
-    if (row.aftermarket != null || row.genuine != null) continue;
+    if (row.costs && Object.keys(row.costs).length) continue;
     const r = brain.respond(`how much for a ${row.model} ${row.repair}`);
     assert.strictEqual(r.card, null, `${row.model} ${row.repair}: quoted a price card with no price on file`);
     assert.ok(/\$/.test(r.text) === false, `${row.model} ${row.repair}: a dollar figure leaked into the answer`);
@@ -56,27 +56,63 @@ test('never quotes a price the knowledge base does not hold', () => {
   }
 });
 
-test('quotes exactly what the table says, no rounding or invention', () => {
-  const priced = KB.pricing.repairs.filter(r => r.aftermarket != null);
-  assert.ok(priced.length > 0, 'no priced rows to check');
+test('every quote is the formula applied to a confirmed part cost', () => {
+  const { labour, gstMultiplier } = KB.pricing.formula;
+  const priced = KB.pricing.repairs.filter(r => r.costs && Object.keys(r.costs).length);
+  assert.ok(priced.length > 0, 'no confirmed costs to check');
+
   for (const row of priced) {
     const r = brain.respond(`how much for a ${row.model} ${row.repair}`);
     assert.ok(r.card, `${row.model} ${row.repair}: expected a price card`);
     const shown = r.card.rows.map(x => x[1]).join(' ');
-    assert.ok(shown.includes('$' + row.aftermarket),
-      `${row.model} ${row.repair}: card shows "${shown}", table says $${row.aftermarket}`);
+
+    const step = KB.pricing.formula.roundUpTo || 0;
+    for (const [tier, cost] of Object.entries(row.costs)) {
+      const raw = (cost + labour) * gstMultiplier;
+      const expected = step ? Math.ceil(raw / step) * step : Math.round(raw * 100) / 100;
+      const money = '$' + (expected % 1 === 0 ? expected : expected.toFixed(2));
+      assert.ok(shown.includes(money),
+        `${row.model} ${row.repair} ${tier}: cost $${cost} should quote ${money}, card shows "${shown}"`);
+    }
+  }
+});
+
+test("the formula is George's arithmetic, and rounding only ever goes up", () => {
+  assert.strictEqual(brain.retailFromCost(55), 175, '(55 + 100) x 1.1 = 170.50 -> 175');
+  assert.strictEqual(brain.retailFromCost(85), 205, '(85 + 100) x 1.1 = 203.50 -> 205');
+  assert.strictEqual(brain.retailFromCost(0), 110, 'a $0 part is still $100 labour + GST');
+  assert.strictEqual(brain.retailFromCost(null), null, 'no cost means no price');
+
+  // never round a customer down
+  for (let cost = 20; cost <= 400; cost += 7) {
+    const raw = Math.round((cost + 100) * 1.1 * 100) / 100;   // settle the float, as the code does
+    const quoted = brain.retailFromCost(cost);
+    assert.ok(quoted >= raw, `cost $${cost}: quoted $${quoted} is below the formula's $${raw.toFixed(2)}`);
+    assert.ok(quoted - raw < 5, `cost $${cost}: rounded up too far`);
+    assert.strictEqual(quoted % 5, 0, `cost $${cost}: $${quoted} is not a multiple of 5`);
+  }
+});
+
+test('the old Shopify figures are kept for reference but never quoted', () => {
+  const legacy = KB.pricing.repairs.filter(r => r.legacyRetail);
+  assert.ok(legacy.length > 0, 'expected some legacy rows');
+  for (const row of legacy) {
+    if (row.costs && Object.keys(row.costs).length) continue;   // superseded by a real cost
+    const r = brain.respond(`how much for a ${row.model} ${row.repair}`);
+    assert.strictEqual(r.card, null,
+      `${row.model} ${row.repair}: quoted from the old figures George said were too high`);
   }
 });
 
 test('every price answer says the price is confirmed in store', () => {
-  const r = brain.respond('how much for an iPhone 13 screen');
+  const r = brain.respond('how much for an iPhone 15 Pro Max screen');
   assert.ok(/confirm/i.test(r.card.note), 'price card must say the price is confirmed in store');
   assert.ok(/warranty/i.test(r.card.note), 'price card must mention the warranty');
 });
 
 test('a live price renders through the same card, and thin data is refused', () => {
-  const live = brain.priceCard('iPhone 13', 'screen', { aftermarket: 172, genuine: 265, source: 'fixdesk' });
-  assert.ok(live.card.rows.some(r => r[1] === '$172'), 'live price not shown');
+  const live = brain.priceCard('iPhone 13', 'screen', { costs: { soft: 60 }, source: 'fixdesk' });
+  assert.ok(live.card.rows.some(r => r[1] === '$180'), 'live cost not run through the formula');
 
   const tickets = brain.priceCard('iPhone 13', 'screen', { low: 150, high: 190, typical: 165, sampleSize: 12 });
   assert.ok(/150/.test(tickets.text) && /190/.test(tickets.text), 'ticket range not shown');
