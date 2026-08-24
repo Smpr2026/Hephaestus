@@ -489,7 +489,12 @@
         "genuine": null,
         "verified": false
       }
-    ]
+    ],
+    "turnaround": {
+      "screen": "Under an hour, while you wait",
+      "battery": "Under an hour, while you wait",
+      "_note": "Shown on every price card. Override a single row by adding \"time\": \"...\" to it."
+    }
   },
   "policies": {
     "repairWarranty": "Every repair comes with a 3-month warranty on parts and labour. It covers the part we fitted and the work we did - it doesn't cover new accidental damage, drops or liquid after the repair.",
@@ -4923,6 +4928,232 @@
     "openHoursStatus": "Online now",
     "closedStatus": "Away — back at 9am",
     "closedPrefix": "Shop's shut at the moment, but here you go — ",
-    "style": "Short messages, sent one after another like a person typing. Contractions. No corporate wording."
+    "style": "Short messages, sent one after another like a person typing. Contractions. No corporate wording.",
+    "readPauseMs": 900,
+    "typePerCharMs": 30,
+    "minTypeMs": 1300,
+    "maxTypeMs": 4500,
+    "betweenBubblesMs": 500,
+    "thinkingLines": [
+      "One sec, let me check that for you.",
+      "Yep — just checking that one now.",
+      "Hang on, I'll pull it up."
+    ]
+  },
+  "catalogue": {
+    "note": "Offline sample only - about 30 of ~900 live products, pulled from the store. With SHOPIFY_STORE_DOMAIN + SHOPIFY_STOREFRONT_TOKEN set, the server searches the real catalogue instead and this is ignored.",
+    "productUrl": "https://sydneymobilephonerepairs.com.au/products/",
+    "items": [
+      {
+        "t": "Bose QuietComfort Ultra Wireless Noise Cancelling Earbuds (Black) - Excellent",
+        "h": "bose-quietcomfort-ultra-wireless-noise-cancelling-earbuds-black-used",
+        "c": "Bose Headphones",
+        "p": 265,
+        "s": 1
+      },
+      {
+        "t": "Bose Noise Cancelling Headphones 700 - Black (Immaculate Condition)",
+        "h": "bose-noise-cancelling-headphones-700-black-immaculate-condition-3",
+        "c": "Bose Headphones",
+        "p": 340,
+        "s": 1
+      },
+      {
+        "t": "Bose Noise Cancelling Headphones 700 (Black) - Pre-loved",
+        "h": "bose-noise-cancelling-headphones-700-black-pre-loved",
+        "c": "Bose Headphones",
+        "p": 300,
+        "s": 1
+      },
+      {
+        "t": "Sony WH-1000XM5 Noise Cancelling Headphones (Black) - Excellent Condition",
+        "h": "sony-wh-1000xm5-xm5-noise-cancelling-headphones-black-used-excellent-condition",
+        "c": "Sony Headphones",
+        "p": 400,
+        "s": 1
+      },
+      {
+        "t": "Sony WF-1000XM5 Wireless Noise Cancelling Earbuds - Silver (Good Condition)",
+        "h": "sony-wf-1000xm5-wireless-noise-cancelling-earbuds-silver-immaculate-condition",
+        "c": "Sony Headphones",
+        "p": 250,
+        "s": 2
+      },
+      {
+        "t": "Beats Studio Pro Wireless Headphones (Black) - Excellent condition",
+        "h": "beats-studio-pro-wireless-headphones-black-used-1",
+        "c": "Beats Headphones",
+        "p": 299,
+        "s": 1
+      },
+      {
+        "t": "Beats Studio3 Wireless Over-Ear Headphones (Matte Black) - Excellent condition",
+        "h": "beats-studio3-wireless-over-ear-headphones-matte-black-used",
+        "c": "Beats Headphones",
+        "p": 200,
+        "s": 1
+      },
+      {
+        "t": "Beats Solo 4 On-Ear Wireless Headphones (Cloud Pink) - Excellent Condition",
+        "h": "beats-solo-4-on-ear-wireless-headphones-cloud-pink-genuine-excellent-condition",
+        "c": "Beats Headphones",
+        "p": 235,
+        "s": 1
+      },
+      {
+        "t": "Beats Powerbeats Pro Totally Wireless Earphones (Black) - Used",
+        "h": "beats-powerbeats-pro-totally-wireless-earphones-black-used-1",
+        "c": "Beats Earphones",
+        "p": 150,
+        "s": 1
+      },
+      {
+        "t": "Beats Powerbeats Pro Totally Wireless Earphones (White) - Used",
+        "h": "beats-powerbeats-pro-totally-wireless-earphones-white-used",
+        "c": "Beats Earphones",
+        "p": 180,
+        "s": 1
+      },
+      {
+        "t": "Anker Soundcore Space One Adaptive Noise Cancelling Headphones - White",
+        "h": "anker-soundcore-space-one-headphone-adaptive-noise-cancellinga3035-white",
+        "c": "Headphones",
+        "p": 165,
+        "s": 3
+      },
+      {
+        "t": "Anker Soundcore Liberty 4 NC Wireless Earbuds Noise Cancelling - Black",
+        "h": "anker-soundcore-liberty-4-nc-wireless-earbuds-noise-cancelling-a3947z11-black",
+        "c": "Headphones",
+        "p": 165,
+        "s": 2
+      },
+      {
+        "t": "Baseus Wireless Headphones",
+        "h": "baseus-wireless-headphones",
+        "c": "Headphones",
+        "p": 120,
+        "s": 2
+      },
+      {
+        "t": "EFM TWS Pelion Sports Earbuds, Touch Control, IPX7 - Black (Pre-Loved)",
+        "h": "efm-tws-hd-earbuds",
+        "c": "Wireless Earphones",
+        "p": 50,
+        "s": 1
+      },
+      {
+        "t": "Genuine Samsung AKG 3.5mm Wired Headphones - White",
+        "h": "genuine-samsung-akg-3-5mm-wired-headphones-white-out-of-box",
+        "c": "Wired Headphones",
+        "p": 11.5,
+        "s": 20
+      },
+      {
+        "t": "Samsung AKG USB-C Headphone Headset (GH59-15198A)",
+        "h": "samsung-akg-usb-type-c-headphone-headset-gh59-15198a-out-of-box",
+        "c": "Wired Headphones",
+        "p": 22,
+        "s": 19
+      },
+      {
+        "t": "Baseus Magnetic MagSafe Wireless Power Bank 10000mAh 20W",
+        "h": "baseus-magnetic-magsafe-bracket-wireless-fast-charge-portable-power-bank-10000mah-20w",
+        "c": "Power Bank",
+        "p": 80,
+        "s": 15
+      },
+      {
+        "t": "Baseus Adaman2 Digital Display Fast Charge Power Bank 10000mAh 30W",
+        "h": "baseus-adaman2-digital-display-fast-charge-power-bank-10000mah-30w",
+        "c": "Power Bank",
+        "p": 70,
+        "s": 10
+      },
+      {
+        "t": "Baseus Bipow Digital Display Fast Charge Power Bank 30000mAh 20W",
+        "h": "baseus-bipow-digital-display-fast-charge-power-bank-30000mah-20w-ppbd050401",
+        "c": "Power Bank",
+        "p": 55,
+        "s": 3
+      },
+      {
+        "t": "Baseus Blade Power Bank 20000mAh 100W - Black",
+        "h": "baseus-blade-portable-power-bank-digital-display-fast-charging-power-bank-hd-edition-20000mah-100w-ppbl000301-black",
+        "c": "Power Bank",
+        "p": 170,
+        "s": 3
+      },
+      {
+        "t": "Romoss Simple10 10000mAh Power Bank - White",
+        "h": "romoss-simple10-10000mah-power-bank-white",
+        "c": "Power Bank",
+        "p": 27,
+        "s": 4
+      },
+      {
+        "t": "Romoss Pure05 5000mAh Portable Power Bank - White",
+        "h": "romoss-pure05-5000mah-portable-power-bank-white",
+        "c": "Power Bank",
+        "p": 30,
+        "s": 5
+      },
+      {
+        "t": "Anker 737 24,000mAh Power Bank Gen 2",
+        "h": "anker-737-24-000mah-power-bank-gen-2-a1289011",
+        "c": "Power Bank",
+        "p": 265,
+        "s": 1
+      },
+      {
+        "t": "ACEFAST M28 Fast Charge Power Bank 22.5W 10000mAh - Black",
+        "h": "acefast-m28-fast-charge-power-bank-22-5w-10000mah-black-ccc-certified",
+        "c": "Power Bank",
+        "p": 35,
+        "s": 1
+      },
+      {
+        "t": "Baseus Car Charger USB-A and USB-C Dual Quick Charge 45W",
+        "h": "baseus-car-charger-usb-and-type-c",
+        "c": "Car Charger",
+        "p": 35,
+        "s": 5
+      },
+      {
+        "t": "Baseus Magic Car Charger 2x USB QC 3.0 45W (Black)",
+        "h": "baseus-magic-car-charger-2x-usb-qc-3-0-45w-black",
+        "c": "Car Charger",
+        "p": 18,
+        "s": 1
+      },
+      {
+        "t": "iQuick PowerWire USB-C to USB-C Charging Data Cable - 2m",
+        "h": "iquick-powerwire-1-series-usb-c-to-usb-c-charging-data-cable-2m",
+        "c": "Cable",
+        "p": 25,
+        "s": 3
+      },
+      {
+        "t": "UV Tempered Glass Screen Protector - iPhone X / XS / 11 Pro",
+        "h": "uv-tempered-glass-screen-protector-iphone-x-xs-11-pro",
+        "c": "Screen Protector",
+        "p": 35,
+        "s": 7
+      },
+      {
+        "t": "UAG Plasma Tablet Case for iPad 9.7 - Ice/Black",
+        "h": "uag-plasma-tablet-case-for-ipad-9-7-ice-black",
+        "c": "Case",
+        "p": 35,
+        "s": 1
+      },
+      {
+        "t": "Galaxy S24 256GB (80% Battery) Pre-Loved, Black",
+        "h": "galaxy-s24-256gb-80-battery-pre-loved-black",
+        "c": "Samsung Handset",
+        "p": 680,
+        "s": 1
+      }
+    ]
   }
 }

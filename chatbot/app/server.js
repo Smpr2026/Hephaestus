@@ -18,6 +18,7 @@ const kbStore = require('./src/kb.js');
 const { createBrain } = require('./src/brain.js');
 const claude = require('./src/claude.js');
 const quotes = require('./src/quotes.js');
+const catalogue = require('./src/catalogue.js');
 
 const PORT = process.env.PORT || 3000;
 const PUBLIC = path.join(__dirname, 'public');
@@ -71,6 +72,17 @@ async function livePrice(message) {
   return brain.priceCard(q.model, q.repair, prices);
 }
 
+// Shopping questions search the real store when it's configured, so the bot
+// can see all ~900 products rather than the sample in the knowledge base.
+async function liveProducts(message) {
+  if (!catalogue.configured()) return null;
+  const q = brain.parseProductQuery(message);
+  if (!q) return null;
+  const items = await catalogue.search(q.terms);
+  if (!items || !items.length) return null;
+  return brain.productAnswer(q, brain.searchCatalogue(q.terms, items, { brand: q.brand, kind: q.kind }));
+}
+
 async function handleChat(req, res) {
   const body = await readBody(req);
   const message = String(body.message || '').slice(0, 2000).trim();
@@ -82,6 +94,9 @@ async function handleChat(req, res) {
 
   const live = await livePrice(message);
   if (live) return send(res, 200, { ...live, engine: 'fixdesk' });
+
+  const shop = await liveProducts(message);
+  if (shop) return send(res, 200, { ...shop, engine: 'shopify' });
 
   if (claude.available()) {
     try {
@@ -150,6 +165,8 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, {
         engine: claude.available() ? 'claude' : 'local',
         livePricing: quotes.configured() ? process.env.FIXDESK_URL : false,
+        liveCatalogue: catalogue.configured() ? process.env.SHOPIFY_STORE_DOMAIN : false,
+        catalogueSample: (KB.catalogue && KB.catalogue.items || []).length,
         model: claude.available() ? claude.MODEL : null,
         intents: KB.intents.length,
         pricesFilled: KB.pricing.repairs.filter(r => r.aftermarket != null || r.genuine != null).length,

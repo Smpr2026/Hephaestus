@@ -53,3 +53,12 @@
 .smpr-send{flex:none;width:40px;height:40px;border-radius:11px;border:0;background:#0A4FA0;color:#fff;cursor:pointer;display:grid;place-items:center}
 .smpr-send svg{width:18px;height:18px}
 .smpr-note{font-size:10.5px;color:#9CA3AF;text-align:center;margin:7px 0 0}
+
+  .smpr-products{margin-top:9px;display:flex;flex-direction:column;gap:7px}
+  .smpr-prod{display:flex;gap:10px;align-items:baseline;border:1px solid #E5E7EB;border-radius:9px;padding:9px 11px;background:#fff;text-decoration:none;color:inherit}
+  .smpr-prod:hover{border-color:#0A4FA0}
+  .smpr-prod-t{flex:1;font-size:13px;line-height:1.35}
+  .smpr-prod-p{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .smpr-prod-s{display:block;font-size:10.5px;margin-top:2px;color:#0F7B43;font-weight:600}
+  .smpr-prod-s.low{color:#B45309}
+  .smpr-prod-s.out{color:#9CA3AF}

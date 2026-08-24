@@ -123,6 +123,18 @@
       html += '<div class="smpr-card-note">' + esc(res.card.note) + '</div></div>';
     }
 
+
+    if(res.products && res.products.length){
+      html += '<div class="smpr-products">';
+      res.products.forEach(function(p){
+        var cls = p.stock > 3 ? '' : (p.stock > 0 ? ' low' : ' out');
+        var label = p.stock > 3 ? 'In stock' : (p.stock > 0 ? 'Only ' + p.stock + ' left' : 'Out of stock');
+        html += '<a class="smpr-prod" href="' + esc(p.url) + '" target="_blank" rel="noopener">' +
+                '<span class="smpr-prod-t">' + esc(p.title) + '<span class="smpr-prod-s' + cls + '">' + label + '</span></span>' +
+                '<span class="smpr-prod-p">$' + esc(p.price) + '</span></a>';
+      });
+      html += '</div>';
+    }
     if (res.contact) {
       html += '<div class="smpr-contact">' +
         '<a class="smpr-btn smpr-btn-call" href="tel:' + esc(b.phoneDial) + '">📞 Call ' + esc(b.phone) + '</a>' +
@@ -159,8 +171,26 @@
     return [text];
   }
 
+  function pace() {
+    var p = (cfg && cfg.persona) || {};
+    return {
+      read: p.readPauseMs || 900,
+      perChar: p.typePerCharMs || 30,
+      min: p.minTypeMs || 1300,
+      max: p.maxTypeMs || 4500,
+      between: p.betweenBubblesMs || 500
+    };
+  }
+
   function typeTime(text) {
-    return Math.max(650, Math.min(2600, text.length * 22)) * SPEED;
+    var p = pace();
+    return Math.max(p.min, Math.min(p.max, text.length * p.perChar)) * SPEED;
+  }
+
+  // Looking a price up takes a person a moment, so say so first.
+  function thinkingLine() {
+    var lines = (cfg.persona && cfg.persona.thinkingLines) || [];
+    return lines.length ? lines[Math.floor(Math.random() * lines.length)] : null;
   }
 
   /* ---------- the conversation ---------- */
@@ -198,6 +228,8 @@
 
   function deliver(readingRow, res) {
     var parts = splitAnswer(res.text);
+    var stall = res.card ? thinkingLine() : null;
+    if (stall) parts.unshift(stall);
 
     if (!shopOpen() && !afterHoursShown && cfg.persona && cfg.persona.closedPrefix) {
       parts[0] = cfg.persona.closedPrefix + parts[0].charAt(0).toLowerCase() + parts[0].slice(1);
@@ -216,11 +248,12 @@
         addBot({
           text: body,
           card: isLast ? res.card : null,
+          products: isLast ? res.products : null,
           contact: isLast ? res.contact : false,
           chips: isLast ? res.chips : []
         });
         step++;
-        setTimeout(next, isLast ? 0 : 260 * SPEED);
+        setTimeout(next, isLast ? 0 : pace().between * SPEED);
       }, typeTime(body));
     })();
   }
