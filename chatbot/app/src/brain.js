@@ -435,13 +435,29 @@ function createBrain(KB) {
     return KB.pricing.tiers || [];
   }
 
+  // Incell is the normal aftermarket panel on an LCD iPhone, but a real step
+  // down on an OLED one. Say which, rather than just quoting the cheap number.
+  function isLcdPhone(model) {
+    return (KB.pricing.lcdModels || []).some(function (m) { return model.indexOf(m) === 0; });
+  }
+
+  function blurbFor(tier, model) {
+    if (tier.id === 'incell' && model && !isLcdPhone(model)) {
+      return KB.pricing.incellOnOled || tier.blurb;
+    }
+    if (tier.id === 'incell' && model && isLcdPhone(model)) {
+      return 'LCD, same as the original panel';
+    }
+    return tier.blurb;
+  }
+
   // {soft: 55, diagnostic: 85} -> the rows a customer sees, cheapest first
-  function tierRows(costs) {
+  function tierRows(costs, model) {
     if (!costs) return [];
     return tiers()
       .filter(function (t) { return costs[t.id] != null; })
       .map(function (t) {
-        return { id: t.id, label: t.label, blurb: t.blurb, price: retailFromCost(costs[t.id]) };
+        return { id: t.id, label: t.label, blurb: blurbFor(t, model), price: retailFromCost(costs[t.id]) };
       })
       .sort(function (a, b) { return a.price - b.price; });
   }
@@ -481,7 +497,7 @@ function createBrain(KB) {
 
   function priceCard(model, repair, prices) {
     // The normal path: part costs the shop has confirmed, run through the formula.
-    var rows = tierRows(prices && prices.costs);
+    var rows = tierRows(prices && prices.costs, model);
     if (rows.length) {
       var art = /^[aeiou]/i.test(model) ? 'an ' : 'a ';
       var cheapest = rows[0];

@@ -68,8 +68,10 @@ test('every quote is the formula applied to a confirmed part cost', () => {
 
     const step = KB.pricing.formula.roundUpTo || 0;
     for (const [tier, cost] of Object.entries(row.costs)) {
-      const raw = (cost + labour) * gstMultiplier;
-      const expected = step ? Math.ceil(raw / step) * step : Math.round(raw * 100) / 100;
+      // settle to cents before rounding, exactly as retailFromCost does -
+      // (31.82 + 100) * 1.1 is 145.00000000000003, and a bare ceil says $150
+      const raw = Math.round((cost + labour) * gstMultiplier * 100) / 100;
+      const expected = step ? Math.ceil(raw / step) * step : raw;
       const money = '$' + (expected % 1 === 0 ? expected : expected.toFixed(2));
       assert.ok(shown.includes(money),
         `${row.model} ${row.repair} ${tier}: cost $${cost} should quote ${money}, card shows "${shown}"`);

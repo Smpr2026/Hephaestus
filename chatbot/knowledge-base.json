@@ -221,7 +221,10 @@
           "aftermarket": 145,
           "genuine": 170
         },
-        "costs": {}
+        "costs": {
+          "incell": 31.82
+        },
+        "evidence": "Back-solved from the Shopify variant explicitly named 'iPhone 11 / Copy INCELL' at $145. Confirm the cost."
       },
       {
         "brand": "Apple",
@@ -232,7 +235,10 @@
           "aftermarket": 150,
           "genuine": 210
         },
-        "costs": {}
+        "costs": {
+          "incell": 36.36
+        },
+        "evidence": "Back-solved from the Shopify variant explicitly named 'iPhone 11 Pro / Copy INCELL' at $150. Confirm the cost."
       },
       {
         "brand": "Apple",
@@ -243,7 +249,10 @@
           "aftermarket": 155,
           "genuine": 230
         },
-        "costs": {}
+        "costs": {
+          "incell": 40.91
+        },
+        "evidence": "Back-solved from the Shopify variant explicitly named 'iPhone 11 Pro Max / Copy INCELL' at $155. Confirm the cost."
       },
       {
         "brand": "Apple",
@@ -254,7 +263,10 @@
           "aftermarket": 150,
           "genuine": 320
         },
-        "costs": {}
+        "costs": {
+          "incell": 45.45
+        },
+        "evidence": "Back-solved from the Shopify variant explicitly named 'iPhone 12 / Copy INCELL' at $160. Confirm the cost."
       },
       {
         "brand": "Apple",
@@ -275,7 +287,10 @@
           "aftermarket": 150,
           "genuine": 320
         },
-        "costs": {}
+        "costs": {
+          "incell": 90.91
+        },
+        "evidence": "Back-solved from the Shopify variant explicitly named 'iPhone 12 Pro / Copy INCELL' at $210. Confirm the cost."
       },
       {
         "brand": "Apple",
@@ -286,7 +301,10 @@
           "aftermarket": 170,
           "genuine": 470
         },
-        "costs": {}
+        "costs": {
+          "incell": 63.64
+        },
+        "evidence": "Back-solved from the Shopify variant explicitly named 'iPhone 12 Pro Max / Copy INCELL' at $180. Confirm the cost."
       },
       {
         "brand": "Apple",
@@ -539,9 +557,14 @@
     },
     "tiers": [
       {
+        "id": "incell",
+        "label": "Incell",
+        "blurb": "Cheapest option — LCD, not OLED"
+      },
+      {
         "id": "soft",
         "label": "Soft OLED",
-        "blurb": "Budget-friendly aftermarket screen"
+        "blurb": "Budget-friendly aftermarket OLED"
       },
       {
         "id": "diagnostic",
@@ -554,7 +577,6 @@
         "blurb": "Original Apple part"
       }
     ],
-    "legacyNote": "legacyRetail holds the old Shopify listing prices. They are NOT quoted. Working the formula backwards, they imply part costs from $32 (iPhone 11) to $145 (15 Pro Max) - so the older models were listed BELOW what the formula now gives, and the newer ones well above. Delete each one as its real cost is entered.",
     "formulaCheck": {
       "invoice": "12344, 14 Mar 2025",
       "line": "lcd copy, Apple 14 Pro",
@@ -563,7 +585,15 @@
       "quotedCost": 55,
       "formulaWouldQuote": 175,
       "verdict": "The formula matches what the shop actually charged to within $5 - the $5 being the round-up rule. It is right."
-    }
+    },
+    "tierNote": "Incell is an LCD panel. On iPhone XR and 11 the phone is natively LCD, so Incell is the normal aftermarket choice. On 11 Pro and up the phone is OLED, so Incell is a real step down in black levels and contrast - the bot must say so rather than just quoting the cheaper number.",
+    "legacyNote": "legacyRetail holds old Shopify listing prices. Where the variant was labelled 'Copy INCELL' the price looks correct for an Incell panel and has been used as cost evidence. The unlabelled 'Part + Install' prices on 13 and up are the ones George flagged as too high - they are still not quoted.",
+    "lcdModels": [
+      "iPhone XR",
+      "iPhone 11",
+      "iPhone SE"
+    ],
+    "incellOnOled": "LCD, not OLED — blacks look grey next to the original"
   },
   "policies": {
     "repairWarranty": "Every repair comes with a 3-month warranty on parts and labour. It covers the part we fitted and the work we did - it doesn't cover new accidental damage, drops or liquid after the repair.",
