@@ -483,7 +483,51 @@ function createBrain(KB) {
     };
   }
 
-  return { respond: respond, fill: fill, norm: norm };
+  // Exposed so a caller with a live price source (FixDesk) can intercept a
+  // price question, fetch the real number, and render the same card.
+  function parsePriceQuery(raw) {
+    var t = norm(raw);
+    var model = detectModel(t);
+    var repair = detectRepair(t);
+    if (!model) return null;
+    if (!repair && !looksLikePrice(t)) return null;
+    return { model: model, repair: repair || 'screen' };
+  }
+
+  // prices: {aftermarket, genuine} from anywhere. Null values render as
+  // "call to confirm" - the bot still never invents a number.
+  function priceCard(model, repair, prices) {
+    if (!prices || (prices.aftermarket == null && prices.genuine == null)) {
+      return {
+        text: fill(KB.pricing.unknownPriceLine),
+        card: null, contact: true,
+        chips: ['Genuine or aftermarket?', 'How long does a repair take?'],
+        intent: 'price:' + model + ':' + repair + ' (no listed price)'
+      };
+    }
+    var art = /^[aeiou]/i.test(model) ? 'an ' : 'a ';
+    return {
+      text: 'Here’s our guide price for ' + art + model + ' ' +
+            (repair === 'screen' ? 'screen' : 'battery') +
+            ' replacement — usually done in under an hour while you wait.',
+      card: {
+        title: model + ' ' + (repair === 'screen' ? 'screen replacement' : 'battery replacement'),
+        rows: [
+          ['Aftermarket part', prices.aftermarket != null ? '$' + prices.aftermarket : 'call to confirm'],
+          ['Genuine OEM part', prices.genuine != null ? '$' + prices.genuine : 'call to confirm']
+        ],
+        note: fill(KB.pricing.disclaimerShort) + ' Every repair includes the ' + B.warranty + '.'
+      },
+      contact: false,
+      chips: ['Genuine or aftermarket?', 'Do I need a booking?', 'Where are you?'],
+      intent: 'price:' + model + ':' + repair + (prices.source ? ' (' + prices.source + ')' : '')
+    };
+  }
+
+  return {
+    respond: respond, fill: fill, norm: norm,
+    parsePriceQuery: parsePriceQuery, priceCard: priceCard
+  };
 }
 
 if (typeof module !== 'undefined' && module.exports) module.exports = { createBrain: createBrain };

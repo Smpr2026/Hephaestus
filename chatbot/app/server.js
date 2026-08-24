@@ -17,6 +17,7 @@ const path = require('path');
 const kbStore = require('./src/kb.js');
 const { createBrain } = require('./src/brain.js');
 const claude = require('./src/claude.js');
+const quotes = require('./src/quotes.js');
 
 const PORT = process.env.PORT || 3000;
 const PUBLIC = path.join(__dirname, 'public');
@@ -56,6 +57,18 @@ function readBody(req) {
   });
 }
 
+// A price question goes to FixDesk first, so the techs' numbers are the ones
+// customers hear. Anything short of a real answer falls through to the
+// knowledge base - the bot still never invents a price.
+async function livePrice(message) {
+  if (!quotes.configured()) return null;
+  const q = brain.parsePriceQuery(message);
+  if (!q) return null;
+  const prices = await quotes.lookup(q.model, q.repair);
+  if (!prices) return null;
+  return brain.priceCard(q.model, q.repair, prices);
+}
+
 async function handleChat(req, res) {
   const body = await readBody(req);
   const message = String(body.message || '').slice(0, 2000).trim();
@@ -64,6 +77,9 @@ async function handleChat(req, res) {
   const history = Array.isArray(body.history)
     ? body.history.slice(-10).filter(m => m && (m.role === 'user' || m.role === 'assistant'))
     : [];
+
+  const live = await livePrice(message);
+  if (live) return send(res, 200, { ...live, engine: 'fixdesk' });
 
   if (claude.available()) {
     try {
@@ -131,6 +147,7 @@ const server = http.createServer(async (req, res) => {
     if (urlPath === '/api/status' && req.method === 'GET') {
       return send(res, 200, {
         engine: claude.available() ? 'claude' : 'local',
+        livePricing: quotes.configured() ? process.env.FIXDESK_URL : false,
         model: claude.available() ? claude.MODEL : null,
         intents: KB.intents.length,
         pricesFilled: KB.pricing.repairs.filter(r => r.aftermarket != null || r.genuine != null).length,

@@ -115,6 +115,35 @@ So the bot works from a table, not a guess:
 - **Online products** → point at the product page, offer the phone to confirm price and stock in
   one call.
 
+### Where the prices come from
+
+The repair techs already maintain prices in **FixDesk**, the shop's own quoting module. A second
+copy in `knowledge-base.json` means two lists and one of them going stale, so the bot asks FixDesk
+first and the knowledge base becomes the fallback rather than the source:
+
+```
+  price question
+       │
+       ▼
+  FixDesk quoting module          ← the techs' numbers, always current
+       │ no answer, 404, slow, or down
+       ▼
+  knowledge-base.json price table ← what ships today
+       │ still nothing
+       ▼
+  "I don't have that one listed — call (02) 8957 1077"
+```
+
+`app/src/quotes.js` is that adapter. It caches for a minute, times out at 2.5 seconds, and returns
+nothing on any failure — a quoting-module outage is logged for the shop and invisible to the
+customer, who simply gets the knowledge-base answer instead. Set `FIXDESK_URL` to turn it on;
+leave it unset and the bot behaves exactly as it does today.
+
+The one assumption about FixDesk's API lives in `mapResponse()`. If the real route or field names
+differ, that function is the only thing to change.
+
+### The fallback table
+
 The table currently holds **real screen prices for iPhone 11 through 15**, pulled from the Shopify
 store. Everything else — batteries, charge ports, all Samsung models — is blank on purpose, so the
 bot handballs those to the phone until George fills them in. Filling in a row is one line of JSON
@@ -254,7 +283,10 @@ committing to a number.
 3. **Returns: 30 days or 2 days?** The Refund Policy page and the Shipping Policy page contradict
    each other, and refund-to-card vs store-credit contradicts too. This is the answer most likely
    to end in a dispute.
-4. **Fill the price table** — batteries and Samsung especially. Every blank row is a handoff that
+4. **The FixDesk quote endpoint** — what's the route, what does it return, and what auth? Give me
+   that (or access to `Smpr2026/fixdesk-pro` and I'll read it myself) and the bot quotes the
+   techs' live prices instead of a copy. The adapter is written and tested against a stand-in;
+   it needs the real shape. Until then, the fallback table's blank rows are each a handoff that
    could have been an answer.
 5. **Afterpay/Zip?** Currently the bot says "call to confirm".
 6. **Mail-in postal address** — the bot tells customers to ring for it. Fine, but a stated address

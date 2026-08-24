@@ -73,6 +73,32 @@ once, run `../build.sh`, and both stay in step.
 | `public/storefront.html` | Fake shop page so you can see the widget in place. |
 | `public/admin.html` | The knowledge base editor — previews the embedded Shopify admin page. |
 
+## Live prices from FixDesk
+
+The repair techs keep prices in FixDesk, so the bot asks FixDesk rather than carrying its own
+copy:
+
+```bash
+export FIXDESK_URL=https://fixdesk.pro
+export FIXDESK_TOKEN=...            # sent as Authorization: Bearer
+npm start                           # admin header now shows live pricing is on
+```
+
+A price question goes to FixDesk first. If FixDesk has no price for that combination, is slow, or
+is down, the bot quietly uses the knowledge-base table instead — the failure is logged for you and
+the customer never sees it. Unset `FIXDESK_URL` and nothing about today's behaviour changes.
+
+`src/quotes.js` assumes one shape:
+
+```
+GET {FIXDESK_URL}/api/quotes?model=iPhone%2013&repair=screen
+  200 → { "aftermarket": 160, "genuine": 260 }    (either may be null)
+  404 → no price on file
+```
+
+If the real route or field names differ, change `mapResponse()` in that file. It's the only place
+the shape is assumed — nothing else needs touching.
+
 ## Turning this into the Shopify app
 
 What's here already maps onto it one-to-one:
