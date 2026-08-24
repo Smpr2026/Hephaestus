@@ -60,6 +60,14 @@ answer:
   "aftermarket": 89, "genuine": null, "verified": true }
 ```
 
+## Testing it
+
+```bash
+cd chatbot/app && npm test
+```
+
+Covers coverage, pricing honesty and the guardrails. See `app/README.md`.
+
 ## Before this goes live
 
 `knowledge-base.json` opens with a `meta.verifyBeforeLaunch` list. The ones that matter most:

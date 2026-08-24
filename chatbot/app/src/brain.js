@@ -138,11 +138,19 @@ function createBrain(KB) {
 
   /* ---------- matching ---------- */
 
+  // Longer patterns may match a prefix, so "charge" catches "charges". Short
+  // ones must match a whole word, or "yo" fires on "you".
+  function patternHit(p, t) {
+    if (p.length < 2) return false;
+    if (p.trim().length <= 3) return t.indexOf(p + ' ') !== -1;
+    return t.indexOf(p) !== -1;
+  }
+
   function scoreIntent(intent, t) {
     var best = 0;
     for (var i = 0; i < intent._pats.length; i++) {
       var p = intent._pats[i];
-      if (p.length > 1 && t.indexOf(p) !== -1) {
+      if (patternHit(p, t)) {
         var s = p.length + (p.trim().split(' ').length > 1 ? 6 : 0);
         if (s > best) best = s;
       }
@@ -154,7 +162,7 @@ function createBrain(KB) {
     for (var i = 0; i < KB.refusals.length; i++) {
       var r = KB.refusals[i];
       for (var j = 0; j < r.match.length; j++) {
-        if (t.indexOf(norm(r.match[j]).slice(0, -1)) !== -1) {
+        if (patternHit(norm(r.match[j]).slice(0, -1), t)) {
           return {
             text: fill(r.answer), card: null, contact: false,
             chips: ['What do you repair?', 'Talk to a human'],

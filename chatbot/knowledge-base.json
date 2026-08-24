@@ -467,7 +467,23 @@
       },
       {
         "brand": "Samsung",
-        "model": "Galaxy A-series",
+        "model": "Galaxy A15",
+        "repair": "screen",
+        "aftermarket": null,
+        "genuine": null,
+        "verified": false
+      },
+      {
+        "brand": "Samsung",
+        "model": "Galaxy A35",
+        "repair": "screen",
+        "aftermarket": null,
+        "genuine": null,
+        "verified": false
+      },
+      {
+        "brand": "Samsung",
+        "model": "Galaxy A55",
         "repair": "screen",
         "aftermarket": null,
         "genuine": null,
@@ -549,11 +565,29 @@
     {
       "id": "spy",
       "match": [
-        "spy on",
-        "track my partner",
-        "read someone's messages",
+        "access her phone",
+        "access his phone",
+        "check my partners phone",
+        "hidden app on",
         "install spyware",
-        "monitor their phone"
+        "monitor my partner",
+        "monitor their phone",
+        "partner's messages",
+        "partners messages",
+        "read her messages",
+        "read his messages",
+        "read my partners",
+        "read someone's messages",
+        "see her texts",
+        "see his texts",
+        "spy app",
+        "spy on",
+        "track my boyfriend",
+        "track my girlfriend",
+        "track my husband",
+        "track my partner",
+        "track my wife",
+        "without them knowing"
       ],
       "answer": "That's not something we'll help with. If you've got a safety concern, the police or 1800RESPECT (1800 737 732) are the right people to call."
     }

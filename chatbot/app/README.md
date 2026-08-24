@@ -73,6 +73,22 @@ once, run `../build.sh`, and both stay in step.
 | `public/storefront.html` | Fake shop page so you can see the widget in place. |
 | `public/admin.html` | The knowledge base editor — previews the embedded Shopify admin page. |
 
+## Testing it
+
+```bash
+npm test
+```
+
+15 checks, about a quarter of a second. They cover the three things a repair shop's bot must not
+get wrong: that it answers what customers actually ask (all 119 bank questions), that it never
+invents a price (every blank row must hand off, every filled row must match the table exactly), and
+that it never says something that lands you in trouble — no claiming to be Apple authorised, no
+promising same-day on water damage, no asking for a passcode, and iCloud bypass, stolen devices and
+spyware always refused.
+
+Run it before anything goes live, and after any edit to the knowledge base. It caught two real
+faults the first time it ran.
+
 ## Live prices from FixDesk
 
 The repair techs keep prices in FixDesk, so the bot asks FixDesk rather than carrying its own
