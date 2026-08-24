@@ -5,6 +5,8 @@
     "updated": "2026-08-23",
     "note": "Single source of truth for the SMPR chatbot. Edit this file, then run ./build.sh to rebuild demo.html. Every answer the bot gives should trace back to something in here.",
     "verifyBeforeLaunch": [
+      "WARRANTY CONFLICT - the most dangerous one. The knowledge base, website and every bot answer say '3-month warranty on parts and labour'. The printed invoice T&Cs (13780 Dec 2025, 14213 Mar 2026) say '30-day limited warranty on labour and SMPR-supplied parts only', while the line items on the same invoices say 'Warranty: 90 Days'. Three different promises. The bot must never promise more than the invoice honours - decide which is true and make all three match.",
+      "The 480 King Georges Road address is still printing on live invoices (14213, 25 Mar 2026) from the RepairDesk/Modsindex template. Fixing Shopify was not enough - the invoice template needs it too.",
       "ADDRESS CONFLICT: the SEO brief says 290 Kingsgrove Road, Kingsgrove NSW 2208. The Shopify store contact policy and at least one product description say 480 King Georges Road, Beverly Hills NSW 2209. The bot must have ONE address. Set business.address below and fix whichever source is wrong.",
       "EMAIL CONFLICT: info@sydneymobilephonerepairs.com.au (SEO brief, shop email) vs quotes@sydneymobilephonerepairs.com.au (Shopify refund + terms policies). Pick one for the bot.",
       "HOURS: Mon-Fri 9:00-18:00, Sat 9:00-14:00 taken from a live product description. Confirm, especially public holidays.",
@@ -82,7 +84,8 @@
       "Penshurst",
       "Riverwood",
       "Wiley Park"
-    ]
+    ],
+    "abn": "61 607 904 683"
   },
   "services": [
     {
@@ -343,7 +346,10 @@
         "legacyRetail": {
           "aftermarket": 220
         },
-        "costs": {}
+        "costs": {
+          "soft": 55
+        },
+        "evidence": "Invoice 12344 (14 Mar 2025): 'lcd copy' 14 Pro charged $170 inc GST, which back-solves to $54.55 cost. Confirm before trusting."
       },
       {
         "brand": "Apple",
@@ -548,7 +554,16 @@
         "blurb": "Original Apple part"
       }
     ],
-    "legacyNote": "legacyRetail holds the old Shopify listing prices. They are NOT quoted. Working the formula backwards, they imply part costs from $32 (iPhone 11) to $145 (15 Pro Max) - so the older models were listed BELOW what the formula now gives, and the newer ones well above. Delete each one as its real cost is entered."
+    "legacyNote": "legacyRetail holds the old Shopify listing prices. They are NOT quoted. Working the formula backwards, they imply part costs from $32 (iPhone 11) to $145 (15 Pro Max) - so the older models were listed BELOW what the formula now gives, and the newer ones well above. Delete each one as its real cost is entered.",
+    "formulaCheck": {
+      "invoice": "12344, 14 Mar 2025",
+      "line": "lcd copy, Apple 14 Pro",
+      "charged": 170.0,
+      "impliedCost": 54.55,
+      "quotedCost": 55,
+      "formulaWouldQuote": 175,
+      "verdict": "The formula matches what the shop actually charged to within $5 - the $5 being the round-up rule. It is right."
+    }
   },
   "policies": {
     "repairWarranty": "Every repair comes with a 3-month warranty on parts and labour. It covers the part we fitted and the work we did - it doesn't cover new accidental damage, drops or liquid after the repair.",
