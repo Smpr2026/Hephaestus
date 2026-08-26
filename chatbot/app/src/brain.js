@@ -37,6 +37,15 @@ function createBrain(KB) {
    'what whats that this there if but so just any some one ').trim().split(' ')
     .forEach(function (w) { STOP[w] = 1; });
 
+  // customers split words the bot knows as one ("after market", "i phone")
+  function canon(t) {
+    return t
+      .replace(/ after market /g, ' aftermarket ')
+      .replace(/ i phone /g, ' iphone ')
+      .replace(/ sam sung /g, ' samsung ')
+      .replace(/ in cell /g, ' incell ');
+  }
+
   function sigTokens(t) {
     var out = {};
     t.trim().split(' ').forEach(function (w) {
@@ -51,6 +60,60 @@ function createBrain(KB) {
     intent._tokens = sigTokens(norm(intent.patterns.join(' ') + ' ' + intent.q));
   });
 
+  // every word the bot knows, so one-typo messages still land
+  var VOCAB = {};
+  (function () {
+    function learn(s) {
+      norm(String(s || '')).trim().split(' ').forEach(function (w) {
+        if (w.length >= 4) VOCAB[w] = 1;
+      });
+    }
+    KB.intents.forEach(function (i) { i.patterns.forEach(learn); learn(i.q); });
+    (KB.pricing.repairs || []).forEach(function (r) { learn(r.brand); learn(r.model); learn(r.repair); });
+    (KB.pricing.tiers || []).forEach(function (t) { learn(t.id); learn(t.name); });
+    ((KB.brands || {}).supported || []).forEach(learn);
+    (KB.refusals || []).forEach(function (r) { (r.match || []).forEach(learn); });
+    learn('aftermarket incell genuine diagnostic screen battery charging speaker camera repair price cost warranty booking');
+  })();
+
+  // one edit apart: substitution, missing/extra letter, or swapped neighbours
+  function editClose(a, b) {
+    if (a === b) return true;
+    var la = a.length, lb = b.length;
+    if (Math.abs(la - lb) > 1) return false;
+    if (la === lb) {
+      var diff = [];
+      for (var i = 0; i < la; i++) if (a[i] !== b[i]) diff.push(i);
+      if (diff.length === 1) return true;
+      return diff.length === 2 && diff[1] === diff[0] + 1 &&
+             a[diff[0]] === b[diff[1]] && a[diff[1]] === b[diff[0]];
+    }
+    var s = la < lb ? a : b, l = la < lb ? b : a, si = 0, li = 0, used = false;
+    while (si < s.length && li < l.length) {
+      if (s[si] === l[li]) { si++; li++; continue; }
+      if (used) return false;
+      used = true; li++;
+    }
+    return true;
+  }
+
+  // fix a token only when exactly one known word is one typo away -
+  // ambiguity keeps the customer's spelling rather than guessing
+  function autocorrect(t) {
+    return ' ' + t.trim().split(' ').map(function (w) {
+      if (w.length < 4 || VOCAB[w] || /\d/.test(w)) return w;
+      var hit = null;
+      for (var v in VOCAB) {
+        if (Math.abs(v.length - w.length) > 1) continue;
+        if (editClose(w, v)) {
+          if (hit && hit !== v) return w;
+          hit = v;
+        }
+      }
+      return hit || w;
+    }).join(' ') + ' ';
+  }
+
   /* ---------- prices ---------- */
 
   // Order matters: "cracked back glass" must hit back_glass before "cracked"
@@ -63,7 +126,7 @@ function createBrain(KB) {
     speaker: ['ear speaker', 'loud speaker', 'speaker', 'microphone', 'muffled', 'no sound'],
     virus: ['virus', 'malware', 'pop ups', 'popups', 'pop up', 'hacked'],
     software: ['software', 'stuck on the logo', 'stuck on the apple logo', 'wont turn on after update', 'restore'],
-    data: ['data transfer', 'data recovery', 'transfer my data', 'recover my data', 'recover my photos', 'transfer everything', 'transfer to my new phone'],
+    data: ['data transfer', 'data recovery', 'transfer my data', 'recover my data', 'recover my photos', 'transfer everything', 'transfer to my new phone', 'move my data', 'moved my data', 'everything onto my new phone'],
     screen: ['screen', 'display', 'lcd', 'oled', 'cracked', 'crack', 'shattered', 'broken screen', 'front glass', 'front screen', 'smashed the front', 'front is']
   };
 
@@ -539,10 +602,19 @@ function createBrain(KB) {
     };
   }
 
+  var lastIntentId = '';
   function respond(raw) {
-    var t = norm(raw);
+    var res = respondCore(raw);
+    if (res && res.intent) lastIntentId = String(res.intent);
+    return res;
+  }
 
-    var ref = refusalCheck(t);
+  function respondCore(raw) {
+    var t = canon(autocorrect(norm(raw)));
+
+    // check refusals against the corrected AND the raw text - a "correction"
+    // must never turn a refusable ask into an answerable one
+    var ref = refusalCheck(t) || refusalCheck(canon(norm(raw)));
     if (ref) return ref;
 
     // mid-booking answers (name, mobile) come before everything else
@@ -554,6 +626,25 @@ function createBrain(KB) {
     // "what else have you got" continues the last product search
     var more = moreProducts(t);
     if (more) return more;
+
+    // "ok i'll go the soft" right after a price card or the screen-options
+    // explainer is picking a tier, not a new question - but "aftermarket,
+    // what does that mean?" is still a question, so question words fall through
+    if (/^price/.test(lastIntentId) &&
+        !/\b(what|mean|difference|explain|which|why|how)\b/.test(t) &&
+        t.trim().split(' ').length <= 8) {
+      var tm = /\b(incell|soft|genuine|oem|diagnostic|aftermarket|cheapest)\b/.exec(t);
+      if (tm) {
+        var tw = { oem: 'genuine', cheapest: 'Incell', incell: 'Incell', soft: 'soft OLED',
+                   genuine: 'genuine', diagnostic: 'diagnostic', aftermarket: 'aftermarket' }[tm[1]] || tm[1];
+        return {
+          text: 'Good choice - ' + tw + " it is. Tell me your phone model and I'll double-check what we've got for it, or book in below and we'll have it ready. Exact price gets confirmed on the spot before we touch the phone.",
+          card: null, contact: false, products: null, options: null,
+          chips: ['Book a repair', 'How long does it take?', 'Where are you?'],
+          intent: 'tier_choice:' + tm[1]
+        };
+      }
+    }
 
     // Shopping comes first when the words name something we sell - "screen
     // protector" must not be answered as a screen repair.
@@ -781,7 +872,7 @@ function createBrain(KB) {
 
   // Returns {terms, brand} when the customer is shopping, null when they aren't.
   function parseProductQuery(raw) {
-    var t = norm(raw);
+    var t = canon(autocorrect(norm(raw)));
     var brand = null;
     for (var i = 0; i < BRANDS.length; i++) {
       if (t.indexOf(' ' + BRANDS[i]) !== -1) { brand = BRANDS[i]; break; }

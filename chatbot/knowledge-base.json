@@ -7859,7 +7859,6 @@
   "note": "The name shown at the top of the chat and on the avatar. Change it to whoever should appear to be answering - the owner, or whichever staff member's name you want on it.",
   "openHoursStatus": "Online now",
   "closedStatus": "Away — back at 9am",
-  "closedPrefix": "Shop's shut at the moment, but here you go — ",
   "style": "Short messages, sent one after another like a person typing. Contractions. No corporate wording.",
   "readPauseMs": 900,
   "typePerCharMs": 30,

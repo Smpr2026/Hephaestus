@@ -231,3 +231,22 @@ test('asking if the shop has moved confirms the move and gives the new address',
   // and data-transfer wording must not trip the move check
   assert.ok(!brain.respond('i moved my data to my new phone can you help').intent.startsWith('moved'));
 });
+
+test('typos and split words still get real answers', () => {
+  // one-typo forgiveness
+  const r1 = brain.respond('whats your adress');
+  assert.ok(r1.text.includes(KB.business.addressShort), `"adress" should reach the address: ${r1.intent}`);
+  // "after market" as two words is the parts explainer, not a shrug
+  const r2 = brain.respond('after market what does that mean');
+  assert.ok(r2.intent.startsWith('price_parts'), `matched ${r2.intent}`);
+  // picking a tier right after a price answer, typos and all
+  const fresh = createBrain(KB);
+  const pr = fresh.respond('how much for an iPhone 13 screen');
+  assert.ok(pr.card, 'price question should give a card');
+  const pick = fresh.respond('ok ill for got eh soft');
+  assert.ok(pick.intent.startsWith('tier_choice:soft'), `matched ${pick.intent}`);
+  assert.ok(/soft OLED/i.test(pick.text));
+  // but a question about a tier still explains it
+  const q = fresh.respond('aftermarket what does that mean');
+  assert.ok(q.intent.startsWith('price_parts'), `matched ${q.intent}`);
+});

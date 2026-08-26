@@ -130,8 +130,11 @@
   + '.sw-send:hover{filter:brightness(1.1)}'
   + '.sw-note{font-size:10.5px;color:var(--w-ink2);text-align:center;padding:0 10px 8px;background:var(--w-bg);flex:none}';
 
+  // Prefix every rule with the widget id so theme stylesheets (and our own
+  // button reset, which carries id specificity) can never out-rank component
+  // styles - Dawn's base.css was flattening the chips and send button.
   var style = document.createElement('style');
-  style.textContent = css;
+  style.textContent = css.replace(/([{}])\.sw-/g, '$1#smprw .sw-');
   document.head.appendChild(style);
 
   /* ---------- markup ---------- */
