@@ -9,7 +9,7 @@
    "The 480 King Georges Road address is still printing on live invoices (14213, 25 Mar 2026) from the RepairDesk/Modsindex template. Fixing Shopify was not enough - the invoice template needs it too.",
    "ADDRESS CONFLICT: the SEO brief says 290 Kingsgrove Road, Kingsgrove NSW 2208. The Shopify store contact policy and at least one product description say 480 King Georges Road, Beverly Hills NSW 2209. The bot must have ONE address. Set business.address below and fix whichever source is wrong.",
    "EMAIL CONFLICT: info@sydneymobilephonerepairs.com.au (SEO brief, shop email) vs quotes@sydneymobilephonerepairs.com.au (Shopify refund + terms policies). Pick one for the bot.",
-   "HOURS: Mon-Fri 9:00-18:00, Sat 9:00-14:00 taken from a live product description. Confirm, especially public holidays.",
+   "HOURS: Mon-Fri 9am-5pm confirmed by George 26 Aug 2026 (the 9-6 the bot had was scraped from a live product description, which is therefore wrong on the site too). Saturday 9am-2pm still assumed from that description - confirm. Public holidays unconfirmed.",
    "PRICES: the screen prices below came from real Shopify variants, but those products are in DRAFT and some rows contradict each other (iPhone 12 shows both $150 and $160 for aftermarket). Confirm every row, then set verified: true.",
    "BATTERY / CHARGE PORT / SAMSUNG prices are null on purpose - the bot will not invent a number. Fill them in and it starts quoting them.",
    "RETURNS CONFLICT: the Shopify Refund Policy says 30 days; the Shipping Policy says change-of-mind requests within 2 days and refunds to store credit only. These contradict each other. Decide which is true before launch - this is the answer most likely to cause a dispute.",
@@ -27,32 +27,32 @@
   "address": "290 Kingsgrove Road, Kingsgrove NSW 2208",
   "addressShort": "290 Kingsgrove Road, Kingsgrove",
   "mapsUrl": "https://maps.google.com/?q=290+Kingsgrove+Road+Kingsgrove+NSW+2208",
-  "hoursSummary": "Mon-Fri 9am-6pm, Sat 9am-2pm. Closed Sunday.",
+  "hoursSummary": "Mon-Fri 9am-5pm, Sat 9am-2pm. Closed Sunday.",
   "hours": [
    {
     "day": "Monday",
     "open": "9:00am",
-    "close": "6:00pm"
+    "close": "5:00pm"
    },
    {
     "day": "Tuesday",
     "open": "9:00am",
-    "close": "6:00pm"
+    "close": "5:00pm"
    },
    {
     "day": "Wednesday",
     "open": "9:00am",
-    "close": "6:00pm"
+    "close": "5:00pm"
    },
    {
     "day": "Thursday",
     "open": "9:00am",
-    "close": "6:00pm"
+    "close": "5:00pm"
    },
    {
     "day": "Friday",
     "open": "9:00am",
-    "close": "6:00pm"
+    "close": "5:00pm"
    },
    {
     "day": "Saturday",
@@ -3662,7 +3662,7 @@
     "open today",
     "trading hours"
    ],
-   "answer": "We're open Monday to Friday 9am-6pm, and Saturday 9am-2pm. Closed Sundays. Walk in any time during those hours - no appointment needed.",
+   "answer": "We're open Monday to Friday 9am-5pm, and Saturday 9am-2pm. Closed Sundays. Walk in any time during those hours - no appointment needed.",
    "chips": [
     "Are you open Sunday?",
     "Where are you?",
@@ -3705,7 +3705,7 @@
     "open saturday",
     "saturday hours"
    ],
-   "answer": "Saturday yes - 9am to 2pm. Sunday we're closed. Monday to Friday we're open 9am-6pm.",
+   "answer": "Saturday yes - 9am to 2pm. Sunday we're closed. Monday to Friday we're open 9am-5pm.",
    "chips": [
     "Where are you?",
     "How long does a repair take?"
@@ -3745,7 +3745,7 @@
     "public holiday",
     "queens birthday"
    ],
-   "answer": "Public holiday hours can change, so it's worth a quick call to {{phone}} before you drive over. Normal hours are Mon-Fri 9am-6pm and Sat 9am-2pm.",
+   "answer": "Public holiday hours can change, so it's worth a quick call to {{phone}} before you drive over. Normal hours are Mon-Fri 9am-5pm and Sat 9am-2pm.",
    "chips": [
     "What are your hours?"
    ],
