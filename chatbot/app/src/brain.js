@@ -621,7 +621,9 @@ function createBrain(KB) {
     'headphone','headphones','earbud','earbuds','earphone','earphones','airpod','airpods','speaker',
     'accessory','accessories','buy','sell','price of','do you have','do you sell','in stock','stock',
     'looking for','got any','after a',
-    'powerbeats','quietcomfort','soundcore','soundlink','magsafe'];
+    'powerbeats','quietcomfort','soundcore','soundlink','magsafe',
+    'steam deck','sd card','memory card','flip phone','senior phone','laptop','macbook for sale',
+    'tablet','smart watch','galaxy watch','monitor','mouse','keyboard','flashlight'];
 
   var BRANDS = ['bose','beats','sony','anker','baseus','samsung','apple','jbl','cygnett','romoss',
     'acefast','uag','iquick','efm','kogan','sennheiser','skullcandy','logitech'];
