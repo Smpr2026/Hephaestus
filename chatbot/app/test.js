@@ -46,9 +46,15 @@ test('a question it has never seen still lands somewhere sensible', () => {
 
 /* ------------------------------------------------------------------ prices */
 
+function rowIsPriced(row) {
+  if (row.costs && Object.keys(row.costs).length) return true;
+  // RepairDesk ticket stats price a row too - but only with enough jobs to mean anything
+  return row.sampleSize >= 3 && (row.typical != null || row.low != null);
+}
+
 test('never quotes a price the knowledge base does not hold', () => {
   for (const row of KB.pricing.repairs) {
-    if (row.costs && Object.keys(row.costs).length) continue;
+    if (rowIsPriced(row)) continue;
     const r = brain.respond(`how much for a ${row.model} ${row.repair}`);
     assert.strictEqual(r.card, null, `${row.model} ${row.repair}: quoted a price card with no price on file`);
     assert.ok(/\$/.test(r.text) === false, `${row.model} ${row.repair}: a dollar figure leaked into the answer`);
@@ -99,7 +105,7 @@ test('the old Shopify figures are kept for reference but never quoted', () => {
   const legacy = KB.pricing.repairs.filter(r => r.legacyRetail);
   assert.ok(legacy.length > 0, 'expected some legacy rows');
   for (const row of legacy) {
-    if (row.costs && Object.keys(row.costs).length) continue;   // superseded by a real cost
+    if (rowIsPriced(row)) continue;   // superseded by a real cost or by ticket history
     const r = brain.respond(`how much for a ${row.model} ${row.repair}`);
     assert.strictEqual(r.card, null,
       `${row.model} ${row.repair}: quoted from the old figures George said were too high`);

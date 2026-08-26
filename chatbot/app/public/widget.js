@@ -126,18 +126,38 @@
 
 
     if(res.products && res.products.length){
+      var KIND_ICON = { earbuds:'\uD83C\uDFA7', headphones:'\uD83C\uDFA7', speaker:'\uD83D\uDD0A',
+        'power bank':'\uD83D\uDD0B', charger:'\uD83D\uDD0C', cable:'\uD83D\uDD0C',
+        protector:'\uD83D\uDEE1\uFE0F', 'case':'\uD83D\uDCF1', phone:'\uD83D\uDCF1' };
       html += '<div class="smpr-products">';
       res.products.forEach(function(p){
         var cls = p.stock > 3 ? '' : (p.stock > 0 ? ' low' : ' out');
         var label = p.stock > 3 ? 'In stock' : (p.stock > 0 ? 'Only ' + p.stock + ' left' : 'Out of stock');
+        var meta = [p.cond, p.colour ? p.colour.charAt(0).toUpperCase() + p.colour.slice(1) : null]
+          .filter(Boolean).join(' \u00B7 ');
+        var icon = KIND_ICON[p.kind] || '\uD83D\uDECD\uFE0F';
+        // the photo swaps to the icon tile if it can't load (the Claude test
+        // panel blocks outside images; the real site shows the photo)
+        var pic = '<span class="smpr-prod-pic">' + icon +
+                  (p.img ? '<img src="' + esc(p.img) + '" alt="" loading="lazy" ' +
+                           'onerror="this.remove()">' : '') + '</span>';
         html += '<div class="smpr-prod-wrap">' +
-                '<a class="smpr-prod" href="' + esc(p.url) + '" target="_blank" rel="noopener">' +
-                '<span class="smpr-prod-t">' + esc(p.title) + '<span class="smpr-prod-s' + cls + '">' + label + '</span></span>' +
+                '<a class="smpr-prod" href="' + esc(p.url) + '" target="_blank" rel="noopener">' + pic +
+                '<span class="smpr-prod-t">' + esc(p.title) +
+                (meta ? '<span class="smpr-prod-m">' + esc(meta) + '</span>' : '') +
+                '<span class="smpr-prod-s' + cls + '">' + label + '</span></span>' +
                 '<span class="smpr-prod-p">$' + esc(p.price) + '</span></a>' +
                 (p.cart && p.stock > 0
                   ? '<a class="smpr-prod-cart" href="' + esc(p.cart) + '" target="_blank" rel="noopener">Add to cart</a>'
                   : '') +
                 '</div>';
+      });
+      html += '</div>';
+    }
+    if(res.options && res.options.length){
+      html += '<div class="smpr-opts">';
+      res.options.forEach(function(o){
+        html += '<button class="smpr-optbtn" type="button" data-q="' + esc(o.q) + '">' + esc(o.label) + '</button>';
       });
       html += '</div>';
     }
@@ -148,7 +168,11 @@
         '</div>';
     }
 
-    log.appendChild(el('div', 'smpr-row smpr-bot', html + '</div>'));
+    var row = el('div', 'smpr-row smpr-bot', html + '</div>');
+    log.appendChild(row);
+    Array.prototype.forEach.call(row.querySelectorAll('.smpr-optbtn'), function (b) {
+      b.addEventListener('click', function () { ask(b.getAttribute('data-q')); });
+    });
 
     chips.innerHTML = '';
     (res.chips || []).forEach(function (c) {
@@ -255,6 +279,7 @@
           text: body,
           card: isLast ? res.card : null,
           products: isLast ? res.products : null,
+          options: isLast ? res.options : null,
           contact: isLast ? res.contact : false,
           chips: isLast ? res.chips : []
         });

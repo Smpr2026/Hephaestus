@@ -60,6 +60,7 @@
     <button data-tab="answers">Answers</button>
     <button data-tab="business">Shop details</button>
     <button data-tab="try">Try it</button>
+    <button data-tab="gaps">Gaps</button>
   </div>
 
   <div class="panel" id="tab-prices">
@@ -85,6 +86,15 @@
   <div class="panel" id="tab-business" hidden>
     <div class="hint">The details every answer is built from. Change them here and every answer updates.</div>
     <div class="grid2" id="bizGrid"></div>
+  </div>
+
+  <div class="panel" id="tab-gaps" hidden>
+    <div class="hint">
+      Questions customers asked that the bot couldn't answer, most-asked first.
+      This list is how it learns: each row is either a price to fill in, an answer to add,
+      or a product to stock. Clear a row by fixing the thing it points at.
+    </div>
+    <div id="gapList"></div>
   </div>
 
   <div class="panel" id="tab-try" hidden>
@@ -202,7 +212,7 @@ $('#filter').addEventListener('input', e => renderIntents(e.target.value));
 document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
   document.querySelectorAll('.tabs button').forEach(x => x.className = '');
   b.className = 'on';
-  ['prices','answers','business','try'].forEach(t => {
+  ['prices','answers','business','try','gaps'].forEach(t => {
     document.getElementById('tab-' + t).hidden = (t !== b.dataset.tab);
   });
 }));
@@ -215,6 +225,16 @@ $('#saveBtn').addEventListener('click', async () => {
   if (r.ok) { dirty = false; $('#saved').hidden = false; boot(); }
   else { alert('Save failed: ' + (await r.text())); $('#saveBtn').disabled = false; }
 });
+
+async function loadGaps(){
+  const rows = await (await fetch('/api/gaps')).json();
+  const el = $('#gapList');
+  if (!rows.length) { el.innerHTML = '<div class="intent">Nothing yet — every question so far got an answer.</div>'; return; }
+  el.innerHTML = rows.map(r =>
+    '<div class="intent"><div class="cat">asked ' + r.n + ' time' + (r.n === 1 ? '' : 's') +
+    ' · ' + esc(r.intent || '') + '</div><div class="q">' + esc(r.q) + '</div></div>').join('');
+}
+document.querySelector('[data-tab=gaps]').addEventListener('click', loadGaps);
 
 async function tryIt(){
   const q = $('#tryInput').value.trim();

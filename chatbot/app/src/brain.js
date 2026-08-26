@@ -53,10 +53,30 @@ function createBrain(KB) {
 
   /* ---------- prices ---------- */
 
+  // Order matters: "cracked back glass" must hit back_glass before "cracked"
+  // hits screen, and "battery not charging" is a battery job. Screen goes last.
   var REPAIR_WORDS = {
-    screen: ['screen', 'display', 'lcd', 'oled', 'cracked', 'crack', 'shattered', 'broken screen'],
-    battery: ['battery', 'batteries', 'drains', 'dying']
+    back_glass: ['back glass', 'rear glass', 'back cover', 'housing'],
+    battery: ['battery', 'batteries', 'drains', 'dying'],
+    charging: ['charging port', 'charge port', 'not charging', 'charging', 'charger port'],
+    camera: ['camera', 'lens'],
+    speaker: ['ear speaker', 'loud speaker', 'speaker', 'microphone', 'muffled', 'no sound'],
+    virus: ['virus', 'malware', 'pop ups', 'popups', 'pop up', 'hacked'],
+    software: ['software', 'stuck on the logo', 'stuck on the apple logo', 'wont turn on after update', 'restore'],
+    data: ['data transfer', 'data recovery', 'transfer my data', 'recover my data', 'recover my photos', 'transfer everything', 'transfer to my new phone'],
+    screen: ['screen', 'display', 'lcd', 'oled', 'cracked', 'crack', 'shattered', 'broken screen', 'front glass', 'front screen', 'smashed the front', 'front is']
   };
+
+  // These aren't tied to a model - a virus clean costs what it costs.
+  var SERVICE_REPAIRS = { software: 1, virus: 1, data: 1 };
+
+  var REPAIR_LABELS = {
+    screen: 'screen replacement', battery: 'battery replacement',
+    back_glass: 'back glass replacement', charging: 'charging port repair',
+    camera: 'camera repair', speaker: 'speaker or microphone repair',
+    software: 'software fix', virus: 'virus removal', data: 'data transfer'
+  };
+  function repairLabel(r) { return REPAIR_LABELS[r] || (r + ' repair'); }
 
   var MODELS = (function () {
     var seen = {};
@@ -124,6 +144,34 @@ function createBrain(KB) {
     };
   }
 
+  // Software, virus and data jobs cost what they cost, whatever the phone -
+  // quoted straight from what the shop has actually charged for them.
+  function serviceAnswer(repair) {
+    var p = (KB.pricing.services || {})[repair];
+    if (!p || p.sampleSize == null) return null;
+    var range = (p.low != null && p.high != null && p.low !== p.high)
+      ? '$' + p.low + '–$' + p.high
+      : '$' + (p.typical != null ? p.typical : p.low);
+    var rows = [['Recent jobs', range]];
+    if (p.typical != null) rows.push(['Most common', '$' + p.typical]);
+    if (p.turnaround) rows.push(['Time in store', p.turnaround]);
+    rows.push(['Based on', p.sampleSize + ' jobs']);
+    lastQuote = { model: null, repair: repair, label: p.label || repairLabel(repair), priceLine: range };
+    return {
+      text: 'Most ' + repairLabel(repair) + ' jobs have come in around ' + range +
+            ' — we’ll tell you the exact price once we’ve had a look at what’s going on.',
+      card: {
+        title: p.label || repairLabel(repair),
+        rows: rows,
+        note: 'That’s what we’ve actually charged recently, not a fixed price. ' +
+              fill(KB.pricing.disclaimerShort) + ' Every repair includes the ' + B.warranty + '.'
+      },
+      contact: false,
+      chips: ['Lock this price in', 'Do I need a booking?', 'How long does a repair take?'],
+      intent: 'service:' + repair + ' (tickets, n=' + p.sampleSize + ')'
+    };
+  }
+
   /* ---------- matching ---------- */
 
   // Longer patterns may match a prefix, so "charge" catches "charges". Short
@@ -172,11 +220,340 @@ function createBrain(KB) {
     };
   }
 
+
+  // A bare model name is a customer holding their phone at the counter.
+  // Ask what's happened to it - don't recite the brands list.
+  function isBareModel(t, model) {
+    var s = ' ' + t + ' ';
+    var aliases = modelAliases(model);
+    for (var i = 0; i < aliases.length; i++) {
+      s = s.replace(' ' + aliases[i] + ' ', ' ');
+    }
+    var left = s.trim().split(' ').filter(function (w) {
+      return w.length >= 3 && !STOP[w] &&
+        ['have','you','the','for','with','about','hey','got'].indexOf(w) === -1;
+    });
+    return left.length <= 1;
+  }
+
+  // The tappable problem list for one model: only faults we can actually
+  // price for it (screen and battery always - everyone asks those).
+  function modelOptions(model) {
+    var defs = [
+      ['screen', 'Cracked or broken screen'],
+      ['battery', 'Battery dying fast'],
+      ['charging', 'Not charging'],
+      ['back_glass', 'Smashed back glass'],
+      ['camera', 'Camera problem'],
+      ['speaker', 'Speaker or microphone']
+    ];
+    var opts = [];
+    defs.forEach(function (d) {
+      var row = priceRow(model, d[0]);
+      var quotable = row && ((row.costs && Object.keys(row.costs).length) || row.sampleSize >= 3);
+      if (quotable || d[0] === 'screen' || d[0] === 'battery') {
+        opts.push({ label: d[1], q: model + ' ' + REPAIR_WORDS[d[0]][0] });
+      }
+    });
+    opts.push({ label: 'Got wet / water damage', q: 'my ' + model + ' got wet' });
+    opts.push({ label: 'Case or accessory for it', q: 'case for ' + model });
+    opts.push({ label: 'Something else', q: 'talk to a human' });
+    return opts;
+  }
+
+  function modelClarify(model) {
+    var art = /^[aeiou]/i.test(model) ? 'An ' : 'A ';
+    return {
+      text: art + model + ' — what\u2019s going on with it? Tap one below, or just tell me in your own words.',
+      card: null, contact: false, products: null,
+      options: modelOptions(model),
+      chips: [],
+      intent: 'model-clarify:' + model
+    };
+  }
+
+
+  // "iphone" on its own deserves "which one?", not a recital of every brand.
+  var DEVICE_NAMES = { iphone: 'iPhone', ipad: 'iPad', imac: 'iMac', macbook: 'MacBook',
+    samsung: 'Samsung', galaxy: 'Galaxy', pixel: 'Pixel', oppo: 'Oppo', huawei: 'Huawei', ipod: 'iPod' };
+
+  function bareDeviceClarify(t) {
+    var toks = t.trim().split(' ');
+    var dev = null;
+    for (var i = 0; i < toks.length; i++) {
+      var w = toks[i].replace(/s$/, '');
+      if (DEVICE_NAMES[w]) { dev = w; break; }
+    }
+    if (!dev) return null;
+    var left = toks.filter(function (x) {
+      var base = x.replace(/s$/, '');
+      return x.length >= 3 && !STOP[x] && !DEVICE_NAMES[base] &&
+        ['have','you','the','for','with','got','fix','repair','you','can'].indexOf(x) === -1;
+    });
+    if (left.length) return null;
+    var nice = DEVICE_NAMES[dev];
+    return {
+      text: nice + ' — yep, we work on them all day. Which model have you got, and what\u2019s happening with it?\n\nOr if you\u2019re after a case, charger or another accessory, just tell me what kind.',
+      card: null, contact: false, products: null,
+      chips: ['How much is a screen repair?', 'Battery replacement', 'Do I need a booking?'],
+      intent: 'device-clarify:' + dev
+    };
+  }
+
+
+  /* ---------- locking in a quote ----------
+   * Customer sees a price, says "lock it in", gives a name and mobile, and
+   * the result is a lead the server can hand to FixDesk. The bot never asks
+   * for anything beyond name + mobile (see guardrails).
+   */
+  var lastQuote = null;       // the last price the customer was shown
+  var pendingBooking = null;  // {stage:'name'|'phone', name, quote}
+  var bookings = [];          // completed leads, for the server to collect
+
+  var BOOK_WORDS = [' lock it in', ' lock in', ' lock that in', ' lock this in',
+    ' lock the price', ' lock this price', ' book it', ' book that', ' book me in',
+    ' hold that price', ' hold the price', ' hold that for me', ' reserve that',
+    ' book my ', ' book a repair', ' book in for', ' book phone in', ' make a booking',
+    ' can i book', ' want to book', ' book an appointment'];
+
+  function startBooking() {
+    if (!lastQuote) {
+      return {
+        text: 'Happy to lock a price in. Tell me the phone and the problem first - say something like \u201ciPhone 12 screen\u201d - and once I\u2019ve quoted it, just say \u201clock it in\u201d.',
+        card: null, contact: false, products: null,
+        chips: ['How much is a screen repair?', 'iPhone battery'],
+        intent: 'booking:no-quote'
+      };
+    }
+    pendingBooking = { stage: 'name', quote: lastQuote };
+    return {
+      text: 'Good as done - I\u2019ll note down the ' + lastQuote.label + ' at ' + lastQuote.priceLine + ' for you. What\u2019s your first name?',
+      card: null, contact: false, products: null, chips: [],
+      intent: 'booking:name'
+    };
+  }
+
+  function bookingStep(raw, t) {
+    if (!pendingBooking) return null;
+    // a question mid-flow gets answered; they can pick the booking up again
+    if (raw.indexOf('?') !== -1) { pendingBooking = null; return null; }
+    // so does a change of subject - a model or a fault is not a name
+    if (detectModel(t) || detectRepair(t) || t.trim().split(' ').length > 5) {
+      pendingBooking = null;
+      return null;
+    }
+    if (t.indexOf(' cancel') !== -1 || t.indexOf(' never mind') !== -1 || t.indexOf(' forget it') !== -1) {
+      pendingBooking = null;
+      return {
+        text: 'No worries - nothing saved. Say \u201clock it in\u201d any time and we\u2019ll pick it up again.',
+        card: null, contact: false, products: null, chips: [], intent: 'booking:cancelled'
+      };
+    }
+    if (pendingBooking.stage === 'name') {
+      var name = raw.trim().replace(/^(hi|hey|im|i am|its|it is|my name is|name is|this is)\s+/i, '')
+                          .split(/\s+/).slice(0, 3).join(' ');
+      if (!/^[a-zA-Z][a-zA-Z' -]{1,39}$/.test(name)) {
+        return {
+          text: 'Just a name is all I need - like \u201cSarah\u201d or \u201cAhmed K\u201d.',
+          card: null, contact: false, products: null, chips: [], intent: 'booking:name-retry'
+        };
+      }
+      pendingBooking.name = name.split(' ').map(function (w) {
+        return w.charAt(0).toUpperCase() + w.slice(1);
+      }).join(' ');
+      pendingBooking.stage = 'phone';
+      return {
+        text: 'Thanks ' + pendingBooking.name + '. And the best mobile number for you? George will text you to confirm.',
+        card: null, contact: false, products: null, chips: [], intent: 'booking:phone'
+      };
+    }
+    // stage: phone
+    var digits = raw.replace(/[^0-9+]/g, '').replace(/^\+61/, '0');
+    if (digits.length < 8 || digits.length > 11) {
+      return {
+        text: 'That doesn\u2019t look like a full number - what\u2019s the best mobile, like 04xx xxx xxx?',
+        card: null, contact: false, products: null, chips: [], intent: 'booking:phone-retry'
+      };
+    }
+    var q = pendingBooking.quote;
+    var lead = { name: pendingBooking.name, phone: digits, model: q.model || null,
+                 repair: q.repair, quoted: q.priceLine, source: 'chatbot' };
+    bookings.push(lead);
+    pendingBooking = null;
+    return {
+      text: 'Done, ' + lead.name + ' - you\u2019re locked in.',
+      card: {
+        title: 'Held for you',
+        rows: [
+          ['Job', q.label],
+          ['Quoted', q.priceLine],
+          ['Name', lead.name],
+          ['Mobile', lead.phone]
+        ],
+        note: 'Just walk in whenever suits - ' + fill('{{hoursSummary}}') + ' Give your name at the counter and we\u2019ll have it ready. George will text you to confirm.'
+      },
+      contact: false, products: null,
+      chips: ['Where are you?', 'How long does a repair take?'],
+      booking: lead,
+      intent: 'booking:done'
+    };
+  }
+
+
+  // "Front and back done" is two jobs. Quote both on the one card rather
+  // than making the customer ask twice.
+  function wantsFrontAndBack(t) {
+    return /front and back|back and front|screen and back|back and screen|front und back|screen and the back/.test(t);
+  }
+
+  // Back glass with a screen is an add-on, not a second job: ~$100 on top
+  // for older models, ~$120 for newer (George's rule, comboRule in the KB).
+  function backAddonFor(model) {
+    var rule = KB.pricing.comboRule;
+    if (!rule) return null;
+    // Samsung back covers are cheap - flat $50 whatever the model
+    if (/^Galaxy|^Samsung/i.test(model) && rule.samsungAddon != null) return rule.samsungAddon;
+    var from = rule.newerFrom || {};
+    var m;
+    if ((m = model.match(/^iPhone (\d+)/)) && Number(m[1]) >= (from.iphone || 13)) return rule.newAddon;
+    return rule.oldAddon;
+  }
+
+  function comboAnswer(model) {
+    // George's rule first: price the pair off whichever screen they pick.
+    var addon = backAddonFor(model);
+    var sRowR = priceRow(model, 'screen');
+    if (addon != null && sRowR) {
+      var tiers2 = tierRows(sRowR.costs, model);
+      if (tiers2.length) {
+        var rows2 = tiers2.map(function (r) {
+          return [r.label + ' + back glass', money(r.price + addon), r.blurb];
+        });
+        rows2.push(['Time in store', 'Usually same day for both']);
+        var fromP = money(tiers2[0].price + addon);
+        lastQuote = {
+          model: model, repair: 'screen + back glass',
+          label: model + ' screen + back glass (done together)',
+          priceLine: 'from ' + fromP
+        };
+        var artR = /^[aeiou]/i.test(model) ? 'an ' : 'a ';
+        return {
+          text: 'Front and back on ' + artR + model + ' \u2014 we do both in the one visit, and together it works out cheaper than two separate jobs: the back glass adds $' + addon + ' on top of whichever screen you go with.',
+          card: {
+            title: model + ' \u2014 screen + back glass',
+            rows: rows2,
+            note: fill(KB.pricing.disclaimerShort) + ' Every repair includes the ' + B.warranty + '.'
+          },
+          contact: false, products: null,
+          chips: ['Lock this price in', 'What\u2019s the difference?', 'Do I need a booking?'],
+          intent: 'price-combo:' + model + ' (rule, +$' + addon + ')'
+        };
+      }
+    }
+    // screens priced from job history (Samsung etc.): same rule, applied
+    // to the range the screen alone has gone for.
+    if (addon != null && sRowR && sRowR.sampleSize >= 3 && sRowR.low != null) {
+      var lo = sRowR.low + addon, hi = sRowR.high + addon;
+      var rangeT = lo !== hi ? '$' + lo + '\u2013$' + hi : '$' + lo;
+      lastQuote = {
+        model: model, repair: 'screen + back glass',
+        label: model + ' screen + back glass (done together)',
+        priceLine: rangeT
+      };
+      var artT = /^[aeiou]/i.test(model) ? 'an ' : 'a ';
+      var rowsT = [['Screen + back glass together', rangeT]];
+      if (sRowR.typical != null) rowsT.push(['Most common', '$' + (sRowR.typical + addon)]);
+      rowsT.push(['Time in store', 'Usually same day for both']);
+      return {
+        text: 'Front and back on ' + artT + model + ' \u2014 we do both in the one visit, and together it works out cheaper than two separate jobs: the back glass adds $' + addon + ' on top of the screen.',
+        card: {
+          title: model + ' \u2014 screen + back glass',
+          rows: rowsT,
+          note: 'Screen price is what recent ' + model + ' screen jobs have gone for, plus the back glass. ' +
+                fill(KB.pricing.disclaimerShort) + ' Every repair includes the ' + B.warranty + '.'
+        },
+        contact: false, products: null,
+        chips: ['Lock this price in', 'Do I need a booking?', 'How long does a repair take?'],
+        intent: 'price-combo:' + model + ' (rule on tickets, +$' + addon + ')'
+      };
+    }
+    // no priced screen for this model: fall back to what the pair has
+    // actually gone for, then to the two-part card.
+    var pkg = (KB.pricing.combos || {})[model];
+    if (pkg) {
+      var range = pkg.low !== pkg.high ? '$' + pkg.low + '\u2013$' + pkg.high : '$' + pkg.typical;
+      lastQuote = {
+        model: model, repair: 'screen + back glass',
+        label: model + ' screen + back glass (done together)',
+        priceLine: range
+      };
+      var art0 = /^[aeiou]/i.test(model) ? 'an ' : 'a ';
+      return {
+        text: 'Front and back on ' + art0 + model + ' \u2014 we do both in the one visit, and doing them together works out cheaper than two separate jobs.',
+        card: {
+          title: model + ' \u2014 screen + back glass',
+          rows: [
+            ['Done together', range],
+            ['Most common', '$' + pkg.typical],
+            ['Time in store', 'Usually same day for both'],
+            ['Based on', pkg.sampleSize + ' jobs' + (pkg.since ? ' since ' + pkg.since : '')]
+          ],
+          note: 'That\u2019s what we\u2019ve actually charged for the pair recently. ' +
+                fill(KB.pricing.disclaimerShort) + ' Every repair includes the ' + B.warranty + '.'
+        },
+        contact: false, products: null,
+        chips: ['Lock this price in', 'Do I need a booking?', 'How long does a repair take?'],
+        intent: 'price-combo:' + model + ' (package, n=' + pkg.sampleSize + ')'
+      };
+    }
+    var sRow = priceRow(model, 'screen');
+    var gRow = priceRow(model, 'back_glass');
+    var sLine = null, gLine = null;
+    if (sRow) {
+      var srows = tierRows(sRow.costs, model);
+      if (srows.length) sLine = 'from ' + money(srows[0].price);
+      else if (sRow.sampleSize >= 3) sLine = '$' + sRow.low + '\u2013$' + sRow.high;
+    }
+    if (gRow && gRow.sampleSize >= 3) gLine = '$' + gRow.low + '\u2013$' + gRow.high;
+    if (!sLine && !gLine) return null;
+    lastQuote = {
+      model: model, repair: 'screen + back glass',
+      label: model + ' screen + back glass',
+      priceLine: (sLine || 'screen TBC') + ' front, ' + (gLine || 'TBC') + ' back'
+    };
+    var art = /^[aeiou]/i.test(model) ? 'an ' : 'a ';
+    return {
+      text: 'Front and back on ' + art + model + ' \u2014 no problem, we do both in the one visit.',
+      card: {
+        title: model + ' \u2014 screen + back glass',
+        rows: [
+          ['Front screen', sLine || 'Call to confirm'],
+          ['Back glass', gLine || 'Call to confirm'],
+          ['Time in store', 'Usually same day for both']
+        ],
+        note: fill(KB.pricing.disclaimerShort) + ' Every repair includes the ' + B.warranty + '.'
+      },
+      contact: false, products: null,
+      chips: ['Lock this price in', 'Do I need a booking?', 'How long does a repair take?'],
+      intent: 'price-combo:' + model
+    };
+  }
+
   function respond(raw) {
     var t = norm(raw);
 
     var ref = refusalCheck(t);
     if (ref) return ref;
+
+    // mid-booking answers (name, mobile) come before everything else
+    var step = bookingStep(raw, t);
+    if (step) return step;
+
+    if (BOOK_WORDS.some(function (p) { return t.indexOf(p) !== -1; })) return startBooking();
+
+    // "what else have you got" continues the last product search
+    var more = moreProducts(t);
+    if (more) return more;
 
     // Shopping comes first when the words name something we sell - "screen
     // protector" must not be answered as a screen repair.
@@ -186,7 +563,18 @@ function createBrain(KB) {
 
     var model = detectModel(t);
     var repair = detectRepair(t);
+    if (repair && SERVICE_REPAIRS[repair]) {
+      var svc = serviceAnswer(repair);
+      if (svc) return svc;
+    }
+    if (model && wantsFrontAndBack(t)) {
+      var combo = comboAnswer(model);
+      if (combo) return combo;
+    }
     if (model && (repair || looksLikePrice(t))) return priceAnswer(model, repair || 'screen');
+    if (model && isBareModel(t, model)) return modelClarify(model);
+    var bare = bareDeviceClarify(t);
+    if (bare && !(shopQ && shopQ.shopping)) return bare;
     if (shopQ) return productAnswer(shopQ);
     if (looksLikePrice(t) && !model && repair) {
       var byRepair = KB.intents.filter(function (i) {
@@ -197,6 +585,7 @@ function createBrain(KB) {
 
     var best = null, bestScore = 0;
     for (var i = 0; i < KB.intents.length; i++) {
+      if (model && KB.intents[i].id === 'brands') continue;
       var s = scoreIntent(KB.intents[i], t);
       if (s > bestScore) { bestScore = s; best = KB.intents[i]; }
     }
@@ -205,6 +594,7 @@ function createBrain(KB) {
     // nothing matched as a phrase - try word overlap before giving up
     var toks = sigTokens(t), tokBest = null, tokScore = 0;
     for (var k = 0; k < KB.intents.length; k++) {
+      if (model && KB.intents[k].id === 'brands') continue;
       var n = 0;
       for (var w in toks) { if (KB.intents[k]._tokens[w]) n++; }
       if (n > tokScore) { tokScore = n; tokBest = KB.intents[k]; }
@@ -214,6 +604,8 @@ function createBrain(KB) {
       r2.intent += ' [word-overlap]';
       return r2;
     }
+
+    if (model) return modelClarify(model);
 
     return {
       text: "I'm not sure about that one, and I'd rather not guess. " + fill(KB.escalation.line),
@@ -228,7 +620,8 @@ function createBrain(KB) {
   var SHOP_WORDS = ['case','cover','charger','cable','protector','tempered','power bank','powerbank',
     'headphone','headphones','earbud','earbuds','earphone','earphones','airpod','airpods','speaker',
     'accessory','accessories','buy','sell','price of','do you have','do you sell','in stock','stock',
-    'looking for','got any','after a'];
+    'looking for','got any','after a',
+    'powerbeats','quietcomfort','soundcore','soundlink','magsafe'];
 
   var BRANDS = ['bose','beats','sony','anker','baseus','samsung','apple','jbl','cygnett','romoss',
     'acefast','uag','iquick','efm','kogan','sennheiser','skullcandy','logitech'];
@@ -242,6 +635,54 @@ function createBrain(KB) {
     return (KB.catalogue && KB.catalogue.items) || [];
   }
 
+  /* A person behind the counter says "comes in black or white - which do you
+   * like?" and mentions the condition of a used one. Read both off the title,
+   * so it works for the offline sample and the live store alike. */
+  var COLOURS = ['black','white','blue','navy','pink','silver','grey','gray','gold','red',
+                 'green','purple','orange','titanium','cream','midnight','starlight','ultramarine'];
+
+  function colourOf(title) {
+    var t = ' ' + String(title).toLowerCase() + ' ';
+    for (var i = 0; i < COLOURS.length; i++) {
+      if (t.indexOf(COLOURS[i]) !== -1) return COLOURS[i] === 'gray' ? 'grey' : COLOURS[i];
+    }
+    return null;
+  }
+
+  var CONDS = [
+    [/like new|as new/i, 'As new'],
+    [/immaculate/i, 'Immaculate'],
+    [/excellent/i, 'Excellent condition'],
+    [/grade a/i, 'Grade A'], [/grade b/i, 'Grade B'], [/grade c/i, 'Grade C'],
+    [/refurbished/i, 'Refurbished'],
+    [/pre.?loved/i, 'Pre-loved'],
+    [/out.of.box/i, 'New, out of box'],
+    [/used/i, 'Used, tested']
+  ];
+
+  function conditionOf(title) {
+    for (var i = 0; i < CONDS.length; i++) {
+      if (CONDS[i][0].test(title)) return CONDS[i][1];
+    }
+    return null;
+  }
+
+  // what's left of a title once colour, condition and bracketed notes go -
+  // two listings sharing this are the same product in different colours
+  function baseKey(title) {
+    var t = String(title).toLowerCase()
+      .replace(/\(.*?\)/g, ' ')
+      .replace(/[-\u2013\u2014].*$/, ' ');
+    COLOURS.forEach(function (c) { t = t.replace(c, ' '); });
+    t = t.replace(/used|refurbished|pre.?loved|excellent|immaculate|genuine|condition|like new|as new|grade [abc]/g, ' ');
+    return t.replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
+  function shortName(title) {
+    var t = String(title).replace(/\(.*?\)/g, '').split(/[-\u2013\u2014]/)[0];
+    return t.replace(/\s+/g, ' ').trim().split(' ').slice(0, 3).join(' ');
+  }
+
   // What kind of thing this is, read off the title. Shopify's product types are
   // too coarse - it files earbuds and over-ear headphones both as "Headphones".
   var KINDS = [
@@ -253,7 +694,11 @@ function createBrain(KB) {
     ['cable',     /cable|cord|lead\b/i],
     ['protector', /protector|tempered|screen guard/i],
     ['case',      /\bcase\b|cover|folio|bumper/i],
-    ['phone',     /handset|iphone \d|galaxy s\d|pre.?loved|refurbished/i]
+    ['tablet',    /tablet|ipad/i],
+    ['watch',     /watch/i],
+    // an actual handset names a phone brand AND storage / condition - "128GB"
+    // alone also matches laptops, and "phone" alone matches phone holders
+    ['phone',     /handset|(iphone|galaxy|pixel|oppo|vivo|nokia|motorola|xiaomi)[^,]*(\d+ ?gb|refurbish|pre.?loved|pre loved|unlocked)|(\d+ ?gb)[^,]*(iphone|galaxy|pixel)/i]
   ];
 
   function kindOf(item) {
@@ -265,6 +710,12 @@ function createBrain(KB) {
   }
 
   function kindInQuery(t) {
+    // "phone"/"handset" in the question means a handset, unless they said
+    // which accessory; "buy an iphone" means a handset too
+    if (/\b(phones?|handsets?)\b/.test(t) &&
+        !/(case|cover|protector|charger|cable|holder|mount|part|screen)/.test(t)) return 'phone';
+    if (/\b(an?|new|used|refurbished|refurb|cheap|second ?hand|pre ?loved)\s+(iphone|samsung|galaxy|pixel)\b/.test(t) &&
+        /\b(buy|sell|got|have|after|looking|want)\b/.test(t)) return 'phone';
     for (var i = 0; i < KINDS.length; i++) {
       if (KINDS[i][1].test(t)) return KINDS[i][0];
     }
@@ -275,7 +726,10 @@ function createBrain(KB) {
     var hay = (item.t + ' ' + (item.c || '')).toLowerCase();
     var n = 0;
     for (var i = 0; i < terms.length; i++) {
-      if (hay.indexOf(terms[i]) !== -1) n++;
+      // a bare number must match as a whole word - "13" is not in "130W"
+      if (/^\d+$/.test(terms[i])) {
+        if (new RegExp('(^|[^0-9])' + terms[i] + '([^0-9]|$)').test(hay)) n += 2;
+      } else if (hay.indexOf(terms[i]) !== -1) n++;
     }
     return n;
   }
@@ -295,6 +749,10 @@ function createBrain(KB) {
     if (opts.kind) {
       var kinded = list.filter(function (i) { return kindOf(i) === opts.kind; });
       if (kinded.length) list = kinded;
+    }
+    if (opts.colour) {
+      var coloured = list.filter(function (i) { return colourOf(i.t) === opts.colour; });
+      if (coloured.length) list = coloured;
     }
 
     return list
@@ -319,16 +777,22 @@ function createBrain(KB) {
     for (var j = 0; j < SHOP_WORDS.length; j++) {
       if (t.indexOf(' ' + SHOP_WORDS[j]) !== -1) { shopping = true; break; }
     }
+    var colour = null;
+    for (var c = 0; c < COLOURS.length; c++) {
+      if (t.indexOf(' ' + COLOURS[c] + ' ') !== -1) { colour = COLOURS[c] === 'gray' ? 'grey' : COLOURS[c]; break; }
+    }
     if (!brand && !shopping) return null;
 
     // a repair question that happens to name a brand is not a shopping question
     if (!shopping && detectRepair(t) && detectModel(t)) return null;
 
     var terms = t.trim().split(' ').filter(function (w) {
+      // model numbers ("13", "8") are short but load-bearing - keep digits
+      if (/^\d+$/.test(w)) return true;
       return w.length >= 3 && !STOP[w] && ['how','much','you','the','for','have','got','sell','buy',
         'any','are','can','want','need','looking','after','does','with'].indexOf(w) === -1;
     });
-    return { terms: terms, brand: brand, kind: kindInQuery(t), shopping: shopping };
+    return { terms: terms, brand: brand, kind: kindInQuery(t), colour: colour, shopping: shopping };
   }
 
   // A bare brand is a question, not an answer: ask which kind before listing.
@@ -342,6 +806,49 @@ function createBrain(KB) {
     return out;
   }
 
+  function productPayload(item) {
+    return {
+      title: item.t,
+      price: item.p,
+      stock: item.s,
+      colour: colourOf(item.t),
+      cond: conditionOf(item.t),
+      img: item.img ? (KB.catalogue.imageBase || '') + item.img : (item.img2 || null),
+      kind: kindOf(item),
+      url: (KB.catalogue.productUrl || '') + item.h,
+      // Shopify cart permalink - one tap and it's in their cart, rather than
+      // making them find the button on the product page.
+      cart: item.v && KB.catalogue.cartUrl ? KB.catalogue.cartUrl + item.v + ':1' : null
+    };
+  }
+
+  // "what else have you got" only means something if we remember what they
+  // were just looking at. One query back is enough.
+  var lastShop = null;
+
+  var MORE_WORDS = [' what other', ' any other', ' anything else', ' what else',
+    ' other models', ' other ones', ' more options', ' show me more', ' any more',
+    ' got more', ' something else', ' the rest', ' keep going'];
+
+  function moreProducts(t) {
+    if (!lastShop) return null;
+    var hit = MORE_WORDS.some(function (p) { return t.indexOf(p) !== -1; });
+    if (!hit) return null;
+    var found = searchCatalogue(lastShop.parsed.terms, null,
+      { brand: lastShop.parsed.brand, kind: lastShop.parsed.kind })
+      .filter(function (i) { return lastShop.shown.indexOf(i.h) === -1; });
+    if (!found.length) {
+      return {
+        text: 'That’s everything I can see on the shelf for that one. Give us a ring on ' +
+              B.phone + ' and we’ll check out the back.',
+        card: null, contact: true, products: null,
+        chips: ['Can I pick up in store?', 'What do you sell?'],
+        intent: 'shop:no-more'
+      };
+    }
+    return productAnswer(lastShop.parsed, found);
+  }
+
   function productAnswer(parsed, items) {
     // A brand with no kind is a question, not an answer - ask which, the way
     // someone behind the counter would, and offer the kinds actually in stock.
@@ -349,8 +856,11 @@ function createBrain(KB) {
       var cats = categoriesFor(parsed.brand);
       if (cats.length > 1) {
         var nice = parsed.brand.charAt(0).toUpperCase() + parsed.brand.slice(1);
+        var listCats = cats.slice(0, 4);
+        var catLine = listCats.slice(0, -1).join(', ') + ' and ' + listCats[listCats.length - 1];
+        if (cats.length > 4) catLine += ' — and a fair bit more';
         return {
-          text: nice + ' — what are you after? We\u2019ve got ' + cats.join(' and ') + ' in at the moment.',
+          text: nice + ' — what are you after? We\u2019ve got ' + catLine + ' in at the moment.',
           card: null, contact: false, products: null,
           chips: cats.slice(0, 3).map(function (c) { return nice + ' ' + c; }),
           intent: 'shop:clarify:' + parsed.brand
@@ -359,7 +869,37 @@ function createBrain(KB) {
     }
 
     var found = items || searchCatalogue(parsed.terms, null,
-      { brand: parsed.brand, kind: parsed.kind });
+      { brand: parsed.brand, kind: parsed.kind, colour: parsed.colour });
+
+    // Same product, two colours, and they haven't picked one: ask, like a
+    // person would, and show both so they can see the difference.
+    if (!parsed.colour && found.length >= 2) {
+      var groups = {};
+      found.slice(0, 6).forEach(function (item) {
+        var k = baseKey(item.t);
+        (groups[k] = groups[k] || []).push(item);
+      });
+      for (var gk in groups) {
+        var g = groups[gk];
+        var cols = [];
+        g.forEach(function (item) {
+          var c = colourOf(item.t);
+          if (c && cols.indexOf(c) === -1) cols.push(c);
+        });
+        if (g.length >= 2 && cols.length >= 2) {
+          var name = shortName(g[0].t);
+          return {
+            text: 'We\u2019ve got the ' + name + ' in ' +
+                  cols.slice(0, -1).join(', ') + ' and ' + cols[cols.length - 1] +
+                  ' \u2014 which colour do you like?',
+            card: null, contact: false,
+            products: g.slice(0, 3).map(productPayload),
+            chips: cols.slice(0, 3).map(function (c) { return name + ' ' + c; }),
+            intent: 'shop:colour-ask:' + gk.split(' ').slice(0, 3).join('-')
+          };
+        }
+      }
+    }
 
     if (!found.length) {
       return {
@@ -375,22 +915,22 @@ function createBrain(KB) {
     var lead = top.length === 1
       ? 'Yep, we\u2019ve got one here:'
       : 'Yep — here\u2019s what we\u2019ve got in at the moment:';
+    var extra = found.length - top.length;
+
+    lastShop = {
+      parsed: parsed,
+      // a continuation (items passed in) extends the list already shown
+      shown: (items && lastShop ? lastShop.shown : [])
+        .concat(top.map(function (i) { return i.h; }))
+    };
 
     return {
-      text: lead,
+      text: lead + (extra > 0
+        ? ' There\u2019s ' + extra + ' more where that came from — say \u201cwhat else\u201d and I\u2019ll show you.'
+        : ''),
       card: null,
       contact: false,
-      products: top.map(function (item) {
-        return {
-          title: item.t,
-          price: item.p,
-          stock: item.s,
-          url: (KB.catalogue.productUrl || '') + item.h,
-          // Shopify cart permalink - one tap and it's in their cart, rather
-          // than making them find the button on the product page.
-          cart: item.v && KB.catalogue.cartUrl ? KB.catalogue.cartUrl + item.v + ':1' : null
-        };
-      }),
+      products: top.map(productPayload),
       chips: ['Can I pick up in store?', 'What are your hours?'],
       intent: 'shop:' + parsed.terms.join('+') + ' (' + found.length + ' match' + (found.length === 1 ? '' : 'es') + ')'
     };
@@ -473,18 +1013,19 @@ function createBrain(KB) {
   var MIN_TICKETS = 3;
 
   function ticketCard(model, repair, p) {
-    var label = model + ' ' + (repair === 'screen' ? 'screen replacement' : 'battery replacement');
+    var label = model + ' ' + repairLabel(repair);
     var art = /^[aeiou]/i.test(model) ? 'an ' : 'a ';
     var range = (p.low != null && p.high != null && p.low !== p.high)
       ? '$' + p.low + '–$' + p.high
       : '$' + (p.typical != null ? p.typical : p.low);
+    lastQuote = { model: model, repair: repair, label: label, priceLine: range };
     var rows = [['Recent jobs', range]];
     if (p.typical != null) rows.push(['Most common', '$' + p.typical]);
     rows.push(['Time in store', turnaround(model, repair)]);
     rows.push(['Based on', p.sampleSize + ' job' + (p.sampleSize === 1 ? '' : 's') +
                             (p.since ? ' since ' + p.since : '')]);
     return {
-      text: 'Most ' + model + ' ' + (repair === 'screen' ? 'screen' : 'battery') +
+      text: 'Most ' + model + ' ' + repairLabel(repair) +
             ' jobs have come in around ' + range + ' — it depends on the part you go with.',
       card: {
         title: label,
@@ -493,7 +1034,7 @@ function createBrain(KB) {
               fill(KB.pricing.disclaimerShort) + ' Every repair includes the ' + B.warranty + '.'
       },
       contact: false,
-      chips: ['Genuine or aftermarket?', 'Do I need a booking?', 'Where are you?'],
+      chips: ['Lock this price in', 'Genuine or aftermarket?', 'Do I need a booking?'],
       intent: 'price:' + model + ':' + repair + ' (tickets, n=' + p.sampleSize + ')'
     };
   }
@@ -504,20 +1045,36 @@ function createBrain(KB) {
     if (rows.length) {
       var art = /^[aeiou]/i.test(model) ? 'an ' : 'a ';
       var cheapest = rows[0];
+      var priced = rows.length;
+      // Genuine is always an option on a screen job, even when no genuine part
+      // cost is in the file. Old listing price if we hold one, else "call".
+      if (repair === 'screen' && !rows.some(function (r) { return r.id === 'genuine'; })) {
+        var gTier = tiers().filter(function (t) { return t.id === 'genuine'; })[0];
+        var gLegacy = prices.legacyRetail && prices.legacyRetail.genuine;
+        rows.push({
+          id: 'genuine',
+          label: gTier ? gTier.label : 'Genuine OEM',
+          blurb: gTier ? gTier.blurb : 'Original Apple part',
+          price: gLegacy != null ? gLegacy : null
+        });
+        if (gLegacy != null) priced += 1;
+      }
+      lastQuote = { model: model, repair: repair, label: model + ' ' + repairLabel(repair),
+                    priceLine: 'from ' + money(cheapest.price) };
       return {
-        text: 'For ' + art + model + ' ' + (repair === 'screen' ? 'screen' : 'battery') +
-              ', we do ' + rows.length + ' option' + (rows.length === 1 ? '' : 's') +
+        text: 'For ' + art + model + ' ' + repairLabel(repair) +
+              ', we do ' + priced + ' option' + (priced === 1 ? '' : 's') +
               ' — from ' + money(cheapest.price) + ' fitted.',
         card: {
-          title: model + ' ' + (repair === 'screen' ? 'screen replacement' : 'battery replacement'),
-          rows: rows.map(function (r) { return [r.label, money(r.price), r.blurb]; })
+          title: model + ' ' + repairLabel(repair),
+          rows: rows.map(function (r) { return [r.label, r.price != null ? money(r.price) : 'Call to confirm', r.blurb]; })
                     .concat([['Time in store', turnaround(model, repair)]]),
           note: fill(KB.pricing.disclaimerShort) + ' Every repair includes the ' + B.warranty + '.'
         },
         contact: false,
         chips: repair === 'screen'
-          ? ['What\u2019s the difference?', 'Screen protector for ' + model, 'Do I need a booking?']
-          : ['Genuine or aftermarket?', 'Power bank', 'Do I need a booking?'],
+          ? ['Lock this price in', 'What\u2019s the difference?', 'Screen protector for ' + model]
+          : ['Lock this price in', 'Genuine or aftermarket?', 'Do I need a booking?'],
         intent: 'price:' + model + ':' + repair + (prices.source ? ' (' + prices.source + ')' : '')
       };
     }
@@ -535,8 +1092,7 @@ function createBrain(KB) {
     var art = /^[aeiou]/i.test(model) ? 'an ' : 'a ';
     return {
       text: 'Here’s our guide price for ' + art + model + ' ' +
-            (repair === 'screen' ? 'screen' : 'battery') +
-            ' replacement — usually done in under an hour while you wait.',
+            repairLabel(repair) + ' — usually done in under an hour while you wait.',
       card: {
         title: model + ' ' + (repair === 'screen' ? 'screen replacement' : 'battery replacement'),
         rows: [

@@ -21,6 +21,7 @@ const quotes = require('./src/quotes.js');
 const catalogue = require('./src/catalogue.js');
 
 const PORT = process.env.PORT || 3000;
+const GAPS_FILE = path.join(__dirname, 'data', 'gaps.jsonl');
 const PUBLIC = path.join(__dirname, 'public');
 
 let KB = kbStore.load();
@@ -110,7 +111,36 @@ async function handleChat(req, res) {
     }
   }
 
-  send(res, 200, { ...brain.respond(message), engine: 'local' });
+  const answer = brain.respond(message);
+  logGap(message, answer);
+  send(res, 200, { ...answer, engine: 'local' });
+}
+
+// Every question the bot punts on is a gap in the knowledge base. Log them,
+// show them in the admin - that list is how the bot gets better each week.
+function logGap(message, answer) {
+  const missed = answer.intent === 'fallback' || String(answer.intent).indexOf('shop:nothing-found') === 0
+    || String(answer.intent).indexOf('(no listed price)') !== -1;
+  if (!missed) return;
+  fs.mkdir(path.dirname(GAPS_FILE), { recursive: true }, err => {
+    if (err) return;
+    fs.appendFile(GAPS_FILE, JSON.stringify({ t: Date.now(), q: message, intent: answer.intent }) + '\n', () => {});
+  });
+}
+
+function readGaps(cb) {
+  fs.readFile(GAPS_FILE, 'utf8', (err, data) => {
+    if (err) return cb([]);
+    const rows = data.trim().split('\n').filter(Boolean).map(l => { try { return JSON.parse(l); } catch (e) { return null; } }).filter(Boolean);
+    // aggregate identical questions so the admin sees "asked 7 times", not 7 rows
+    const agg = {};
+    rows.forEach(r => {
+      const k = r.q.toLowerCase().trim();
+      agg[k] = agg[k] || { q: r.q, n: 0, last: 0, intent: r.intent };
+      agg[k].n++; agg[k].last = Math.max(agg[k].last, r.t);
+    });
+    cb(Object.values(agg).sort((a, b) => b.n - a.n || b.last - a.last).slice(0, 100));
+  });
 }
 
 function serveStatic(req, res, urlPath) {
@@ -161,6 +191,10 @@ const server = http.createServer(async (req, res) => {
       });
     }
 
+    if (urlPath === '/api/gaps' && req.method === 'GET') {
+      return readGaps(rows => send(res, 200, rows));
+    }
+
     if (urlPath === '/api/status' && req.method === 'GET') {
       return send(res, 200, {
         engine: claude.available() ? 'claude' : 'local',
@@ -169,7 +203,7 @@ const server = http.createServer(async (req, res) => {
         catalogueSample: (KB.catalogue && KB.catalogue.items || []).length,
         model: claude.available() ? claude.MODEL : null,
         intents: KB.intents.length,
-        pricesFilled: KB.pricing.repairs.filter(r => r.aftermarket != null || r.genuine != null).length,
+        pricesFilled: KB.pricing.repairs.filter(r => r.costs && Object.keys(r.costs).length).length,
         pricesTotal: KB.pricing.repairs.length
       });
     }

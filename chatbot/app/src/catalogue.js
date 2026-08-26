@@ -35,6 +35,7 @@ const QUERY = `
           handle
           productType
           availableForSale
+          featuredImage { url(transform: { maxWidth: 160 }) }
           priceRange { minVariantPrice { amount } }
           variants(first: 1) { edges { node { id quantityAvailable } } }
         }
@@ -66,7 +67,9 @@ function mapNode(node) {
     // without it Shopify returns null, so fall back to the in-stock flag.
     s: typeof qty === 'number' ? qty : (node.availableForSale ? 1 : 0),
     // numeric id only - the cart permalink does not take the gid:// form
-    v: variant?.id ? String(variant.id).split('/').pop() : null
+    v: variant?.id ? String(variant.id).split('/').pop() : null,
+    // full URL already; brain.js only prefixes imageBase onto relative paths
+    img2: node.featuredImage?.url || null
   };
 }
 
