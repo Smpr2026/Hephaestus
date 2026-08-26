@@ -583,6 +583,14 @@ function createBrain(KB) {
       if (byRepair) return fromIntent(byRepair);
     }
 
+    // "have you moved from beverly hills" must confirm the move, not recite
+    // the suburbs we serve - suburb names alone would out-score it below.
+    if (/\b(you (guys )?moved?\b|have you moved|did you move|moved from|relocat\w*|still (in|at)|old (shop|store|address)|new (address|location)|king george)/.test(t) &&
+        /\b(beverly|kingsgrove|king george|location|address|where|shop|store|moved)/.test(t)) {
+      var movedIntent = KB.intents.filter(function (x) { return x.id === 'moved'; })[0];
+      if (movedIntent) return fromIntent(movedIntent);
+    }
+
     var best = null, bestScore = 0;
     for (var i = 0; i < KB.intents.length; i++) {
       if (model && KB.intents[i].id === 'brands') continue;
@@ -595,6 +603,9 @@ function createBrain(KB) {
     var toks = sigTokens(t), tokBest = null, tokScore = 0;
     for (var k = 0; k < KB.intents.length; k++) {
       if (model && KB.intents[k].id === 'brands') continue;
+      // "moved" only fires on a real ask about the move - loose word overlap
+      // ("i moved my data...") must never answer "yes, we've moved!"
+      if (KB.intents[k].id === 'moved') continue;
       var n = 0;
       for (var w in toks) { if (KB.intents[k]._tokens[w]) n++; }
       if (n > tokScore) { tokScore = n; tokBest = KB.intents[k]; }

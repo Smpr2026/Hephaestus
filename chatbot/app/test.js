@@ -212,3 +212,22 @@ test('the shop has one address, and no answer claims a second shopfront', () => 
   const strays = answers.filter(a => secondShop.test(a));
   assert.deepStrictEqual(strays, [], `answers claiming the old shopfront:\n${strays.join('\n')}`);
 });
+
+test('asking if the shop has moved confirms the move and gives the new address', () => {
+  for (const q of [
+    'have you moved from beverly hills whats you location',
+    'have yiou moved from beverly hills whats you location',
+    'are you still in beverly hills?',
+    'did you move?',
+    'whats your new address',
+  ]) {
+    const r = brain.respond(q);
+    assert.ok(r.intent.startsWith('moved'), `"${q}" matched ${r.intent}`);
+    assert.ok(/we've moved/i.test(r.text), `"${q}" should confirm the move`);
+    assert.ok(r.text.includes(KB.business.addressShort), `"${q}" should give the new address`);
+  }
+  // suburb questions must still get the suburbs answer, not the moved one
+  assert.ok(brain.respond('do you service beverly hills').intent.startsWith('suburbs'));
+  // and data-transfer wording must not trip the move check
+  assert.ok(!brain.respond('i moved my data to my new phone can you help').intent.startsWith('moved'));
+});
