@@ -778,6 +778,15 @@ function createBrain(KB) {
     }
     if (best && bestScore >= 3) return fromIntent(best);
 
+    // a general repair ask with no model or fault named is the services
+    // answer - word overlap must never bounce it to the contact card just
+    // because both mention "phone"
+    if (/\b(repairs?|fix|fixing|fixed)\b/.test(t) && !model && !repair &&
+        t.trim().split(' ').length <= 7) {
+      var svcIntent = KB.intents.filter(function (x) { return x.id === 'services'; })[0];
+      if (svcIntent) return fromIntent(svcIntent);
+    }
+
     // nothing matched as a phrase - try word overlap before giving up
     var toks = sigTokens(t), tokBest = null, tokScore = 0;
     for (var k = 0; k < KB.intents.length; k++) {

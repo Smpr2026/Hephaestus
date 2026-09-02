@@ -353,6 +353,19 @@ test('handoffs are earned: only after a device or issue is on the table', () => 
   assert.ok(fresh.respond('what are your hours').intent.startsWith('hours'));
 });
 
+test('a general repair ask gets the services answer, never the contact card', () => {
+  // live-testing regression: "how about phone repairs" word-overlapped onto
+  // contact because both mention "phone"
+  for (const q of ['how about phone repairs', 'phone repairs', 'do you do phone repairs',
+                   'repairs?', 'can you fix my phone']) {
+    const fresh = createBrain(KB);
+    const r = fresh.respond(q);
+    assert.ok(r.intent.startsWith('services'), `"${q}" matched ${r.intent}`);
+  }
+  // and real contact questions still get the contact details
+  assert.ok(brain.respond('whats your phone number').intent.startsWith('contact'));
+});
+
 test('turn one never asks for a number - warm triage on any broad opener', () => {
   for (const q of ['i need help', 'i have a damaged phone', 'can you help me', 'i have a question']) {
     const cold = createBrain(KB);
