@@ -800,16 +800,22 @@ function createBrain(KB) {
     // A broad "my phone's damaged" or a bare "i need help" is the start of a
     // conversation, not a dead end - ask what a counter tech would ask.
     // No forms, no number-collecting, ever, on an opener.
+    // one short line, no option menus - a person wouldn't hand you a form
     var damageAsk = /\b(damaged?|broken?|smashed|cracked|dropped|busted|shattered|dead|stuffed|cooked|wrecked|faulty|playing up|not working|wont work|stopped working|issues?|problems?|trouble|help)\b/.test(t) &&
                     /\b(phone|mobile|device|ipad|tablet|laptop|macbook|watch|it)\b/.test(t);
     var helpAsk = t.trim().split(' ').length <= 6 && /\b(help|assist|question|enquiry|inquiry)\b/.test(t);
-    if (damageAsk || helpAsk) {
+    if (damageAsk) {
       return {
-        text: "No worries at all - what's going on with your device, and what model is it? " +
-              "Cracked screen, battery dying, won't turn on... whatever you can tell me and I'll sort you out.",
+        text: "No dramas - what phone is it, and what's it doing?",
         card: null, contact: false, products: null, options: null,
-        chips: ['iPhone', 'Samsung', 'Something else'],
-        intent: 'triage'
+        chips: [], intent: 'triage'
+      };
+    }
+    if (helpAsk) {
+      return {
+        text: "No worries at all - what are you after?",
+        card: null, contact: false, products: null, options: null,
+        chips: [], intent: 'triage'
       };
     }
 

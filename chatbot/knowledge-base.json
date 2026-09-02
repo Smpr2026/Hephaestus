@@ -3468,13 +3468,8 @@
         "yo",
         "hi there"
       ],
-      "answer": "Hey, Hope here. What's happened to your phone?",
-      "chips": [
-        "How much is a screen repair?",
-        "What are your hours?",
-        "Where are you?",
-        "Do I need a booking?"
-      ],
+      "answer": "Hey, Hope here - what can I do for you?",
+      "chips": [],
       "_pats": [
         " hi",
         " hello",
