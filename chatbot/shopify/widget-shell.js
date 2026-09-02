@@ -53,10 +53,10 @@
   + '.sw-launch svg{width:28px;height:28px;transition:transform .25s ease}'
   + '.sw-launch.open svg.sw-i-chat{display:none}.sw-launch:not(.open) svg.sw-i-x{display:none}'
   /* photo avatar: the face fills the launcher circle until the panel opens */
-  + '.sw-launch .sw-face{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%}'
+  + '.sw-launch .sw-face{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 22%;border-radius:50%}'
   + '.sw-launch.open .sw-face{display:none}'
   + '.sw-launch.has-face:not(.open) svg.sw-i-chat{display:none}'
-  + '.sw-av img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}'
+  + '.sw-av img{width:100%;height:100%;object-fit:cover;object-position:50% 22%;border-radius:50%;display:block}'
   + '.sw-ring{position:absolute;inset:0;border-radius:50%;border:2px solid var(--w-accent2);opacity:0;animation:swring 2.4s ease-out 3}'
   + '@keyframes swring{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.65);opacity:0}}'
   + '.sw-badge{position:absolute;top:-2px;right:-2px;min-width:19px;height:19px;border-radius:10px;background:#E44;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px;box-shadow:0 1px 4px rgba(0,0,0,.3)}'

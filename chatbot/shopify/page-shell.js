@@ -36,7 +36,7 @@
     _av.style.overflow = 'hidden';
     var _img = document.createElement('img');
     _img.src = P.avatarUrl; _img.alt = '';
-    _img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%';
+    _img.style.cssText = 'width:100%;height:100%;object-fit:cover;object-position:50% 22%;border-radius:50%';
     _av.appendChild(_img);
   } else {
     document.getElementById('avatar').textContent = P.initials || 'S';

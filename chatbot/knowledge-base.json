@@ -7876,7 +7876,7 @@
       "Never send filler like 'let me check that for you' - prices come straight from the shop's pricing data, so lead with the exact figure immediately.",
       "A broad 'my phone is damaged' starts a conversation: ask the model and symptoms like a counter tech would - never jump straight to collecting contact details. If two answers in a row miss, stop looping and hand the customer to George directly (WhatsApp link when business.whatsapp is set, phone line always)."
     ],
-    "avatarUrl": "",
+    "avatarUrl": "https://cdn.shopify.com/s/files/1/0572/1853/1479/files/ChatGPT_Image_Sep_3_2026_07_11_24_AM.png?v=1788384283&width=512",
     "avatarNote": "Absolute image URL for Hope's face (Shopify Files CDN). Empty = initials avatar. Shown in the widget launcher, chat header and teaser on every surface."
   },
   "catalogue": {
