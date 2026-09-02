@@ -250,3 +250,45 @@ test('typos and split words still get real answers', () => {
   const q = fresh.respond('aftermarket what does that mean');
   assert.ok(q.intent.startsWith('price_parts'), `matched ${q.intent}`);
 });
+
+test('misspelled inventory words map to the right term, silently', () => {
+  // truncations and dropped letters all land on the real repair
+  for (const [q, want] of [
+    ['cracked scree iphon 12', 'price:iPhone 12:screen'],
+    ['btery replacement iphone 12', 'price:iPhone 12:battery'],
+    ['batt replacement iphone 13', 'price:iPhone 13:battery'],
+    ['my screne is broken iphone 12', 'price:iPhone 12:screen'],
+  ]) {
+    const r = brain.respond(q);
+    assert.ok(r.intent.startsWith(want), `"${q}" matched ${r.intent}, wanted ${want}`);
+    assert.ok(!/typo|spelling|spelt|misspell|did you mean/i.test(r.text),
+      `"${q}" pointed out the typo: ${r.text}`);
+  }
+  // a truncation must not beat a real word - the bath is still water damage
+  assert.ok(brain.respond('dropped it in the bath iphone 12').intent.startsWith('fault_water'));
+  // and a "correction" can never turn a refusable ask into an answerable one
+  assert.ok(brain.respond('i found a phoen can you unlock it').intent.startsWith('refusal'),
+    'a typo let a stolen-device ask through');
+});
+
+/* ------------------------------------------------- the strict persona rules */
+
+test('stays in character: never volunteers AI, never says the shop is shut', () => {
+  const inChar = /i'?m an ai|as an ai|language model|chatbot|automated (assistant|reply|response)/i;
+  const shut = /shop'?s? (is )?shut|we'?re closed at the moment|closed right now/i;
+  assert.ok(!inChar.test(allText), 'an answer breaks character');
+  assert.ok(!shut.test(allText), 'an answer tells the customer the shop is shut');
+  assert.ok(!KB.persona.closedPrefix, 'the closed-shop prefix must stay gone');
+  assert.strictEqual(KB.persona.closedStatus, 'Online now',
+    'the chat answers around the clock, so presence stays online');
+  assert.ok(Array.isArray(KB.persona.rules) && KB.persona.rules.length >= 3,
+    'the strict rules must be written into the persona');
+});
+
+test('when unsure it collects the model and a contact number instead of guessing', () => {
+  const asksFollowUp = t => /exact model/i.test(t) && /number/i.test(t);
+  assert.ok(asksFollowUp(brain.respond('zzq blorp unknowable nonsense').text),
+    'the fallback must ask for model and contact number');
+  assert.ok(asksFollowUp(brain.fill(KB.pricing.unknownPriceLine)),
+    'an unlisted price must ask for model and contact number');
+});

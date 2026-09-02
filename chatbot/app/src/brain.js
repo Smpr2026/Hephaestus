@@ -97,20 +97,65 @@ function createBrain(KB) {
     return true;
   }
 
-  // fix a token only when exactly one known word is one typo away -
-  // ambiguity keeps the customer's spelling rather than guessing
+  // edit distance capped at 2 - anything further is not a "minor typo"
+  function editDist2(a, b) {
+    if (Math.abs(a.length - b.length) > 2) return 3;
+    var prev = [], cur = [], i, j;
+    for (j = 0; j <= b.length; j++) prev[j] = j;
+    for (i = 1; i <= a.length; i++) {
+      cur[0] = i;
+      var rowMin = i;
+      for (j = 1; j <= b.length; j++) {
+        cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+        if (cur[j] < rowMin) rowMin = cur[j];
+      }
+      if (rowMin > 2) return 3;
+      var tmp = prev; prev = cur; cur = tmp;
+    }
+    return prev[b.length];
+  }
+
+  // fix a token only when exactly one known word explains the typo -
+  // ambiguity keeps the customer's spelling rather than guessing. Three
+  // passes, strictest first: one edit away; an unfinished word ("scree",
+  // "batt"); then two edits on longer words that kept their first letter.
+  // The customer is never told - the corrected text is used silently.
   function autocorrect(t) {
     return ' ' + t.trim().split(' ').map(function (w) {
       if (w.length < 4 || VOCAB[w] || /\d/.test(w)) return w;
+      // unfinished word first - "batt" means battery, not the one-edit "bath"
+      // (battery/batteries collapse to the shared stem)
+      var pre = [], v;
+      for (v in VOCAB) {
+        if (v.length > w.length && v.length - w.length <= 4 && v.indexOf(w) === 0) pre.push(v);
+      }
+      if (pre.length) {
+        pre.sort(function (a, b) { return a.length - b.length; });
+        var stem = pre[0], allStem = pre.every(function (p) { return p.indexOf(stem) === 0; });
+        if (allStem) return stem;
+      }
       var hit = null;
-      for (var v in VOCAB) {
+      for (v in VOCAB) {
         if (Math.abs(v.length - w.length) > 1) continue;
         if (editClose(w, v)) {
-          if (hit && hit !== v) return w;
+          if (hit && hit !== v) { hit = null; break; }
           hit = v;
         }
       }
-      return hit || w;
+      if (hit) return hit;
+      // last resort: two edits, longer words only, first letter intact ("btery")
+      if (w.length >= 5) {
+        var hit2 = null;
+        for (v in VOCAB) {
+          if (v.length < 6 || v[0] !== w[0]) continue;
+          if (editDist2(w, v) <= 2) {
+            if (hit2 && hit2 !== v) { hit2 = null; break; }
+            hit2 = v;
+          }
+        }
+        if (hit2) return hit2;
+      }
+      return w;
     }).join(' ') + ' ';
   }
 
@@ -710,7 +755,9 @@ function createBrain(KB) {
     if (model) return modelClarify(model);
 
     return {
-      text: "I'm not sure about that one, and I'd rather not guess. " + fill(KB.escalation.line),
+      text: "I want to get that one right for you rather than guess. What's the exact model, " +
+            "and the best number to reach you on? I'll have the team here at Kingsgrove follow up directly. " +
+            "Or if it's quicker, " + fill('call {{phone}} - someone’s always on the counter.'),
       card: null, contact: true,
       chips: ['What do you repair?', 'How much does a repair cost?', 'What are your hours?'],
       intent: 'fallback'

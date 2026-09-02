@@ -33,11 +33,15 @@
 
   /* ---------- styles ---------- */
   var css = ''
-  + '#smprw{--w-accent:#0A4FA0;--w-accent2:#1668C7;--w-ink:#16202B;--w-ink2:#5A6878;--w-bg:#FFFFFF;--w-bg2:#F2F5F9;--w-line:#DFE5EC;--w-good:#22C55E;--w-warn:#F59E0B;'
-  + 'position:fixed;z-index:2147483000;bottom:0;right:0;font:400 15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--w-ink);-webkit-font-smoothing:antialiased}'
-  + '@media (prefers-color-scheme:dark){#smprw{--w-ink:#E8EEF5;--w-ink2:#9FAEBE;--w-bg:#141C26;--w-bg2:#1B2531;--w-line:#2A3644;--w-accent:#2F73C9;--w-accent2:#4E92E8}}'
-  + '#smprw *{box-sizing:border-box;margin:0;padding:0}'
-  + '#smprw button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}'
+  + ':host{all:initial;display:block;--w-accent:#0A4FA0;--w-accent2:#1668C7;--w-ink:#16202B;--w-ink2:#5A6878;--w-bg:#FFFFFF;--w-bg2:#F2F5F9;--w-line:#DFE5EC;--w-good:#22C55E;--w-warn:#F59E0B;'
+  + 'position:fixed;z-index:2147483000;bottom:0;right:0}'
+  + '@media (prefers-color-scheme:dark){:host{--w-ink:#E8EEF5;--w-ink2:#9FAEBE;--w-bg:#141C26;--w-bg2:#1B2531;--w-line:#2A3644;--w-accent:#2F73C9;--w-accent2:#4E92E8}}'
+  // theme !important rules can still hit the host from outside and inherit
+  // through; this wrapper is unreachable by page selectors, so all:initial
+  // here cuts every inherited property dead (custom properties still pass)
+  + '.sw-wrap{all:initial;display:block;font:400 15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--w-ink);-webkit-font-smoothing:antialiased}'
+  + '*{box-sizing:border-box;margin:0;padding:0}'
+  + 'button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}'
 
   /* launcher */
   + '.sw-launch{position:fixed;bottom:22px;right:22px;width:60px;height:60px;border-radius:50%;'
@@ -130,12 +134,19 @@
   + '.sw-send:hover{filter:brightness(1.1)}'
   + '.sw-note{font-size:10.5px;color:var(--w-ink2);text-align:center;padding:0 10px 8px;background:var(--w-bg);flex:none}';
 
-  // Prefix every rule with the widget id so theme stylesheets (and our own
-  // button reset, which carries id specificity) can never out-rank component
-  // styles - Dawn's base.css was flattening the chips and send button.
+  // The whole widget lives in a shadow root: theme stylesheets cannot cross
+  // the boundary, so no Dawn (or any theme) rule can ever reshape the pills,
+  // send button or input again. The inline style on the host pins its
+  // geometry even against theme rules that target #smprw itself, and
+  // all:initial severs every inherited property at the boundary.
+  var host = document.createElement('div');
+  host.id = 'smprw';
+  host.style.cssText = 'all:initial;display:block;position:fixed;bottom:0;right:0;z-index:2147483000';
+  document.body.appendChild(host);
+  var shadow = host.attachShadow({ mode: 'open' });
   var style = document.createElement('style');
-  style.textContent = css.replace(/([{}])\.sw-/g, '$1#smprw .sw-');
-  document.head.appendChild(style);
+  style.textContent = css;
+  shadow.appendChild(style);
 
   /* ---------- markup ---------- */
   var CHAT_SVG = '<svg class="sw-i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>';
@@ -143,13 +154,13 @@
   var SEND_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>';
 
   var root = document.createElement('div');
-  root.id = 'smprw';
+  root.className = 'sw-wrap';
   root.innerHTML =
     '<button class="sw-launch" type="button" aria-label="Chat with us">' +
       '<span class="sw-ring"></span>' + CHAT_SVG + X_SVG +
       '<span class="sw-badge" style="display:none">1</span>' +
     '</button>';
-  document.body.appendChild(root);
+  shadow.appendChild(root);
 
   var launch = root.querySelector('.sw-launch');
   var badge = root.querySelector('.sw-badge');
