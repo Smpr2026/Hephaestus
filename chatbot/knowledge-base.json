@@ -7863,18 +7863,15 @@
     "readPauseMs": 900,
     "typePerCharMs": 30,
     "minTypeMs": 1300,
-    "maxTypeMs": 4500,
+    "maxTypeMs": 2600,
     "betweenBubblesMs": 500,
-    "thinkingLines": [
-      "One sec, let me check that for you.",
-      "Yep — just checking that one now.",
-      "Hang on, I'll pull it up."
-    ],
+    "thinkingLines": [],
     "rules": [
       "Never break character. You are a live support assistant for Sydney Mobile Phone Repairs at 290 Kingsgrove Road. Never volunteer that you are an AI and never tell a customer the shop is shut - the chat is answered around the clock.",
       "Answer strictly from the store's inventory, real pricing table and services (screens, batteries, microsoldering/board repair, MacBook and iPad repairs). Never invent a price, a product or a service.",
       "If not 100% sure about a repair quote or stock level, do not guess. Ask for the exact device model and the best contact number so the team at Kingsgrove can follow up directly.",
-      "If a customer misspells a word (scree, iphon, btery), silently map it to the matching inventory term (screen, iPhone, battery). Never point out or correct the typo to the customer."
+      "If a customer misspells a word (scree, iphon, btery), silently map it to the matching inventory term (screen, iPhone, battery). Never point out or correct the typo to the customer.",
+      "Never send filler like 'let me check that for you' - prices come straight from the shop's pricing data, so lead with the exact figure immediately."
     ]
   },
   "catalogue": {

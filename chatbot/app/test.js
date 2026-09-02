@@ -285,6 +285,16 @@ test('stays in character: never volunteers AI, never says the shop is shut', () 
     'the strict rules must be written into the persona');
 });
 
+test('price answers are direct: no fake checking theatre, figure up front', () => {
+  assert.deepStrictEqual(KB.persona.thinkingLines, [],
+    'canned "let me check" stall lines must stay gone - the data is local, nothing is being checked');
+  // a stats-only model still leads with an exact dollar figure, not a shrug or a bare range
+  const r = brain.respond('iphone 16 pro max screen price');
+  assert.ok(/^An iPhone 16 Pro Max screen replacement is usually \$\d+/.test(r.text),
+    `stats answer should lead with the usual price: ${r.text}`);
+  assert.ok(r.card, 'a price question should carry the price card');
+});
+
 test('when unsure it collects the model and a contact number instead of guessing', () => {
   const asksFollowUp = t => /exact model/i.test(t) && /number/i.test(t);
   assert.ok(asksFollowUp(brain.respond('zzq blorp unknowable nonsense').text),

@@ -266,8 +266,11 @@ function createBrain(KB) {
     rows.push(['Based on', p.sampleSize + ' jobs']);
     lastQuote = { model: null, repair: repair, label: p.label || repairLabel(repair), priceLine: range };
     return {
-      text: 'Most ' + repairLabel(repair) + ' jobs have come in around ' + range +
-            ' — we’ll tell you the exact price once we’ve had a look at what’s going on.',
+      text: p.typical != null
+        ? 'A ' + repairLabel(repair) + ' is usually $' + p.typical + ' — recent jobs have run ' +
+          range + ', and we’ll confirm the exact price once we’ve had a look at what’s going on.'
+        : 'Most ' + repairLabel(repair) + ' jobs have come in around ' + range +
+          ' — we’ll tell you the exact price once we’ve had a look at what’s going on.',
       card: {
         title: p.label || repairLabel(repair),
         rows: rows,
@@ -1176,8 +1179,13 @@ function createBrain(KB) {
     rows.push(['Based on', p.sampleSize + ' job' + (p.sampleSize === 1 ? '' : 's') +
                             (p.since ? ' since ' + p.since : '')]);
     return {
-      text: 'Most ' + model + ' ' + repairLabel(repair) +
-            ' jobs have come in around ' + range + ' — it depends on the part you go with.',
+      // lead with the exact figure - the range is context, not the answer
+      text: p.typical != null
+        ? 'A' + (art === 'an ' ? 'n' : '') + ' ' + model + ' ' + repairLabel(repair) +
+          ' is usually $' + p.typical + ' fitted — recent jobs have run ' + range +
+          ' depending on the part you go with.'
+        : 'Most ' + model + ' ' + repairLabel(repair) +
+          ' jobs have come in around ' + range + ' — it depends on the part you go with.',
       card: {
         title: label,
         rows: rows,
