@@ -670,7 +670,7 @@ function createBrain(KB) {
     var ctxBits = [];
     if (lastModel) ctxBits.push('Phone: ' + lastModel);
     ctxBits.push('Question: ' + String(raw).slice(0, 200));
-    var ctx = 'Hi, I’m on your website chat and have a question the assistant couldn’t sort. ' + ctxBits.join('. ');
+    var ctx = 'Hi George - I was chatting with Hope on your website and have a question that needs a person. ' + ctxBits.join('. ');
     var wa = String(B.whatsapp || '').replace(/[^\d]/g, '');
     var res = {
       text: 'You know what, rather than me going back and forth - let me put you straight onto George. ' +

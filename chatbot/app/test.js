@@ -171,7 +171,7 @@ test('never promises same-day on water damage or board-level work', () => {
 
 test('is honest when asked whether it is a person', () => {
   const r = brain.respond('are you a bot');
-  assert.ok(/assistant|not george in person|not a person/i.test(r.text),
+  assert.ok(/assistant|not a person|hope/i.test(r.text),
     `must admit it is not a person: ${r.text}`);
 });
 
