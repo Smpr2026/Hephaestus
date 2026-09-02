@@ -651,8 +651,9 @@ function createBrain(KB) {
   }
 
   var lastIntentId = '';
-  var lastModel = null;   // the device this conversation is about, across turns
-  var missStreak = 0;     // consecutive answers we couldn't ground - 2 means stuck
+  var lastModel = null;        // the device this conversation is about, across turns
+  var repairDiscussed = false; // a specific issue has come up - handoffs are allowed now
+  var missStreak = 0;          // consecutive answers we couldn't ground - 2 means stuck
 
   function respond(raw) {
     var res = respondCore(raw);
@@ -732,6 +733,7 @@ function createBrain(KB) {
     var model = detectModel(t);
     var repair = detectRepair(t);
     if (model) lastModel = model;  // remember the device across turns
+    if (repair) repairDiscussed = true;
     if (repair && SERVICE_REPAIRS[repair]) {
       var svc = serviceAnswer(repair);
       if (svc) return svc;
@@ -795,27 +797,41 @@ function createBrain(KB) {
 
     if (model) return modelClarify(model);
 
-    // A broad "my phone's damaged" is the start of a conversation, not a dead
-    // end - ask what a counter tech would ask. No forms, no number-collecting.
-    if (/\b(damaged?|broken?|smashed|cracked|dropped|busted|shattered|dead|stuffed|cooked|wrecked|faulty|playing up|not working|wont work|stopped working|issues?|problems?|trouble|help)\b/.test(t) &&
-        /\b(phone|mobile|device|ipad|tablet|laptop|macbook|watch|it)\b/.test(t)) {
+    // A broad "my phone's damaged" or a bare "i need help" is the start of a
+    // conversation, not a dead end - ask what a counter tech would ask.
+    // No forms, no number-collecting, ever, on an opener.
+    var damageAsk = /\b(damaged?|broken?|smashed|cracked|dropped|busted|shattered|dead|stuffed|cooked|wrecked|faulty|playing up|not working|wont work|stopped working|issues?|problems?|trouble|help)\b/.test(t) &&
+                    /\b(phone|mobile|device|ipad|tablet|laptop|macbook|watch|it)\b/.test(t);
+    var helpAsk = t.trim().split(' ').length <= 6 && /\b(help|assist|question|enquiry|inquiry)\b/.test(t);
+    if (damageAsk || helpAsk) {
       return {
-        text: "No dramas, happens all the time. What phone is it, and what's it doing - or not doing? " +
-              "Cracked screen, battery dying, won't turn on... whatever you can tell me and I'll price it up.",
+        text: "No worries at all - what's going on with your device, and what model is it? " +
+              "Cracked screen, battery dying, won't turn on... whatever you can tell me and I'll sort you out.",
         card: null, contact: false, products: null, options: null,
         chips: ['iPhone', 'Samsung', 'Something else'],
         intent: 'triage'
       };
     }
 
-    // second miss in a row: stop looping and hand over
-    if (missStreak >= 1) return escalateAnswer(raw);
+    // Handoffs are earned, not default. Only once a specific device or repair
+    // has actually been discussed and we're still missing does the customer
+    // get handed to George; before that, stay in the conversation.
+    if (missStreak >= 1 && (lastModel || repairDiscussed)) return escalateAnswer(raw);
+    if (missStreak >= 1) {
+      return {
+        text: "I might be getting my wires crossed, sorry! Easiest thing - tell me what device " +
+              "you've got and what's happened to it, and I'll take it from there. " +
+              "Or if it's quicker, " + fill('give us a ring on {{phone}} - someone’s always on the counter.'),
+        card: null, contact: true, products: null, options: null,
+        chips: ['What do you repair?', 'How much does a repair cost?', 'What are your hours?'],
+        intent: 'fallback-steer'
+      };
+    }
 
     return {
-      text: "I want to get that one right for you rather than guess. What's the exact model, " +
-            "and the best number to reach you on? I'll have the team here at Kingsgrove follow up directly. " +
-            "Or if it's quicker, " + fill('call {{phone}} - someone’s always on the counter.'),
-      card: null, contact: true,
+      text: "Hmm, I want to make sure I get you the right answer rather than guess. " +
+            "What device is it, and what's going on with it?",
+      card: null, contact: false,
       chips: ['What do you repair?', 'How much does a repair cost?', 'What are your hours?'],
       intent: 'fallback'
     };

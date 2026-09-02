@@ -319,8 +319,16 @@ test('a broad "damaged phone" starts a conversation, never a form', () => {
   assert.ok(fresh.respond('its an iphone 13 and the screen is smashed').intent.startsWith('price:iPhone 13:screen'));
 });
 
-test('two misses in a row hand over to George instead of looping', () => {
+test('handoffs are earned: only after a device or issue is on the table', () => {
+  // nothing discussed yet: keep steering the conversation, never escalate
+  const cold = createBrain(KB);
+  assert.strictEqual(cold.respond('zzq blorp one').intent, 'fallback');
+  assert.strictEqual(cold.respond('zzq blorp two').intent, 'fallback-steer');
+  assert.ok(!/best number|your number|reach you/i.test(cold.respond('zzq blorp three').text),
+    'steering must not collect a phone number');
+  // a device has been discussed: the second miss hands over with context
   const fresh = createBrain(KB);
+  fresh.respond('iphone 12');
   assert.strictEqual(fresh.respond('zzq blorp one').intent, 'fallback');
   const e = fresh.respond('zzq blorp two');
   assert.strictEqual(e.intent, 'fallback-escalate');
@@ -345,10 +353,21 @@ test('two misses in a row hand over to George instead of looping', () => {
   assert.ok(fresh.respond('what are your hours').intent.startsWith('hours'));
 });
 
-test('when unsure it collects the model and a contact number instead of guessing', () => {
-  const asksFollowUp = t => /exact model/i.test(t) && /number/i.test(t);
-  assert.ok(asksFollowUp(brain.respond('zzq blorp unknowable nonsense').text),
-    'the fallback must ask for model and contact number');
-  assert.ok(asksFollowUp(brain.fill(KB.pricing.unknownPriceLine)),
+test('turn one never asks for a number - warm triage on any broad opener', () => {
+  for (const q of ['i need help', 'i have a damaged phone', 'can you help me', 'i have a question']) {
+    const cold = createBrain(KB);
+    const r = cold.respond(q);
+    assert.ok(/triage|greeting/.test(r.intent), `"${q}" matched ${r.intent}`);
+    assert.ok(!/number|follow up/i.test(r.text), `"${q}" panicked into lead capture: ${r.text}`);
+    assert.ok(!r.contact, `"${q}" must not render the contact row`);
+  }
+  // a first miss mid-conversation is also conversational, not a form
+  const cold = createBrain(KB);
+  const miss = cold.respond('zzq blorp unknowable nonsense');
+  assert.strictEqual(miss.intent, 'fallback');
+  assert.ok(!/number/i.test(miss.text) && !miss.contact, `first miss must stay conversational: ${miss.text}`);
+  // an unlisted price is a real dead end on a discussed device - the number ask lives there
+  assert.ok(/exact model/i.test(brain.fill(KB.pricing.unknownPriceLine)) &&
+            /number/i.test(brain.fill(KB.pricing.unknownPriceLine)),
     'an unlisted price must ask for model and contact number');
 });
