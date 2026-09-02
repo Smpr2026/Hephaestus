@@ -15,7 +15,7 @@
       "RETURNS CONFLICT: the Shopify Refund Policy says 30 days; the Shipping Policy says change-of-mind requests within 2 days and refunds to store credit only. These contradict each other. Decide which is true before launch - this is the answer most likely to cause a dispute.",
       "PAYMENT: confirm whether Afterpay / Zip / PayPal are accepted in store and online.",
       "MAIL-IN: confirm the postal address customers should send devices to.",
-      "WHATSAPP: business.whatsapp is empty. Ask George for a WhatsApp-enabled number (mobile, or the shop line if registered with WhatsApp Business) in international digits, e.g. 614XXXXXXXX. Once set, the stuck-conversation escalation shows a 'WhatsApp us now' button that opens WhatsApp with the customer's device and question pre-filled. Until then escalation offers the phone line and a callback."
+      "WHATSAPP: escalation pings George's mobile 0466 661 669 (61466661669) via wa.me deep link - confirmed by George 2 Sep 2026. The number appears in the public widget code as a click-to-chat link, same as printing it on the shopfront."
     ]
   },
   "business": {
@@ -87,7 +87,7 @@
       "Wiley Park"
     ],
     "abn": "61 607 904 683",
-    "whatsapp": ""
+    "whatsapp": "61466661669"
   },
   "services": [
     {

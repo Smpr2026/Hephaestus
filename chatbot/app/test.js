@@ -325,8 +325,13 @@ test('two misses in a row hand over to George instead of looping', () => {
   const e = fresh.respond('zzq blorp two');
   assert.strictEqual(e.intent, 'fallback-escalate');
   assert.ok(e.escalate && typeof e.escalate.question === 'string', 'escalation must carry context');
-  assert.ok(!e.links, 'no WhatsApp link while business.whatsapp is unset');
-  // with a WhatsApp number configured the link appears, context pre-filled
+  // the link follows business.whatsapp: present iff a number is configured
+  if (KB.business.whatsapp) {
+    assert.ok(e.links && e.links[0].href.startsWith('https://wa.me/' + KB.business.whatsapp + '?text='),
+      'WhatsApp link must target the configured number');
+  } else {
+    assert.ok(!e.links, 'no WhatsApp link while business.whatsapp is unset');
+  }
   const KB2 = JSON.parse(JSON.stringify(KB));
   KB2.business.whatsapp = '61400000000';
   const w = createBrain(KB2);
