@@ -295,6 +295,51 @@ test('price answers are direct: no fake checking theatre, figure up front', () =
   assert.ok(r.card, 'a price question should carry the price card');
 });
 
+test('remembers the device across turns like a person at the counter', () => {
+  const fresh = createBrain(KB);
+  fresh.respond('i have an iphone 12');
+  assert.ok(fresh.respond('how much for a screen').intent.startsWith('price:iPhone 12:screen'),
+    'the screen ask should use the remembered phone');
+  assert.ok(fresh.respond('and the battery?').intent.startsWith('price:iPhone 12:battery'),
+    'the follow-up should stay on the same phone');
+  assert.ok(fresh.respond('what if i do the screen and back glass together').intent.startsWith('price-combo:iPhone 12'),
+    'the multi-issue combo should price against the remembered phone');
+  // info questions keep their own answers - memory must not turn everything into a price card
+  assert.ok(fresh.respond('how long does a screen repair take').intent.startsWith('turnaround'));
+  assert.ok(fresh.respond('is there warranty on the screen').intent.startsWith('warranty'));
+});
+
+test('a broad "damaged phone" starts a conversation, never a form', () => {
+  const fresh = createBrain(KB);
+  const r = fresh.respond('i have a damaged phone');
+  assert.strictEqual(r.intent, 'triage', `matched ${r.intent}`);
+  assert.ok(!/number|contact/i.test(r.text), `triage must not collect details: ${r.text}`);
+  assert.ok(!r.contact, 'triage must not render the contact row');
+  // and the conversation flows on to a real quote
+  assert.ok(fresh.respond('its an iphone 13 and the screen is smashed').intent.startsWith('price:iPhone 13:screen'));
+});
+
+test('two misses in a row hand over to George instead of looping', () => {
+  const fresh = createBrain(KB);
+  assert.strictEqual(fresh.respond('zzq blorp one').intent, 'fallback');
+  const e = fresh.respond('zzq blorp two');
+  assert.strictEqual(e.intent, 'fallback-escalate');
+  assert.ok(e.escalate && typeof e.escalate.question === 'string', 'escalation must carry context');
+  assert.ok(!e.links, 'no WhatsApp link while business.whatsapp is unset');
+  // with a WhatsApp number configured the link appears, context pre-filled
+  const KB2 = JSON.parse(JSON.stringify(KB));
+  KB2.business.whatsapp = '61400000000';
+  const w = createBrain(KB2);
+  w.respond('iphone 12'); w.respond('zzq one');
+  const e2 = w.respond('zzq two');
+  assert.ok(e2.links && e2.links[0].href.startsWith('https://wa.me/61400000000?text='),
+    'WhatsApp deep link should target the configured number');
+  assert.ok(decodeURIComponent(e2.links[0].href).includes('iPhone 12'),
+    'the pre-filled message should carry the remembered device');
+  // a good answer resets the streak
+  assert.ok(fresh.respond('what are your hours').intent.startsWith('hours'));
+});
+
 test('when unsure it collects the model and a contact number instead of guessing', () => {
   const asksFollowUp = t => /exact model/i.test(t) && /number/i.test(t);
   assert.ok(asksFollowUp(brain.respond('zzq blorp unknowable nonsense').text),

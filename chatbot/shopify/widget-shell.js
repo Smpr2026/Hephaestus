@@ -314,6 +314,13 @@
       });
       html += '</div>';
     }
+    if(res.links && res.links.length){
+      html += '<div class="sw-contact">';
+      res.links.forEach(function(l){
+        html += '<a class="sw-call" href="' + esc(l.href) + '" target="_blank" rel="noopener">' + esc(l.label) + '</a>';
+      });
+      html += '</div>';
+    }
     if(res.contact){
       html += '<div class="sw-contact">' +
         '<a class="sw-call" href="tel:' + esc(B.phoneDial) + '">Call ' + esc(B.phone) + '</a>' +

@@ -651,9 +651,38 @@ function createBrain(KB) {
   }
 
   var lastIntentId = '';
+  var lastModel = null;   // the device this conversation is about, across turns
+  var missStreak = 0;     // consecutive answers we couldn't ground - 2 means stuck
+
   function respond(raw) {
     var res = respondCore(raw);
-    if (res && res.intent) lastIntentId = String(res.intent);
+    if (res && res.intent) {
+      lastIntentId = String(res.intent);
+      missStreak = /^fallback/.test(lastIntentId) ? missStreak + 1 : 0;
+    }
+    return res;
+  }
+
+  // When the conversation is stuck, hand it to George with the context
+  // attached instead of looping. WhatsApp deep link when the shop has a
+  // number registered; the phone line either way.
+  function escalateAnswer(raw) {
+    var ctxBits = [];
+    if (lastModel) ctxBits.push('Phone: ' + lastModel);
+    ctxBits.push('Question: ' + String(raw).slice(0, 200));
+    var ctx = 'Hi, I’m on your website chat and have a question the assistant couldn’t sort. ' + ctxBits.join('. ');
+    var wa = String(B.whatsapp || '').replace(/[^\d]/g, '');
+    var res = {
+      text: 'You know what, rather than me going back and forth - let me put you straight onto George. ' +
+            (wa ? 'Tap below and it’ll open WhatsApp with your question ready to send, or ' : '') +
+            'call ' + B.phone + ' and someone will sort you out on the spot. ' +
+            'Or leave your number here and we’ll ring you back.',
+      card: null, contact: true, products: null, options: null,
+      chips: ['What do you repair?', 'Where are you?'],
+      intent: 'fallback-escalate',
+      escalate: { model: lastModel, question: String(raw).slice(0, 500) }
+    };
+    if (wa) res.links = [{ label: 'WhatsApp us now', href: 'https://wa.me/' + wa + '?text=' + encodeURIComponent(ctx) }];
     return res;
   }
 
@@ -702,16 +731,25 @@ function createBrain(KB) {
 
     var model = detectModel(t);
     var repair = detectRepair(t);
+    if (model) lastModel = model;  // remember the device across turns
     if (repair && SERVICE_REPAIRS[repair]) {
       var svc = serviceAnswer(repair);
       if (svc) return svc;
     }
-    if (model && wantsFrontAndBack(t)) {
-      var combo = comboAnswer(model);
+    if ((model || lastModel) && wantsFrontAndBack(t)) {
+      var combo = comboAnswer(model || lastModel);
       if (combo) return combo;
     }
     if (model && (repair || looksLikePrice(t))) return priceAnswer(model, repair || 'screen');
     if (model && isBareModel(t, model)) return modelClarify(model);
+    // "how much for a screen" after the customer already named their phone -
+    // a person at the counter wouldn't ask which phone again. Questions about
+    // time, warranty or process still get their own answers, not a price card.
+    if (!model && repair && lastModel &&
+        !/\b(long|take|takes|turnaround|warranty|guarantee|when|why|where|book|fix|repair)\b/.test(t) &&
+        (looksLikePrice(t) || t.trim().split(' ').length <= 7)) {
+      return priceAnswer(lastModel, repair);
+    }
     var bare = bareDeviceClarify(t);
     if (bare && !(shopQ && shopQ.shopping)) return bare;
     if (shopQ) return productAnswer(shopQ);
@@ -756,6 +794,22 @@ function createBrain(KB) {
     }
 
     if (model) return modelClarify(model);
+
+    // A broad "my phone's damaged" is the start of a conversation, not a dead
+    // end - ask what a counter tech would ask. No forms, no number-collecting.
+    if (/\b(damaged?|broken?|smashed|cracked|dropped|busted|shattered|dead|stuffed|cooked|wrecked|faulty|playing up|not working|wont work|stopped working|issues?|problems?|trouble|help)\b/.test(t) &&
+        /\b(phone|mobile|device|ipad|tablet|laptop|macbook|watch|it)\b/.test(t)) {
+      return {
+        text: "No dramas, happens all the time. What phone is it, and what's it doing - or not doing? " +
+              "Cracked screen, battery dying, won't turn on... whatever you can tell me and I'll price it up.",
+        card: null, contact: false, products: null, options: null,
+        chips: ['iPhone', 'Samsung', 'Something else'],
+        intent: 'triage'
+      };
+    }
+
+    // second miss in a row: stop looping and hand over
+    if (missStreak >= 1) return escalateAnswer(raw);
 
     return {
       text: "I want to get that one right for you rather than guess. What's the exact model, " +

@@ -101,6 +101,13 @@
       });
       html += '</div>';
     }
+    if(res.links && res.links.length){
+      html += '<div class="contact">';
+      res.links.forEach(function(l){
+        html += '<a class="c-call" href="' + esc(l.href) + '" target="_blank" rel="noopener">' + esc(l.label) + '</a>';
+      });
+      html += '</div>';
+    }
     if(res.contact){
       html += '<div class="contact">' +
         '<a class="c-call" href="tel:' + esc(B.phoneDial) + '">Call ' + esc(B.phone) + '</a>' +

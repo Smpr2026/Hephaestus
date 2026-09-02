@@ -14,7 +14,8 @@
       "BATTERY / CHARGE PORT / SAMSUNG prices are null on purpose - the bot will not invent a number. Fill them in and it starts quoting them.",
       "RETURNS CONFLICT: the Shopify Refund Policy says 30 days; the Shipping Policy says change-of-mind requests within 2 days and refunds to store credit only. These contradict each other. Decide which is true before launch - this is the answer most likely to cause a dispute.",
       "PAYMENT: confirm whether Afterpay / Zip / PayPal are accepted in store and online.",
-      "MAIL-IN: confirm the postal address customers should send devices to."
+      "MAIL-IN: confirm the postal address customers should send devices to.",
+      "WHATSAPP: business.whatsapp is empty. Ask George for a WhatsApp-enabled number (mobile, or the shop line if registered with WhatsApp Business) in international digits, e.g. 614XXXXXXXX. Once set, the stuck-conversation escalation shows a 'WhatsApp us now' button that opens WhatsApp with the customer's device and question pre-filled. Until then escalation offers the phone line and a callback."
     ]
   },
   "business": {
@@ -85,7 +86,8 @@
       "Riverwood",
       "Wiley Park"
     ],
-    "abn": "61 607 904 683"
+    "abn": "61 607 904 683",
+    "whatsapp": ""
   },
   "services": [
     {
@@ -7871,7 +7873,8 @@
       "Answer strictly from the store's inventory, real pricing table and services (screens, batteries, microsoldering/board repair, MacBook and iPad repairs). Never invent a price, a product or a service.",
       "If not 100% sure about a repair quote or stock level, do not guess. Ask for the exact device model and the best contact number so the team at Kingsgrove can follow up directly.",
       "If a customer misspells a word (scree, iphon, btery), silently map it to the matching inventory term (screen, iPhone, battery). Never point out or correct the typo to the customer.",
-      "Never send filler like 'let me check that for you' - prices come straight from the shop's pricing data, so lead with the exact figure immediately."
+      "Never send filler like 'let me check that for you' - prices come straight from the shop's pricing data, so lead with the exact figure immediately.",
+      "A broad 'my phone is damaged' starts a conversation: ask the model and symptoms like a counter tech would - never jump straight to collecting contact details. If two answers in a row miss, stop looping and hand the customer to George directly (WhatsApp link when business.whatsapp is set, phone line always)."
     ]
   },
   "catalogue": {

@@ -113,7 +113,27 @@ async function handleChat(req, res) {
 
   const answer = brain.respond(message);
   logGap(message, answer);
+  notifyEscalation(message, answer);
   send(res, 200, { ...answer, engine: 'local' });
+}
+
+// A stuck conversation (the brain sets `escalate`) pings George instantly
+// when ESCALATION_WEBHOOK_URL is configured. The URL can be anything that
+// accepts a JSON POST - a Twilio Studio flow or WhatsApp Business API
+// endpoint that forwards to his WhatsApp, a Slack webhook, a Zap. Without
+// the env var this is a silent no-op; the customer still gets the phone
+// number and WhatsApp link in the chat itself.
+function notifyEscalation(message, answer) {
+  const url = process.env.ESCALATION_WEBHOOK_URL;
+  if (!url || !answer || !answer.escalate) return;
+  const body = JSON.stringify({
+    source: 'smpr-chatbot',
+    at: new Date().toISOString(),
+    model: answer.escalate.model || null,
+    question: answer.escalate.question || message,
+  });
+  fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body })
+    .catch(err => console.error('[escalation] webhook failed:', err.message));
 }
 
 // Every question the bot punts on is a gap in the knowledge base. Log them,
