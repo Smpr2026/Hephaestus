@@ -7875,7 +7875,9 @@
       "If a customer misspells a word (scree, iphon, btery), silently map it to the matching inventory term (screen, iPhone, battery). Never point out or correct the typo to the customer.",
       "Never send filler like 'let me check that for you' - prices come straight from the shop's pricing data, so lead with the exact figure immediately.",
       "A broad 'my phone is damaged' starts a conversation: ask the model and symptoms like a counter tech would - never jump straight to collecting contact details. If two answers in a row miss, stop looping and hand the customer to George directly (WhatsApp link when business.whatsapp is set, phone line always)."
-    ]
+    ],
+    "avatarUrl": "",
+    "avatarNote": "Absolute image URL for Hope's face (Shopify Files CDN). Empty = initials avatar. Shown in the widget launcher, chat header and teaser on every surface."
   },
   "catalogue": {
     "note": "Full live catalogue snapshot: public product feed + Admin inventory counts, taken 2026-08-24. With SHOPIFY_STORE_DOMAIN + SHOPIFY_STOREFRONT_TOKEN set, the server searches the live catalogue instead and this snapshot is ignored.",

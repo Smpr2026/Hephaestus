@@ -13,6 +13,8 @@
 
   var BRAIN = createBrain(KB);
   var B = KB.business, P = KB.persona || {};
+  var AV = String(P.avatarUrl || '');
+  function avInner(){ return AV ? '<img src="' + esc(AV) + '" alt="">' : esc(P.initials || 'S'); }
 
   function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
@@ -50,6 +52,11 @@
   + '.sw-launch:hover{transform:scale(1.07)}'
   + '.sw-launch svg{width:28px;height:28px;transition:transform .25s ease}'
   + '.sw-launch.open svg.sw-i-chat{display:none}.sw-launch:not(.open) svg.sw-i-x{display:none}'
+  /* photo avatar: the face fills the launcher circle until the panel opens */
+  + '.sw-launch .sw-face{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:50%}'
+  + '.sw-launch.open .sw-face{display:none}'
+  + '.sw-launch.has-face:not(.open) svg.sw-i-chat{display:none}'
+  + '.sw-av img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}'
   + '.sw-ring{position:absolute;inset:0;border-radius:50%;border:2px solid var(--w-accent2);opacity:0;animation:swring 2.4s ease-out 3}'
   + '@keyframes swring{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.65);opacity:0}}'
   + '.sw-badge{position:absolute;top:-2px;right:-2px;min-width:19px;height:19px;border-radius:10px;background:#E44;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 5px;box-shadow:0 1px 4px rgba(0,0,0,.3)}'
@@ -156,8 +163,9 @@
   var root = document.createElement('div');
   root.className = 'sw-wrap';
   root.innerHTML =
-    '<button class="sw-launch" type="button" aria-label="Chat with us">' +
-      '<span class="sw-ring"></span>' + CHAT_SVG + X_SVG +
+    '<button class="sw-launch' + (AV ? ' has-face' : '') + '" type="button" aria-label="Chat with us">' +
+      '<span class="sw-ring"></span>' +
+      (AV ? '<img class="sw-face" src="' + esc(AV) + '" alt="">' : '') + CHAT_SVG + X_SVG +
       '<span class="sw-badge" style="display:none">1</span>' +
     '</button>';
   shadow.appendChild(root);
@@ -174,7 +182,7 @@
     panel.className = 'sw-panel';
     panel.innerHTML =
       '<div class="sw-head">' +
-        '<span class="sw-av">' + esc(P.initials || 'S') + '</span>' +
+        '<span class="sw-av">' + avInner() + '</span>' +
         '<span class="sw-who"><b>' + esc(P.name || B.name) + '</b>' +
         '<span><i class="sw-dot' + (IS_OPEN ? '' : ' away') + '"></i>' +
         esc((P.role ? P.role + ' · ' : '') + (IS_OPEN ? (P.openHoursStatus || 'Online now') : (P.closedStatus || 'Away'))) +
@@ -249,7 +257,7 @@
     tease = document.createElement('div');
     tease.className = 'sw-tease';
     tease.innerHTML =
-      '<span class="sw-av" style="background:linear-gradient(135deg,var(--w-accent),var(--w-accent2));border:0">' + esc(P.initials || 'S') + '</span>' +
+      '<span class="sw-av" style="background:linear-gradient(135deg,var(--w-accent),var(--w-accent2));border:0">' + avInner() + '</span>' +
       '<p><em>' + esc(P.name || B.name) + '</em>' +
       "G'day 👋 need a hand with a repair or finding something?</p>" +
       '<button class="sw-tx" type="button" aria-label="Dismiss">×</button>';

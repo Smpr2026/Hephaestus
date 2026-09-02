@@ -30,7 +30,17 @@
   var IS_OPEN = shopOpen();
 
   document.getElementById('who').textContent = P.name || B.name;
-  document.getElementById('avatar').textContent = P.initials || 'S';
+  if (P.avatarUrl) {
+    var _av = document.getElementById('avatar');
+    _av.textContent = '';
+    _av.style.overflow = 'hidden';
+    var _img = document.createElement('img');
+    _img.src = P.avatarUrl; _img.alt = '';
+    _img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%';
+    _av.appendChild(_img);
+  } else {
+    document.getElementById('avatar').textContent = P.initials || 'S';
+  }
   document.getElementById('presence').textContent =
     (P.role ? P.role + ' · ' : '') + (IS_OPEN ? (P.openHoursStatus || 'Online now') : (P.closedStatus || 'Away'));
   if(!IS_OPEN) document.getElementById('live').style.background = 'var(--signal)';
