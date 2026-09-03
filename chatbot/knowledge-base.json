@@ -7881,7 +7881,9 @@
       "A broad opener ('hi', 'i need help', 'my phone is damaged') starts a conversation: respond warmly and ask the model and symptoms - never ask for a phone number or promise a follow-up on the first exchange. If answers keep missing AFTER a device or issue has been discussed, stop looping and hand the customer to George directly (WhatsApp link and phone)."
     ],
     "avatarUrl": "https://cdn.shopify.com/s/files/1/0572/1853/1479/files/ChatGPT_Image_Sep_3_2026_07_11_24_AM.png?v=1788384283&width=512",
-    "avatarNote": "Absolute image URL for Hope's face (Shopify Files CDN). Empty = initials avatar. Shown in the widget launcher, chat header and teaser on every surface."
+    "avatarNote": "Absolute image URL for Hope's face (Shopify Files CDN). Empty = initials avatar. Shown in the widget launcher, chat header and teaser on every surface.",
+    "chatApi": "",
+    "chatApiNote": "Full URL of the hosted chat endpoint (e.g. https://smpr-bot.up.railway.app/api/chat). When set, the widget sends every non-shopping message there - the Node server in app/ answers with Claude (knowledge base as its only source of truth) and the local engine remains the instant fallback on any error. Empty = fully local keyword engine, no server needed."
   },
   "catalogue": {
     "note": "Full live catalogue snapshot: public product feed + Admin inventory counts, taken 2026-08-24. With SHOPIFY_STORE_DOMAIN + SHOPIFY_STOREFRONT_TOKEN set, the server searches the live catalogue instead and this snapshot is ignored.",

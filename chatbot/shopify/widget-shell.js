@@ -423,7 +423,32 @@
   }
   function timeout(ms){ return new Promise(function(_, rej){ setTimeout(rej, ms); }); }
 
+  /* ---------- Claude mode: persona.chatApi points at the hosted server ---- */
+  var API = String(P.chatApi || '');
+  var hist = [];
+  try { hist = JSON.parse(sessionStorage.getItem('smprw.hist') || '[]'); } catch(e){}
+  function remember(role, content){
+    hist.push({ role: role, content: String(content).slice(0, 1500) });
+    hist = hist.slice(-12);
+    try { sessionStorage.setItem('smprw.hist', JSON.stringify(hist)); } catch(e){}
+  }
+  // ask the hosted brain; any failure quietly falls back to the local one
+  function apiAnswer(text){
+    var ctl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+    var timer = setTimeout(function(){ if (ctl) ctl.abort(); }, 12000);
+    return fetch(API, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ message: text, history: hist }),
+      signal: ctl ? ctl.signal : undefined
+    })
+      .then(function(r){ if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+      .then(function(j){ clearTimeout(timer); if (!j || !j.text) throw new Error('empty'); return j; })
+      .catch(function(){ clearTimeout(timer); return null; });
+  }
+
   function resolveAnswer(text){
+    remember('user', text);
     var parsed = BRAIN.parseProductQuery(text);
     if (parsed){
       return Promise.race([liveSearch(parsed), timeout(3000)])
@@ -438,10 +463,14 @@
         })
         .catch(function(){ return BRAIN.respond(text); });
     }
+    if (API){
+      return apiAnswer(text).then(function(j){ return j || BRAIN.respond(text); });
+    }
     return Promise.resolve(BRAIN.respond(text));
   }
 
   function deliver(res){
+    if (res && res.text) remember('assistant', res.text);
     var text = lastAsked;
     var parts = split(res.text);
     var stall = res.card ? thinkingLine() : null;
