@@ -410,3 +410,22 @@ test('turn one never asks for a number - warm triage on any broad opener', () =>
             /number/i.test(brain.fill(KB.pricing.unknownPriceLine)),
     'an unlisted price must ask for model and contact number');
 });
+
+test('a disputed warranty crack never gets argued - it pivots to a free inspection', () => {
+  // George's counter script: validate, never diagnose or deny in chat,
+  // pivot every dispute to a free look under the macro lens at the shop
+  for (const q of ['my screen cracked by itself', 'the screen you replaced cracked in my pocket',
+                   'it just cracked and i never dropped it', 'screen cracked under warranty']) {
+    const fresh = createBrain(KB);
+    const r = fresh.respond(q);
+    assert.ok(r.intent.startsWith('warranty_dispute'), `"${q}" matched ${r.intent}`);
+    assert.ok(/free of charge|macro lens/i.test(r.text), `"${q}" must offer the free inspection`);
+    assert.ok(!/void|not covered|your fault/i.test(r.text), `"${q}" must never deny the claim: ${r.text}`);
+  }
+  // plain warranty questions still get their own answers, not the dispute pivot
+  for (const q of ['what voids the warranty', 'how do i claim warranty', 'whats the warranty']) {
+    const r = createBrain(KB).respond(q);
+    assert.ok(r.intent.startsWith('warranty') && !r.intent.startsWith('warranty_dispute'),
+      `"${q}" matched ${r.intent}`);
+  }
+});

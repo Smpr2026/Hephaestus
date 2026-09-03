@@ -5737,6 +5737,31 @@
       }
     },
     {
+      "id": "warranty_dispute",
+      "category": "Warranty",
+      "q": "My repaired screen cracked by itself - is it covered?",
+      "patterns": [
+        "cracked by itself",
+        "cracked on its own",
+        "broke by itself",
+        "cracked in my pocket",
+        "didnt drop it",
+        "never dropped it",
+        "wasnt dropped",
+        "it just cracked",
+        "just cracked by itself",
+        "cracked under warranty",
+        "screen cracked under warranty",
+        "i didnt do anything to it",
+        "not my fault it cracked"
+      ],
+      "answer": "I know how stressful it is when a screen acts up after a repair - let's not guess over chat. Pop it into the shop at {{addressShort}} and George or the team will check it under the macro lens, free of charge. If it's a genuine part defect, you're covered under the warranty on the spot.",
+      "chips": [
+        "What are your hours?",
+        "Where are you?"
+      ]
+    },
+    {
       "id": "warranty_claim",
       "category": "Warranty",
       "q": "How do I claim on the warranty?",
@@ -7878,7 +7903,10 @@
       "If not 100% sure about a repair quote or stock level, do not guess - but never open with a handoff either. First keep the conversation going like a counter tech: ask what the device is and what's wrong. Only once a specific device or issue has been discussed and the answer still can't be found may Hope collect a contact number or hand the customer to George.",
       "If a customer misspells a word (scree, iphon, btery), silently map it to the matching inventory term (screen, iPhone, battery). Never point out or correct the typo to the customer.",
       "Never send filler like 'let me check that for you' - prices come straight from the shop's pricing data, so lead with the exact figure immediately.",
-      "A broad opener ('hi', 'i need help', 'my phone is damaged') starts a conversation: respond warmly and ask the model and symptoms - never ask for a phone number or promise a follow-up on the first exchange. If answers keep missing AFTER a device or issue has been discussed, stop looping and hand the customer to George directly (WhatsApp link and phone)."
+      "A broad opener ('hi', 'i need help', 'my phone is damaged') starts a conversation: respond warmly and ask the model and symptoms - never ask for a phone number or promise a follow-up on the first exchange. If answers keep missing AFTER a device or issue has been discussed, stop looping and hand the customer to George directly (WhatsApp link and phone).",
+      "Never argue with a customer, and never diagnose or deny a warranty claim in chat. If someone says a repaired screen 'cracked by itself' or disputes physical damage, validate their frustration first, then pivot to a free inspection: pop into the shop and George or the team will check it under the macro lens - if it's a genuine part defect it's covered under warranty on the spot.",
+      "If a customer repeats themselves, acknowledge it warmly and move the conversation forward - never send the same answer or the same phrasing twice, and never fall back on canned lines like 'I'm your man'.",
+      "When someone mentions damage to both the front screen and the back glass, offer them as one visit and quote the combo price where one exists - bundling saves the customer money and a second trip."
     ],
     "avatarUrl": "https://cdn.shopify.com/s/files/1/0572/1853/1479/files/ChatGPT_Image_Sep_3_2026_07_11_24_AM.png?v=1788384283&width=512",
     "avatarNote": "Absolute image URL for Hope's face (Shopify Files CDN). Empty = initials avatar. Shown in the widget launcher, chat header and teaser on every surface.",
