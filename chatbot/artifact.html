@@ -363,7 +363,7 @@ function createBrain(KB) {
     (KB.pricing.tiers || []).forEach(function (t) { learn(t.id); learn(t.name); });
     ((KB.brands || {}).supported || []).forEach(learn);
     (KB.refusals || []).forEach(function (r) { (r.match || []).forEach(learn); });
-    learn('aftermarket incell genuine diagnostic screen battery charging speaker camera repair price cost warranty booking');
+    learn('aftermarket incell genuine diagnostic screen battery charging speaker camera repair price cost warranty booking handset handsets');
   })();
 
   // one edit apart: substitution, missing/extra letter, or swapped neighbours
@@ -1171,7 +1171,7 @@ function createBrain(KB) {
 
   /* ---------- the shop: find the thing, show the price, say if it's here ---- */
 
-  var SHOP_WORDS = ['case','cover','charger','cable','protector','tempered','power bank','powerbank',
+  var SHOP_WORDS = ['handset','handsets','case','cover','charger','cable','protector','tempered','power bank','powerbank',
     'headphone','headphones','earbud','earbuds','earphone','earphones','airpod','airpods','speaker',
     'accessory','accessories','buy','sell','price of','do you have','do you sell','in stock','stock',
     'looking for','got any','after a',
@@ -1333,6 +1333,11 @@ function createBrain(KB) {
     for (var j = 0; j < SHOP_WORDS.length; j++) {
       if (t.indexOf(' ' + SHOP_WORDS[j]) !== -1) { shopping = true; break; }
     }
+    // "i want a phone" / "i need a handset" is shopping, not a fault report
+    if (!shopping && /\b(want|wants|need|needs|after|buy|get|grab|looking)\b/.test(t) &&
+        /\b(phones?|handsets?|mobiles?)\b/.test(t) &&
+        !/(case|cover|protector|charger|cable|holder|mount|part|screen|repair|fix)/.test(t) &&
+        !detectRepair(t)) shopping = true;
     var colour = null;
     for (var c = 0; c < COLOURS.length; c++) {
       if (t.indexOf(' ' + COLOURS[c] + ' ') !== -1) { colour = COLOURS[c] === 'gray' ? 'grey' : COLOURS[c]; break; }
@@ -1446,7 +1451,7 @@ function createBrain(KB) {
     // the first handset off the shelf.
     if (parsed.kind === 'phone' && !parsed.brand && !parsed.qualified) {
       var extras = parsed.terms.filter(function (w) {
-        return !/^(phone|phones|mobile|mobiles|smartphone|smartphones|buy|purchase|new|show|get|give|see|like)$/.test(w) && !/^\d+$/.test(w);
+        return !/^(phone|phones|mobile|mobiles|handset|handsets|smartphone|smartphones|buy|purchase|new|show|get|give|see|like|doyou)$/.test(w) && !/^\d+$/.test(w);
       });
       if (parsed.vague || !extras.length) {
         pendingPhoneQualify = true;

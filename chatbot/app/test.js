@@ -354,6 +354,11 @@ test('handoffs are earned: only after a device or issue is on the table', () => 
 });
 
 test('a vague phone-buying ask gets qualified like a salesperson would', () => {
+  // live-testing regression: "i want a handset" was a miss that escalated
+  for (const ask of ['i want a handset', 'i want handset what doyou have', 'i want a phone', 'i need a new phone']) {
+    const h = createBrain(KB);
+    assert.strictEqual(h.respond(ask).intent, 'shop:qualify-phone', `"${ask}" must qualify, not miss`);
+  }
   const fresh = createBrain(KB);
   const q = fresh.respond('maybe like a phone to buy but i dont know what i want');
   assert.strictEqual(q.intent, 'shop:qualify-phone', `matched ${q.intent}`);
