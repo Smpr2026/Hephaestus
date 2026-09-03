@@ -353,6 +353,27 @@ test('handoffs are earned: only after a device or issue is on the table', () => 
   assert.ok(fresh.respond('what are your hours').intent.startsWith('hours'));
 });
 
+test('a vague phone-buying ask gets qualified like a salesperson would', () => {
+  const fresh = createBrain(KB);
+  const q = fresh.respond('maybe like a phone to buy but i dont know what i want');
+  assert.strictEqual(q.intent, 'shop:qualify-phone', `matched ${q.intent}`);
+  assert.ok(!q.products, 'must ask what make/budget before listing stock');
+  assert.ok(/what sort|what make|after/i.test(q.text));
+  // the answer narrows: cheapest matching handsets, cheapest first
+  const f = fresh.respond('samsung, something cheap');
+  assert.ok(f.products && f.products.length, 'the follow-up should list phones');
+  assert.ok(f.products.every(p => p.kind === 'phone'), 'handsets only, not accessories');
+  // a buying question naming a model shows handsets, family first
+  const c = createBrain(KB);
+  const r = c.respond('do you have iphone 12 for sale');
+  assert.ok(r.products && r.products.every(p => p.kind === 'phone'),
+    'a named model in a buying ask means the handset, not a case');
+  assert.ok(/iphone/i.test(r.products[0].title), 'iPhones should lead an iPhone ask');
+  // but a specific accessory search still works
+  const c2 = createBrain(KB);
+  assert.ok(/case/i.test(c2.respond('do you have iphone 12 cases for sale').intent));
+});
+
 test('a general repair ask gets the services answer, never the contact card', () => {
   // live-testing regression: "how about phone repairs" word-overlapped onto
   // contact because both mention "phone"

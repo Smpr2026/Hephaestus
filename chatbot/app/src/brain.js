@@ -705,6 +705,14 @@ function createBrain(KB) {
     var more = moreProducts(t);
     if (more) return more;
 
+    // the answer to "what sort of phone are you after?" - one shot, then
+    // normal routing takes back over
+    if (pendingPhoneQualify) {
+      pendingPhoneQualify = false;
+      var qf = phoneQualifyFollowup(t);
+      if (qf) return qf;
+    }
+
     // "ok i'll go the soft" right after a price card or the screen-options
     // explainer is picking a tier, not a new question - but "aftermarket,
     // what does that mean?" is still a question, so question words fall through
@@ -741,6 +749,25 @@ function createBrain(KB) {
     if ((model || lastModel) && wantsFrontAndBack(t)) {
       var combo = comboAnswer(model || lastModel);
       if (combo) return combo;
+    }
+    // "do you have an iphone 12 for sale" is shopping, not a repair ask -
+    // and a named model in a buying question means the handset, not a case
+    if (shopQ && shopQ.shopping && !repair &&
+        /\b(for sale|buy|sell|selling|purchase|in stock|second hand|pre ?loved|refurbished)\b/.test(t)) {
+      if (model && !shopQ.kind) shopQ.kind = 'phone';
+      var shopFound = searchCatalogue(shopQ.terms, null,
+        { brand: shopQ.brand, kind: shopQ.kind, colour: shopQ.colour });
+      if (model && shopFound.length) {
+        var ml = model.toLowerCase(), fam = ml.split(' ')[0];
+        function rank(item) {
+          var title = item.t.toLowerCase();
+          if (title.indexOf(ml) !== -1) return 0;   // the exact model
+          if (title.indexOf(fam) !== -1) return 1;  // same family (any iPhone)
+          return 2;                                 // everything else
+        }
+        shopFound = shopFound.slice().sort(function (a, b) { return rank(a) - rank(b); });
+      }
+      return productAnswer(shopQ, shopFound.length ? shopFound : null);
     }
     if (model && (repair || looksLikePrice(t))) return priceAnswer(model, repair || 'screen');
     if (model && isBareModel(t, model)) return modelClarify(model);
@@ -932,7 +959,7 @@ function createBrain(KB) {
     ['charger',   /charger|adapter|charging (dock|pad)/i],
     ['cable',     /cable|cord|lead\b/i],
     ['protector', /protector|tempered|screen guard/i],
-    ['case',      /\bcase\b|cover|folio|bumper/i],
+    ['case',      /\bcases?\b|cover|folio|bumper/i],
     ['tablet',    /tablet|ipad/i],
     ['watch',     /watch/i],
     // an actual handset names a phone brand AND storage / condition - "128GB"
@@ -1031,7 +1058,9 @@ function createBrain(KB) {
       return w.length >= 3 && !STOP[w] && ['how','much','you','the','for','have','got','sell','buy',
         'any','are','can','want','need','looking','after','does','with'].indexOf(w) === -1;
     });
-    return { terms: terms, brand: brand, kind: kindInQuery(t), colour: colour, shopping: shopping };
+    // "i dont know what i want" is browsing, not a search query
+    var vague = /\b(dont know|don t know|not sure|no idea|unsure|maybe|just looking|browsing|recommend|suggest|whatever you)\b/.test(t);
+    return { terms: terms, brand: brand, kind: kindInQuery(t), colour: colour, shopping: shopping, vague: vague };
   }
 
   // A bare brand is a question, not an answer: ask which kind before listing.
@@ -1064,6 +1093,39 @@ function createBrain(KB) {
   // "what else have you got" only means something if we remember what they
   // were just looking at. One query back is enough.
   var lastShop = null;
+  var pendingPhoneQualify = false;  // we asked what make/budget - next answer narrows
+
+  // "samsung", "iphone under $300", "something cheap" right after the
+  // what-are-you-after question runs a narrowed phone search.
+  function phoneQualifyFollowup(t) {
+    var term = null, brand = null;
+    if (/\b(iphone|apple)\b/.test(t)) { term = 'iphone'; brand = 'apple'; }
+    else if (/\b(samsung|galaxy)\b/.test(t)) { term = 'samsung'; brand = 'samsung'; }
+    else {
+      var bm = /\b(nokia|oppo|pixel|google|motorola|xiaomi|vivo|realme)\b/.exec(t);
+      if (bm) term = bm[1];
+    }
+    var budget = null;
+    var m = /(?:under|below|less than|max|up to|around|about)?\s*\$\s*(\d{2,4})\b/.exec(t) ||
+            /\b(?:under|below|less than|max|up to|around|about)\s+(\d{2,4})\b/.exec(t);
+    if (m) budget = parseInt(m[1], 10);
+    var cheap = /\b(cheap|cheapest|budget|affordable)\b/.test(t);
+    if (!term && budget == null && !cheap) return null;
+
+    var parsed = { terms: [term || 'phone'], brand: brand, kind: 'phone', colour: null, shopping: true, vague: false, qualified: true };
+    var found = searchCatalogue(parsed.terms, null, { brand: brand, kind: 'phone' });
+    if (budget != null) found = found.filter(function (i) { return parseFloat(i.p) <= budget * 1.15; });
+    if (cheap || budget != null) found = found.slice().sort(function (a, b) { return parseFloat(a.p) - parseFloat(b.p); });
+    if (!found.length) {
+      return {
+        text: 'Nothing on the shelf ' + (budget != null ? 'under $' + budget + ' ' : '') + 'in that right now - ' +
+              'stock moves fast though. Give us a ring on ' + B.phone + ' and we’ll check out the back, ' +
+              'or tell me another make or budget and I’ll look again.',
+        card: null, contact: true, products: null, chips: [], intent: 'shop:qualify-none'
+      };
+    }
+    return productAnswer(parsed, found);
+  }
 
   var MORE_WORDS = [' what other', ' any other', ' anything else', ' what else',
     ' other models', ' other ones', ' more options', ' show me more', ' any more',
@@ -1089,6 +1151,23 @@ function createBrain(KB) {
   }
 
   function productAnswer(parsed, items) {
+    // A vague "i want a phone" gets qualified before anything hits the
+    // counter - a salesperson asks what make and budget, they don't grab
+    // the first handset off the shelf.
+    if (parsed.kind === 'phone' && !parsed.brand && !parsed.qualified) {
+      var extras = parsed.terms.filter(function (w) {
+        return !/^(phone|phones|mobile|mobiles|smartphone|smartphones|buy|purchase|new|show|get|give|see|like)$/.test(w) && !/^\d+$/.test(w);
+      });
+      if (parsed.vague || !extras.length) {
+        pendingPhoneQualify = true;
+        return {
+          text: 'Yeah easy - what sort of phone are you after? iPhone, Samsung, something else? ' +
+                'And if you’ve got a rough budget, tell me and I’ll match you up.',
+          card: null, contact: false, products: null, options: null,
+          chips: [], intent: 'shop:qualify-phone'
+        };
+      }
+    }
     // A brand with no kind is a question, not an answer - ask which, the way
     // someone behind the counter would, and offer the kinds actually in stock.
     if (parsed.brand && !parsed.kind) {
