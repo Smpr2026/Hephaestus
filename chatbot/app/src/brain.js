@@ -218,6 +218,12 @@ function createBrain(KB) {
     var out = [m];
     if (m.indexOf('iphone ') === 0) out.push(m.replace('iphone ', ''));
     if (m.indexOf('galaxy ') === 0) out.push('samsung ' + m, m.replace('galaxy ', ''));
+    // the price table names Pixels inconsistently ("Google 7 Pro",
+    // "Google PIXEL8") - customers say "pixel 7 pro", so alias both ways
+    if (m.indexOf('google ') === 0) {
+      var rest = m.replace('google ', '').replace('pixel ', '').replace(/^pixel/, '').trim();
+      if (rest) out.push('pixel ' + rest, 'google pixel ' + rest);
+    }
     return out;
   }
 
@@ -346,7 +352,7 @@ function createBrain(KB) {
     return {
       text: fill(intent.answer),
       card: null,
-      contact: intent.id === 'human' || intent.id === 'complaint',
+      contact: intent.contact === true || intent.id === 'human' || intent.id === 'complaint',
       chips: (intent.chips || []).slice(0, 3),
       intent: intent.id + ' (' + intent.category + ')'
     };
@@ -671,6 +677,61 @@ function createBrain(KB) {
     };
   }
 
+  var MULTI_LABELS = {
+    screen: 'Screen replacement', battery: 'Battery replacement',
+    charging: 'Charging port repair', camera: 'Camera repair',
+    speaker: 'Speaker / mic repair', back_glass: 'Back glass replacement'
+  };
+
+  function detectRepairsAll(t) {
+    var found = [];
+    for (var k in REPAIR_WORDS) {
+      if (SERVICE_REPAIRS[k]) continue;
+      for (var i = 0; i < REPAIR_WORDS[k].length; i++) {
+        if (t.indexOf(' ' + REPAIR_WORDS[k][i]) !== -1) { found.push(k); break; }
+      }
+    }
+    return found;
+  }
+
+  // "screen and battery on the iphone 12" - two or more faults named in one
+  // breath get one stacked quote for the one visit. Every line comes from a
+  // real price row; if any named fault has no row, this stays out of the way
+  // and the single-fault path answers instead.
+  function multiFaultAnswer(model, keys) {
+    var items = [], from = false, total = 0;
+    for (var i = 0; i < keys.length; i++) {
+      var row = priceRow(model, keys[i]);
+      if (!row) return null;
+      var price = null, tiers = tierRows(row.costs, model);
+      if (tiers.length) { price = tiers[0].price; from = true; }
+      else if (row.typical != null) price = row.typical;
+      if (price == null) return null;
+      total += price;
+      items.push([MULTI_LABELS[keys[i]] || keys[i], (tiers.length ? 'from ' : '') + money(price)]);
+    }
+    items.push(['All together, one visit', (from ? 'from ' : '') + money(total)]);
+    lastQuote = {
+      model: model, repair: keys.join(' + '),
+      label: model + ' ' + keys.join(' + ') + ' (done together)',
+      priceLine: (from ? 'from ' : '') + money(total)
+    };
+    var art = /^[aeiou]/i.test(model) ? 'an ' : 'a ';
+    return {
+      text: 'We can sort all of that in the one visit on ' + art + model + ' — here’s how it works out:',
+      card: {
+        title: model + ' — ' + keys.map(function (k) {
+          return (MULTI_LABELS[k] || k).toLowerCase().replace(' replacement', '').replace(' repair', '');
+        }).join(' + '),
+        rows: items,
+        note: fill(KB.pricing.disclaimerShort) + ' Every repair includes the ' + B.warranty + '.'
+      },
+      contact: false, products: null,
+      chips: ['Lock this price in', 'How long will it take?', 'Do I need a booking?'],
+      intent: 'price-multi:' + model + ':' + keys.join('+')
+    };
+  }
+
   var lastIntentId = '';
   var lastModel = null;        // the device this conversation is about, across turns
   var repairDiscussed = false; // a specific issue has come up - handoffs are allowed now
@@ -829,6 +890,11 @@ function createBrain(KB) {
       var combo = comboAnswer(model || lastModel);
       if (combo) return combo;
     }
+    var multiKeys = detectRepairsAll(t);
+    if ((model || lastModel) && multiKeys.length >= 2) {
+      var multiA = multiFaultAnswer(model || lastModel, multiKeys);
+      if (multiA) return multiA;
+    }
     // "do you have an iphone 12 for sale" is shopping, not a repair ask -
     // and a named model in a buying question means the handset, not a case
     if (shopQ && shopQ.shopping && !repair &&
@@ -856,6 +922,12 @@ function createBrain(KB) {
     if (!model && repair && lastModel &&
         !/\b(long|take|takes|turnaround|warranty|guarantee|when|why|where|book|fix|repair)\b/.test(t) &&
         (looksLikePrice(t) || t.trim().split(' ').length <= 7)) {
+      // "and the battery and charging port too" names two faults - stack them
+      var memKeys = detectRepairsAll(t);
+      if (memKeys.length >= 2) {
+        var memMulti = multiFaultAnswer(lastModel, memKeys);
+        if (memMulti) return memMulti;
+      }
       return priceAnswer(lastModel, repair);
     }
     var bare = bareDeviceClarify(t);

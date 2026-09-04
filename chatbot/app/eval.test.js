@@ -196,6 +196,49 @@ test('any "do you charge to look" phrasing gets the free-inspection answer', () 
   }
 });
 
+/* ------------------------------- 9. price book, multi-fault, follow-ups */
+
+test('the RepairDesk price book answers with exact recent figures', () => {
+  for (const [q, want] of [
+    ['iphone 16 pro max screen price', /price:iPhone 16 Pro Max:screen/],
+    ['iphone 7 screen price', /price:iPhone 7:screen/],
+    ['how much for a samsung s22 ultra screen', /price:Galaxy S22 Ultra:screen/],
+    ['pixel 7 pro screen cost', /price:Google 7 Pro:screen/],
+    ['iphone 14 pro max back glass price', /price:iPhone 14 Pro Max:back_glass/],
+  ]) {
+    const r = createBrain(KB).respond(q);
+    assert.ok(want.test(r.intent), `"${q}" matched ${r.intent}`);
+    assert.ok(/\$\d/.test(textOf(r)), `"${q}" should quote a real figure`);
+  }
+});
+
+test('two faults in one breath get one stacked quote for one visit', () => {
+  const r = createBrain(KB).respond('iphone 12 screen and battery price');
+  assert.ok(r.intent.startsWith('price-multi:iPhone 12'), `matched ${r.intent}`);
+  assert.ok(r.card && r.card.rows.some(row => /one visit/i.test(row[0])),
+    'the card must total the visit');
+  // and via memory: name the phone once, stack the faults later
+  const b = createBrain(KB);
+  b.respond('how much for an iphone 11 screen');
+  const follow = b.respond('and the battery and charging port too');
+  assert.ok(follow.intent.startsWith('price-multi:iPhone 11:battery+charging'),
+    `memory multi-fault matched ${follow.intent}`);
+  // a fault with no row never gets an invented line - single path answers
+  const solo = createBrain(KB).respond('galaxy a15 screen and camera price');
+  assert.ok(!/price-multi/.test(solo.intent) || !/camera.*\$/i.test(JSON.stringify(solo.card || '')),
+    'no invented camera price');
+});
+
+test('repair follow-ups route to the counter, honestly', () => {
+  for (const q of ['is my phone ready', 'any update on my repair', 'when can i pick it up',
+                   'following up on my repair']) {
+    const r = createBrain(KB).respond(q);
+    assert.ok(r.intent.startsWith('repair_status'), `"${q}" matched ${r.intent}`);
+    assert.ok(/can'?t see the repair queue/i.test(textOf(r)), 'must be honest about not seeing the queue');
+    assert.ok(r.contact, 'must hand the customer the phone number');
+  }
+});
+
 /* --------------------------------------------------- 6. identity holds */
 
 test('asked straight out, Hope is honest but stays in character', () => {
