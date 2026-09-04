@@ -184,6 +184,18 @@ test('consoles are their own answer, never the phone spiel', () => {
   }
 });
 
+/* -------------------------------------------- 8. the look is free, always */
+
+test('any "do you charge to look" phrasing gets the free-inspection answer', () => {
+  for (const q of ['do you charge to look at it', 'is the quote free', 'inspection fee',
+                   'do you charge a checking fee', 'free inspection?']) {
+    const r = createBrain(KB).respond(q);
+    assert.ok(r.intent.startsWith('quote'), `"${q}" matched ${r.intent}`);
+    assert.ok(/free/i.test(textOf(r)) && /macro lens/i.test(textOf(r)),
+      `"${q}" should promise the free look under the macro lens: ${textOf(r).slice(0, 120)}`);
+  }
+});
+
 /* --------------------------------------------------- 6. identity holds */
 
 test('asked straight out, Hope is honest but stays in character', () => {

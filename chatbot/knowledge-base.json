@@ -4498,9 +4498,18 @@
         "have a look",
         "diagnostic",
         "check it",
-        "what's wrong with it"
+        "what's wrong with it",
+        "charge to look",
+        "charge to look at it",
+        "inspection fee",
+        "checking fee",
+        "diagnostic fee",
+        "assessment fee",
+        "cost to look at it",
+        "look at it for free",
+        "free inspection"
       ],
-      "answer": "Yes, and assessment is free. Bring it in and we'll tell you what's wrong and what it costs before we touch anything. Want a number now? Call {{phone}} with your model and the fault and we'll quote you on the phone.",
+      "answer": "The look is always free - bring it in and we'll check it under the macro lens on the spot, tell you what's wrong and exactly what it'll cost before we touch anything. Want a number now? Call {{phone}} with your model and the fault and we'll quote you on the phone.",
       "chips": [
         "How much is a screen repair?",
         "Where are you?"
