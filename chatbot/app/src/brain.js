@@ -926,6 +926,22 @@ function createBrain(KB) {
       var multiA = multiFaultAnswer(model || lastModel, multiKeys);
       if (multiA) return multiA;
     }
+    // "what if i want to do the back glass with my repair" - a second fault
+    // added onto a quote they already have stacks into the same visit, on the
+    // same phone, without ever re-asking the model
+    if (!model && repair && lastModel && lastQuote && lastQuote.model === lastModel &&
+        /\b(with|also|as ?well|too|same time|together|add|plus|while)\b/.test(t)) {
+      var prevKey = String(lastQuote.repair || '').split(' ')[0];
+      if (prevKey && prevKey !== repair && !SERVICE_REPAIRS[repair]) {
+        if ((prevKey === 'screen' && repair === 'back_glass') ||
+            (prevKey === 'back_glass' && repair === 'screen')) {
+          var comboAdd = comboAnswer(lastModel);
+          if (comboAdd) return comboAdd;
+        }
+        var stacked = multiFaultAnswer(lastModel, [prevKey, repair]);
+        if (stacked) return stacked;
+      }
+    }
     // "do you have an iphone 12 for sale" is shopping, not a repair ask -
     // and a named model in a buying question means the handset, not a case
     if (shopQ && shopQ.shopping && !repair &&

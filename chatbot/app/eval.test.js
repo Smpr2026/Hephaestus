@@ -85,7 +85,10 @@ test('Hope remembers the device across the whole conversation', () => {
   ]);
   assert.ok(/iPhone 12/.test(scr.intent), `screen quote lost the model: ${scr.intent}`);
   assert.ok(/iPhone 12:battery/.test(bat.intent), `battery follow-up forgot the phone: ${bat.intent}`);
-  assert.ok(/iPhone 12:back_glass/.test(glass.intent), `back glass follow-up forgot the phone: ${glass.intent}`);
+  // "as well" right after the battery quote stacks the two into one visit -
+  // the phone is still remembered, and the customer sees the combined total
+  assert.ok(/iPhone 12/.test(glass.intent) && /back_glass/.test(glass.intent),
+    `back glass follow-up forgot the phone: ${glass.intent}`);
   assert.ok(/^price-combo:iPhone 12/.test(combo.intent), `combo ask didn't route to combo pricing: ${combo.intent}`);
   assert.ok(/one visit|together/i.test(textOf(combo)), 'combo answer should sell the single visit');
 });
@@ -273,6 +276,26 @@ test('a symptom first never wipes memory - the model completes it', () => {
     const r = createBrain(KB).respond(q);
     assert.ok(want.test(r.intent), `"${q}" matched ${r.intent}`);
   }
+});
+
+/* --------------------------- 10. adding a fault onto a standing quote */
+
+test("a second fault added 'with my repair' stacks onto the standing quote", () => {
+  // George's live transcript: screen quoted, a shopping detour, then
+  // "what if i want to do the back glass with my repair" reverted to the
+  // generic call-us answer. It must combo on the remembered phone instead.
+  const b = createBrain(KB);
+  b.respond('i have a cracked screen');
+  b.respond('15 pro max front screen');
+  b.respond('i need also some headphoens do you sell'); // detour must not wipe the quote
+  const combo = b.respond('what ifg i want to do the back glass with my repair');
+  assert.ok(combo.intent.startsWith('price-combo:iPhone 15 Pro Max'), `matched ${combo.intent}`);
+  assert.ok(/one visit/i.test(combo.text), 'must sell the single visit');
+  // and a non-glass pair stacks through the multi path
+  const c = createBrain(KB);
+  c.respond('iphone 11 battery price');
+  const stacked = c.respond('can you do the charging port as well');
+  assert.ok(stacked.intent.startsWith('price-multi:iPhone 11'), `matched ${stacked.intent}`);
 });
 
 /* --------------------------------------------------- 6. identity holds */
