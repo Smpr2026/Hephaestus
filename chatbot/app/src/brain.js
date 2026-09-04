@@ -735,6 +735,12 @@ function createBrain(KB) {
   var lastIntentId = '';
   var lastModel = null;        // the device this conversation is about, across turns
   var repairDiscussed = false; // a specific issue has come up - handoffs are allowed now
+  // symptom-first memory: the customer led with the fault, the model comes
+  // next - never make them repeat the symptom
+  var FAULT_KEYS = { fault_screen: 'screen', fault_battery: 'battery', fault_charging: 'charging',
+                     fault_camera: 'camera', fault_audio: 'speaker' };
+  var pendingFault = null;     // {repair: key} for priceable faults, {generic: true} otherwise
+  var awaitingTicket = false;  // we've asked for their ticket/name on a repair follow-up
   var missStreak = 0;          // consecutive answers we couldn't ground - 2 means stuck
   var lastReplyText = '';      // what we last said - a repeat gets acknowledged, never echoed
   var repeatIdx = 0;
@@ -767,6 +773,10 @@ function createBrain(KB) {
         lastMissTokens = sigTokens(canon(slang(norm(raw))));
       } else {
         var taughtId = baseIntentId(lastIntentId);
+        if (taughtId === 'repair_status') awaitingTicket = true;
+        if (taughtId && taughtId.indexOf('fault_') === 0 && !lastModel) {
+          pendingFault = FAULT_KEYS[taughtId] ? { repair: FAULT_KEYS[taughtId] } : { generic: true };
+        }
         if (lastMissTokens && taughtId && !NO_LEARN[taughtId] &&
             KB.intents.some(function (x) { return x.id === taughtId; })) {
           for (var lw in lastMissTokens) {
@@ -834,6 +844,27 @@ function createBrain(KB) {
     // must never turn a refusable ask into an answerable one
     var ref = refusalCheck(t) || refusalCheck(canon(norm(raw)));
     if (ref) return ref;
+
+    // they've just been asked for their ticket details on a repair follow-up.
+    // The chat can't see the FixDesk queue, so the honest fastest path is
+    // putting those exact details in front of the team: WhatsApp or the phone.
+    if (awaitingTicket) {
+      awaitingTicket = false;
+      var looksDetails = /\d{3,}/.test(t) || / (under|name is|booked|for) /.test(t) ||
+                         (t.trim().split(' ').length <= 4 && raw.indexOf('?') === -1);
+      if (looksDetails) {
+        var waT = String(B.whatsapp || '').replace(/\D/g, '');
+        var msgT = 'Hi George - chasing up my repair. Details: ' + String(raw).trim().slice(0, 120);
+        var resT = {
+          text: 'Sweet, got it. Fastest way to an answer: tap WhatsApp below and those details go straight to the team’s phone, or ring ' + B.phone + ' and they’ll pull the job up while you’re on the line - if a part’s still on its way they’ll tell you straight and give you a day to expect it. All the work’s covered by our ' + B.warranty + ' either way.',
+          card: null, contact: true, products: null, options: null,
+          chips: [], intent: 'repair-status:followup'
+        };
+        if (waT) resT.links = [{ label: 'WhatsApp the team now', href: 'https://wa.me/' + waT + '?text=' + encodeURIComponent(msgT) }];
+        return resT;
+      }
+      // that wasn't ticket details - answer whatever they actually asked
+    }
 
     // mid-booking answers (name, mobile) come before everything else
     var step = bookingStep(raw, t);
@@ -915,6 +946,20 @@ function createBrain(KB) {
       return productAnswer(shopQ, shopFound.length ? shopFound : null);
     }
     if (model && (repair || looksLikePrice(t))) return priceAnswer(model, repair || 'screen');
+    // symptom-first memory: they led with the fault, now they've named the
+    // phone - answer for that fault on that phone, never re-ask the symptom
+    if (model && pendingFault && isBareModel(t, model)) {
+      var pf = pendingFault; pendingFault = null;
+      lastModel = model; repairDiscussed = true;
+      if (pf.repair) return priceAnswer(model, pf.repair);
+      var artF = /^[aeiou]/i.test(model) ? 'an ' : 'a ';
+      return {
+        text: 'Righto, ' + artF + model + ' playing up like that - could be the battery, a bad update or something on the board, so it needs a proper look. The look’s free under the macro lens at ' + B.addressShort + ', you get an exact quote before we touch anything, and every repair’s covered by our ' + B.warranty + '.',
+        card: null, contact: false, products: null, options: null,
+        chips: ['How long does a repair take?', 'What are your hours?'],
+        intent: 'fault-follow:' + model
+      };
+    }
     if (model && isBareModel(t, model)) return modelClarify(model);
     // "how much for a screen" after the customer already named their phone -
     // a person at the counter wouldn't ask which phone again. Questions about

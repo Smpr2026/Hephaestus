@@ -18,6 +18,7 @@ const kbStore = require('./src/kb.js');
 const { createBrain } = require('./src/brain.js');
 const claude = require('./src/claude.js');
 const quotes = require('./src/quotes.js');
+const tickets = require('./src/tickets.js');
 const catalogue = require('./src/catalogue.js');
 
 const PORT = process.env.PORT || 3000;
@@ -92,6 +93,12 @@ async function handleChat(req, res) {
   const history = Array.isArray(body.history)
     ? body.history.slice(-10).filter(m => m && (m.role === 'user' || m.role === 'assistant'))
     : [];
+
+  // a status ask with a ticket number gets the real job status when the
+  // FixDesk connection is configured; otherwise the brain's honest
+  // collect-and-hand-off flow answers
+  const ticket = await tickets.ticketStatus(KB, message);
+  if (ticket) return send(res, 200, { ...ticket, engine: 'fixdesk-tickets' });
 
   const live = await livePrice(message);
   if (live) return send(res, 200, { ...live, engine: 'fixdesk' });

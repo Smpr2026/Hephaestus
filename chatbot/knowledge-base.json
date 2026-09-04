@@ -6410,7 +6410,11 @@
         "smashed screen",
         "touch doesnt work",
         "touch not working",
-        "touch screen not"
+        "touch screen not",
+        "flickering",
+        "flickers",
+        "screen glitching",
+        "glitching screen"
       ],
       "answer": "Screen replacement is our most common job and it's usually done in under an hour while you wait. Tell me the model and I'll give you a guide price - and if the glass is cracked but the display still works, it's still worth replacing before moisture gets in.",
       "chips": [
@@ -6478,7 +6482,12 @@
         "swollen battery",
         "battery health",
         "replace battery",
-        "new battery"
+        "new battery",
+        "drains fast",
+        "gets hot",
+        "gets really hot",
+        "overheating",
+        "running hot"
       ],
       "answer": "Sounds like a battery replacement - usually done in under an hour. If the battery is swelling or pushing the screen up, stop using the phone and bring it in sooner rather than later. Call {{phone}} with your model and we'll quote it.",
       "chips": [
@@ -6647,7 +6656,14 @@
         "not turning on",
         "stuck on logo",
         "won't turn on",
-        "wont turn on"
+        "wont turn on",
+        "reboots",
+        "keeps rebooting",
+        "restarts by itself",
+        "restarting by itself",
+        "randomly restarts",
+        "turns itself off",
+        "keeps turning off"
       ],
       "answer": "Could be the battery, the screen, or something on the board. It needs a proper look - assessment is free, and if it turns out to be board-level we do micro-soldering in house rather than sending it away. Bring it in to {{addressShort}} or call {{phone}}.",
       "chips": [
@@ -8001,10 +8017,20 @@
         "my ticket number",
         "check on my repair",
         "following up on my repair",
-        "follow up on my phone"
+        "follow up on my phone",
+        "status of my ticket",
+        "status of my repair",
+        "ticket status",
+        "repair status",
+        "has my part arrived",
+        "has my screen arrived",
+        "part arrived yet",
+        "parts arrived",
+        "hows the repair going",
+        "wheres my phone up to"
       ],
-      "answer": "I can't see the repair queue from the chat, but the team can check in seconds - call {{phone}} with your name or ticket number and they'll tell you exactly where it's at. If it's ready they'll say so on the spot, and you can collect any time we're open: {{hoursSummary}}",
-      "contact": true,
+      "answer": "Righto - give me the ticket number, or the name or mobile the job's booked under, and I'll point you straight at an answer.",
+      "contact": false,
       "chips": [
         "What are your hours?",
         "Where are you?"

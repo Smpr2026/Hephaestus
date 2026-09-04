@@ -229,13 +229,49 @@ test('two faults in one breath get one stacked quote for one visit', () => {
     'no invented camera price');
 });
 
-test('repair follow-ups route to the counter, honestly', () => {
-  for (const q of ['is my phone ready', 'any update on my repair', 'when can i pick it up',
-                   'following up on my repair']) {
+test('repair follow-ups collect the ticket, then route it straight to the team', () => {
+  for (const q of ['is my phone ready', 'whats the status of my ticket', 'has my part arrived',
+                   'any update on my repair', 'when can i pick it up']) {
     const r = createBrain(KB).respond(q);
     assert.ok(r.intent.startsWith('repair_status'), `"${q}" matched ${r.intent}`);
-    assert.ok(/can'?t see the repair queue/i.test(textOf(r)), 'must be honest about not seeing the queue');
-    assert.ok(r.contact, 'must hand the customer the phone number');
+    assert.ok(/ticket number|name or mobile/i.test(textOf(r)), 'must ask for the ticket details');
+  }
+  // step two: the details go into a prefilled WhatsApp link + the shop line
+  const b = createBrain(KB);
+  b.respond('is my phone ready');
+  const f = b.respond('ticket 14213');
+  assert.ok(f.intent === 'repair-status:followup', `details matched ${f.intent}`);
+  assert.ok(f.links && f.links[0].href.includes('14213'), 'WhatsApp link must carry the ticket number');
+  assert.ok(f.contact, 'must hand over the shop line too');
+  assert.ok(!/ready for pickup|on the workbench|waiting on parts/i.test(textOf(f)),
+    'must never fabricate a live status the chat cannot see');
+  // a question instead of details escapes the flow cleanly
+  const c = createBrain(KB);
+  c.respond('is my repair ready');
+  assert.ok(/^price:/.test(c.respond('actually how much is an iphone 13 screen?').intent),
+    'a topic change mid-flow must route normally');
+});
+
+test('a symptom first never wipes memory - the model completes it', () => {
+  // priceable fault: symptom, then bare model, straight to the quote
+  const b = createBrain(KB);
+  b.respond('battery drains fast');
+  const q1 = b.respond('samsung s22 ultra');
+  assert.ok(/^price:Galaxy S22 Ultra:battery/.test(q1.intent), `matched ${q1.intent}`);
+  // board-level fault: symptom, then model, gets the free-look pivot with the
+  // shop, macro lens and warranty anchored - never "what's going on with it?"
+  const c = createBrain(KB);
+  c.respond('my phone wont turn on');
+  const q2 = c.respond('its an iphone 12');
+  assert.ok(q2.intent === 'fault-follow:iPhone 12', `matched ${q2.intent}`);
+  assert.ok(/macro lens/i.test(q2.text) && /kingsgrove/i.test(q2.text) && /3-month/i.test(q2.text),
+    'the follow answer must anchor shop, free look and warranty');
+  assert.ok(!/what.?s going on with it/i.test(q2.text), 'must never re-ask the symptom');
+  // reboot/overheat phrasings route to faults, not fallback
+  for (const [q, want] of [['my phone reboots', /fault_dead/], ['phone gets really hot', /fault_battery/],
+                           ['my screen is flickering', /fault_screen/]]) {
+    const r = createBrain(KB).respond(q);
+    assert.ok(want.test(r.intent), `"${q}" matched ${r.intent}`);
   }
 });
 
