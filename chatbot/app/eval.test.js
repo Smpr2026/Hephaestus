@@ -298,6 +298,28 @@ test("a second fault added 'with my repair' stacks onto the standing quote", () 
   assert.ok(stacked.intent.startsWith('price-multi:iPhone 11'), `matched ${stacked.intent}`);
 });
 
+/* -------------------------- 11. combos priced from real combined jobs */
+
+test('a fault pair the shop has done before quotes its real combined history', () => {
+  // iPhone X screen+battery: 16 real combined jobs in the line history
+  const r = createBrain(KB).respond('iphone x screen and battery price');
+  assert.ok(r.intent.startsWith('price-multi:iPhone X'), `matched ${r.intent}`);
+  const rows = JSON.stringify(r.card.rows);
+  assert.ok(/combined jobs/i.test(rows), 'the total must come from real combined jobs');
+  assert.ok(/Most common/.test(rows), 'and show the most common combined charge');
+  // screen+back glass keeps George's rule but shows the history alongside
+  const c = createBrain(KB).respond('samsung s20 ultra screen and back glass');
+  assert.ok(c.intent.startsWith('price-combo:Galaxy S20 Ultra'), `matched ${c.intent}`);
+  assert.ok(/Recent combined jobs/.test(JSON.stringify(c.card.rows)),
+    'the combo card must show what recent combined jobs went for');
+  // a pair with no history still gets an honest sum, never an invented history line
+  const KB2 = JSON.parse(JSON.stringify(KB));
+  KB2.pricing.multiCombos = {};
+  const s = createBrain(KB2).respond('iphone 11 battery and charging port price');
+  assert.ok(s.intent.startsWith('price-multi:iPhone 11'), `matched ${s.intent}`);
+  assert.ok(!/combined jobs/i.test(JSON.stringify(s.card.rows)), 'no fabricated history');
+});
+
 /* --------------------------------------------------- 6. identity holds */
 
 test('asked straight out, Hope is honest but stays in character', () => {

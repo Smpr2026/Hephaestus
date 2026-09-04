@@ -567,6 +567,11 @@ function createBrain(KB) {
         var rows2 = tiers2.map(function (r) {
           return [r.label + ' + back glass', money(r.price + addon), r.blurb];
         });
+        var pkgR = (KB.pricing.combos || {})[model];
+        if (pkgR && pkgR.sampleSize >= 3) {
+          rows2.push(['Recent combined jobs', '$' + pkgR.low + '–$' + pkgR.high +
+                      ' (' + pkgR.sampleSize + ' done)']);
+        }
         rows2.push(['Time in store', 'Usually same day for both']);
         var fromP = money(tiers2[0].price + addon);
         lastQuote = {
@@ -601,6 +606,11 @@ function createBrain(KB) {
       var artT = /^[aeiou]/i.test(model) ? 'an ' : 'a ';
       var rowsT = [['Screen + back glass together', rangeT]];
       if (sRowR.typical != null) rowsT.push(['Most common', '$' + (sRowR.typical + addon)]);
+      var pkgT = (KB.pricing.combos || {})[model];
+      if (pkgT && pkgT.sampleSize >= 3) {
+        rowsT.push(['Recent combined jobs', '$' + pkgT.low + '–$' + pkgT.high +
+                    ' (' + pkgT.sampleSize + ' done)']);
+      }
       rowsT.push(['Time in store', 'Usually same day for both']);
       return {
         text: 'Front and back on ' + artT + model + ' \u2014 we do both in the one visit, and together it works out cheaper than two separate jobs: the back glass adds $' + addon + ' on top of the screen.',
@@ -710,11 +720,23 @@ function createBrain(KB) {
       total += price;
       items.push([MULTI_LABELS[keys[i]] || keys[i], (tiers.length ? 'from ' : '') + money(price)]);
     }
-    items.push(['All together, one visit', (from ? 'from ' : '') + money(total)]);
+    // the shop has done this exact pair before: quote what it actually went
+    // for, not a plain sum - real combined jobs usually come in cheaper
+    var hist = (KB.pricing.multiCombos || {})[model + '|' + keys.slice().sort().join('+')];
+    var totalLine;
+    if (hist && hist.sampleSize >= 3) {
+      totalLine = hist.low !== hist.high ? '$' + hist.low + '–$' + hist.high : '$' + hist.typical;
+      items.push(['All together, one visit', totalLine]);
+      items.push(['Most common', '$' + hist.typical]);
+      items.push(['Based on', hist.sampleSize + ' combined jobs we’ve done']);
+    } else {
+      totalLine = (from ? 'from ' : '') + money(total);
+      items.push(['All together, one visit', totalLine]);
+    }
     lastQuote = {
       model: model, repair: keys.join(' + '),
       label: model + ' ' + keys.join(' + ') + ' (done together)',
-      priceLine: (from ? 'from ' : '') + money(total)
+      priceLine: totalLine
     };
     var art = /^[aeiou]/i.test(model) ? 'an ' : 'a ';
     return {

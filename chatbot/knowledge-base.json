@@ -4831,159 +4831,236 @@
       "_note": "Model-independent services aggregated from RepairDesk tickets since 2023. Hardware rows use jobs since Jul 2024 only. Regenerate with mine-prices.js (see repo docs)."
     },
     "combos": {
-      "iPhone 14 Pro Max": {
+      "Galaxy Note 10 Plus": {
+        "low": 460,
+        "high": 480,
+        "typical": 470,
+        "sampleSize": 5,
+        "since": "2021"
+      },
+      "Galaxy Note 20 Ultra": {
+        "low": 425,
+        "high": 500,
+        "typical": 490,
+        "sampleSize": 12,
+        "since": "2022"
+      },
+      "Galaxy Note 9": {
         "low": 330,
-        "high": 550,
-        "typical": 400,
-        "sampleSize": 6,
-        "since": "Jul 2024"
-      },
-      "iPhone 13": {
-        "low": 245,
-        "high": 250,
-        "typical": 250,
-        "sampleSize": 2,
-        "since": "Nov 2025"
-      },
-      "iPhone 12 Pro": {
-        "low": 320,
-        "high": 350,
-        "typical": 350,
-        "sampleSize": 4,
-        "since": "Oct 2024"
-      },
-      "iPhone 12 Pro Max": {
-        "low": 250,
-        "high": 450,
-        "typical": 350,
-        "sampleSize": 5,
-        "since": "Aug 2024"
-      },
-      "iPhone 15 Pro Max": {
-        "low": 300,
-        "high": 500,
-        "typical": 350,
-        "sampleSize": 8,
-        "since": "Oct 2024"
-      },
-      "iPhone 13 Pro Max": {
-        "low": 300,
         "high": 400,
-        "typical": 350,
+        "typical": 345,
         "sampleSize": 7,
-        "since": "Jul 2024"
+        "since": "2020"
       },
-      "iPhone 11": {
-        "low": 200,
-        "high": 300,
-        "typical": 250,
+      "Galaxy S10": {
+        "low": 400,
+        "high": 420,
+        "typical": 410,
         "sampleSize": 5,
-        "since": "Jul 2024"
+        "since": "2021"
       },
-      "Huawei P30 / P30 Pro": {
-        "low": 260,
-        "high": 320,
-        "typical": 320,
-        "sampleSize": 2,
-        "since": "Aug 2025"
+      "Galaxy S10 Plus": {
+        "low": 380,
+        "high": 420,
+        "typical": 400,
+        "sampleSize": 8,
+        "since": "2020"
       },
-      "iPhone 11 Pro": {
-        "low": 220,
-        "high": 250,
-        "typical": 250,
-        "sampleSize": 2,
-        "since": "Feb 2025"
-      },
-      "iPhone XR": {
-        "low": 220,
-        "high": 350,
-        "typical": 300,
+      "Galaxy S20": {
+        "low": 360,
+        "high": 400,
+        "typical": 400,
         "sampleSize": 3,
-        "since": "Jan 2025"
+        "since": "2023"
       },
-      "iPhone 14": {
-        "low": 300,
-        "high": 300,
-        "typical": 300,
-        "sampleSize": 2,
-        "since": "Dec 2024"
-      },
-      "Galaxy S22 Ultra": {
-        "low": 440,
-        "high": 500,
-        "typical": 500,
-        "sampleSize": 2,
-        "since": "Oct 2025"
-      },
-      "Galaxy S21 Plus 5G": {
-        "low": 300,
-        "high": 450,
-        "typical": 450,
-        "sampleSize": 2,
-        "since": "Jul 2024"
-      },
-      "iPhone 12": {
-        "low": 200,
-        "high": 300,
-        "typical": 300,
-        "sampleSize": 3,
-        "since": "Aug 2024"
-      },
-      "iPhone XS Max": {
-        "low": 250,
-        "high": 300,
-        "typical": 300,
-        "sampleSize": 2,
-        "since": "Dec 2024"
-      },
-      "iPhone 14 Pro": {
-        "low": 250,
-        "high": 350,
-        "typical": 350,
-        "sampleSize": 4,
-        "since": "Feb 2025"
-      },
-      "iPhone 13 Pro": {
-        "low": 300,
-        "high": 350,
-        "typical": 350,
-        "sampleSize": 5,
-        "since": "Aug 2024"
-      },
-      "Back Glass, Copy Screen": {
-        "low": 275,
-        "high": 275,
-        "typical": 275,
-        "sampleSize": 2,
-        "since": "Mar 2025"
+      "Galaxy S20 Plus": {
+        "low": 450,
+        "high": 490,
+        "typical": 470,
+        "sampleSize": 6,
+        "since": "2021"
       },
       "Galaxy S20 Ultra": {
         "low": 400,
-        "high": 400,
+        "high": 440,
         "typical": 400,
-        "sampleSize": 2,
-        "since": "Apr 2025"
+        "sampleSize": 13,
+        "since": "2021"
+      },
+      "Galaxy S21 Plus 5G": {
+        "low": 360,
+        "high": 400,
+        "typical": 365,
+        "sampleSize": 5,
+        "since": "2023"
       },
       "Galaxy S21 Ultra": {
-        "low": 350,
-        "high": 450,
-        "typical": 400,
-        "sampleSize": 5,
-        "since": "Jul 2024"
+        "low": 400,
+        "high": 500,
+        "typical": 455,
+        "sampleSize": 10,
+        "since": "2022"
       },
-      "iPhone 11 Pro Max": {
+      "Galaxy S22 Ultra": {
+        "low": 500,
+        "high": 550,
+        "typical": 540,
+        "sampleSize": 9,
+        "since": "2022"
+      },
+      "Galaxy S8": {
+        "low": 250,
+        "high": 300,
+        "typical": 275,
+        "sampleSize": 8,
+        "since": "2021"
+      },
+      "Galaxy S8 Plus": {
+        "low": 250,
+        "high": 340,
+        "typical": 300,
+        "sampleSize": 5,
+        "since": "2021"
+      },
+      "Huawei P30 / P30 Pro": {
+        "low": 300,
+        "high": 350,
+        "typical": 320,
+        "sampleSize": 5,
+        "since": "2021"
+      },
+      "iPhone 11": {
         "low": 250,
         "high": 300,
         "typical": 300,
-        "sampleSize": 2,
-        "since": "Dec 2024"
+        "sampleSize": 23,
+        "since": "2021"
       },
-      "Galaxy S10+": {
-        "low": 380,
-        "high": 380,
+      "iPhone 11 Pro": {
+        "low": 220,
+        "high": 290,
+        "typical": 250,
+        "sampleSize": 5,
+        "since": "2020"
+      },
+      "iPhone 11 Pro Max": {
+        "low": 250,
+        "high": 430,
+        "typical": 325,
+        "sampleSize": 8,
+        "since": "2021"
+      },
+      "iPhone 12": {
+        "low": 300,
+        "high": 400,
+        "typical": 300,
+        "sampleSize": 9,
+        "since": "2022"
+      },
+      "iPhone 12 Pro": {
+        "low": 300,
+        "high": 350,
+        "typical": 340,
+        "sampleSize": 9,
+        "since": "2021"
+      },
+      "iPhone 12 Pro Max": {
+        "low": 250,
+        "high": 350,
+        "typical": 350,
+        "sampleSize": 5,
+        "since": "2024"
+      },
+      "iPhone 13": {
+        "low": 250,
+        "high": 480,
+        "typical": 280,
+        "sampleSize": 5,
+        "since": "2022"
+      },
+      "iPhone 13 Pro": {
+        "low": 300,
+        "high": 400,
+        "typical": 350,
+        "sampleSize": 9,
+        "since": "2023"
+      },
+      "iPhone 13 Pro Max": {
+        "low": 300,
+        "high": 650,
+        "typical": 350,
+        "sampleSize": 9,
+        "since": "2022"
+      },
+      "iPhone 14": {
+        "low": 220,
+        "high": 300,
+        "typical": 300,
+        "sampleSize": 3,
+        "since": "2024"
+      },
+      "iPhone 14 Pro": {
+        "low": 300,
+        "high": 350,
+        "typical": 350,
+        "sampleSize": 5,
+        "since": "2024"
+      },
+      "iPhone 14 Pro Max": {
+        "low": 330,
+        "high": 400,
         "typical": 380,
-        "sampleSize": 2,
-        "since": "Jul 2024"
+        "sampleSize": 7,
+        "since": "2024"
+      },
+      "iPhone 15 Pro Max": {
+        "low": 300,
+        "high": 450,
+        "typical": 340,
+        "sampleSize": 8,
+        "since": "2024"
+      },
+      "iPhone 8": {
+        "low": 160,
+        "high": 200,
+        "typical": 180,
+        "sampleSize": 24,
+        "since": "2020"
+      },
+      "iPhone 8 Plus": {
+        "low": 180,
+        "high": 200,
+        "typical": 200,
+        "sampleSize": 22,
+        "since": "2020"
+      },
+      "iPhone X": {
+        "low": 220,
+        "high": 300,
+        "typical": 250,
+        "sampleSize": 36,
+        "since": "2020"
+      },
+      "iPhone XR": {
+        "low": 270,
+        "high": 300,
+        "typical": 300,
+        "sampleSize": 16,
+        "since": "2020"
+      },
+      "iPhone XS": {
+        "low": 260,
+        "high": 300,
+        "typical": 300,
+        "sampleSize": 20,
+        "since": "2020"
+      },
+      "iPhone XS Max": {
+        "low": 280,
+        "high": 370,
+        "typical": 320,
+        "sampleSize": 40,
+        "since": "2020"
       }
     },
     "combosNote": "Screen + back glass done as one job, priced from single-line RepairDesk tickets naming both (no battery/camera/port on the line), jobs since Jul 2024, n>=2. Package beats the sum of the parts - quote this when a customer asks for front and back.",
@@ -4996,6 +5073,498 @@
         "galaxyS": 22
       },
       "samsungAddon": 50
+    },
+    "multiCombos": {
+      "Galaxy Note 10 Plus|back_glass+charging": {
+        "low": 140,
+        "high": 160,
+        "typical": 150,
+        "sampleSize": 5,
+        "since": "2021"
+      },
+      "Galaxy S7|battery+charging": {
+        "low": 100,
+        "high": 120,
+        "typical": 120,
+        "sampleSize": 3,
+        "since": "2021"
+      },
+      "Galaxy Tab S2 T819Y|charging+screen": {
+        "low": 120,
+        "high": 250,
+        "typical": 205,
+        "sampleSize": 4,
+        "since": "2024"
+      },
+      "iPad 5th Gen|battery+screen": {
+        "low": 120,
+        "high": 140,
+        "typical": 140,
+        "sampleSize": 3,
+        "since": "2022"
+      },
+      "iPad 7th Gen|battery+screen": {
+        "low": 200,
+        "high": 220,
+        "typical": 210,
+        "sampleSize": 6,
+        "since": "2021"
+      },
+      "iPad 7th Gen|charging+screen": {
+        "low": 220,
+        "high": 230,
+        "typical": 230,
+        "sampleSize": 3,
+        "since": "2022"
+      },
+      "iPad 9.7 6th gen|battery+screen": {
+        "low": 160,
+        "high": 260,
+        "typical": 200,
+        "sampleSize": 5,
+        "since": "2022"
+      },
+      "iPad 9.7 6th gen|charging+screen": {
+        "low": 200,
+        "high": 200,
+        "typical": 200,
+        "sampleSize": 6,
+        "since": "2021"
+      },
+      "iPad 9th gen|battery+screen": {
+        "low": 200,
+        "high": 280,
+        "typical": 250,
+        "sampleSize": 5,
+        "since": "2022"
+      },
+      "iPad 9th gen|charging+screen": {
+        "low": 240,
+        "high": 250,
+        "typical": 250,
+        "sampleSize": 3,
+        "since": "2025"
+      },
+      "iPad Mini 4|battery+screen": {
+        "low": 280,
+        "high": 300,
+        "typical": 300,
+        "sampleSize": 3,
+        "since": "2021"
+      },
+      "iPhone 11 Pro Max|battery+charging": {
+        "low": 120,
+        "high": 180,
+        "typical": 180,
+        "sampleSize": 3,
+        "since": "2023"
+      },
+      "iPhone 11 Pro Max|camera+screen": {
+        "low": 190,
+        "high": 370,
+        "typical": 310,
+        "sampleSize": 4,
+        "since": "2022"
+      },
+      "iPhone 11 Pro|battery+screen": {
+        "low": 180,
+        "high": 180,
+        "typical": 180,
+        "sampleSize": 3,
+        "since": "2022"
+      },
+      "iPhone 11 Pro|charging+screen": {
+        "low": 250,
+        "high": 300,
+        "typical": 300,
+        "sampleSize": 3,
+        "since": "2023"
+      },
+      "iPhone 11|battery+screen": {
+        "low": 200,
+        "high": 250,
+        "typical": 220,
+        "sampleSize": 10,
+        "since": "2021"
+      },
+      "iPhone 11|charging+screen": {
+        "low": 220,
+        "high": 240,
+        "typical": 230,
+        "sampleSize": 5,
+        "since": "2021"
+      },
+      "iPhone 11|screen+speaker": {
+        "low": 140,
+        "high": 160,
+        "typical": 160,
+        "sampleSize": 3,
+        "since": "2021"
+      },
+      "iPhone 12 Pro Max|back_glass+camera": {
+        "low": 200,
+        "high": 220,
+        "typical": 220,
+        "sampleSize": 7,
+        "since": "2023"
+      },
+      "iPhone 12 Pro|back_glass+camera": {
+        "low": 250,
+        "high": 280,
+        "typical": 280,
+        "sampleSize": 3,
+        "since": "2023"
+      },
+      "iPhone 12 Pro|back_glass+charging": {
+        "low": 250,
+        "high": 250,
+        "typical": 250,
+        "sampleSize": 3,
+        "since": "2022"
+      },
+      "iPhone 13 Pro Max|back_glass+battery": {
+        "low": 250,
+        "high": 250,
+        "typical": 250,
+        "sampleSize": 5,
+        "since": "2023"
+      },
+      "iPhone 13 Pro Max|back_glass+camera": {
+        "low": 200,
+        "high": 320,
+        "typical": 200,
+        "sampleSize": 8,
+        "since": "2024"
+      },
+      "iPhone 13 Pro Max|back_glass+speaker": {
+        "low": 160,
+        "high": 220,
+        "typical": 220,
+        "sampleSize": 3,
+        "since": "2023"
+      },
+      "iPhone 13 Pro|back_glass+battery": {
+        "low": 160,
+        "high": 280,
+        "typical": 280,
+        "sampleSize": 3,
+        "since": "2024"
+      },
+      "iPhone 13 Pro|battery+charging": {
+        "low": 200,
+        "high": 200,
+        "typical": 200,
+        "sampleSize": 3,
+        "since": "2024"
+      },
+      "iPhone 13|back_glass+battery": {
+        "low": 120,
+        "high": 190,
+        "typical": 190,
+        "sampleSize": 3,
+        "since": "2024"
+      },
+      "iPhone 13|battery+screen": {
+        "low": 200,
+        "high": 200,
+        "typical": 200,
+        "sampleSize": 3,
+        "since": "2025"
+      },
+      "iPhone 14 Plus|battery+screen": {
+        "low": 180,
+        "high": 250,
+        "typical": 230,
+        "sampleSize": 4,
+        "since": "2024"
+      },
+      "iPhone 14 Pro Max|back_glass+battery": {
+        "low": 250,
+        "high": 280,
+        "typical": 265,
+        "sampleSize": 4,
+        "since": "2025"
+      },
+      "iPhone 14 Pro|back_glass+battery": {
+        "low": 250,
+        "high": 300,
+        "typical": 300,
+        "sampleSize": 11,
+        "since": "2024"
+      },
+      "iPhone 15 Pro Max|back_glass+battery": {
+        "low": 120,
+        "high": 250,
+        "typical": 250,
+        "sampleSize": 3,
+        "since": "2025"
+      },
+      "iPhone 6 Plus|battery+screen": {
+        "low": 100,
+        "high": 100,
+        "typical": 100,
+        "sampleSize": 5,
+        "since": "2021"
+      },
+      "iPhone 6S Plus|battery+charging": {
+        "low": 120,
+        "high": 125,
+        "typical": 120,
+        "sampleSize": 6,
+        "since": "2020"
+      },
+      "iPhone 6S Plus|battery+screen": {
+        "low": 130,
+        "high": 150,
+        "typical": 130,
+        "sampleSize": 5,
+        "since": "2021"
+      },
+      "iPhone 6S|battery+charging": {
+        "low": 100,
+        "high": 120,
+        "typical": 100,
+        "sampleSize": 5,
+        "since": "2021"
+      },
+      "iPhone 6S|battery+screen": {
+        "low": 120,
+        "high": 130,
+        "typical": 120,
+        "sampleSize": 10,
+        "since": "2020"
+      },
+      "iPhone 6|battery+screen": {
+        "low": 90,
+        "high": 120,
+        "typical": 115,
+        "sampleSize": 10,
+        "since": "2020"
+      },
+      "iPhone 6|battery+speaker": {
+        "low": 60,
+        "high": 100,
+        "typical": 100,
+        "sampleSize": 3,
+        "since": "2020"
+      },
+      "iPhone 7 Plus|battery+camera": {
+        "low": 90,
+        "high": 140,
+        "typical": 140,
+        "sampleSize": 3,
+        "since": "2020"
+      },
+      "iPhone 7 Plus|battery+charging": {
+        "low": 140,
+        "high": 150,
+        "typical": 145,
+        "sampleSize": 4,
+        "since": "2021"
+      },
+      "iPhone 7 Plus|battery+screen": {
+        "low": 150,
+        "high": 150,
+        "typical": 150,
+        "sampleSize": 6,
+        "since": "2021"
+      },
+      "iPhone 7 Plus|camera+screen": {
+        "low": 140,
+        "high": 150,
+        "typical": 150,
+        "sampleSize": 3,
+        "since": "2022"
+      },
+      "iPhone 7|battery+charging": {
+        "low": 90,
+        "high": 120,
+        "typical": 120,
+        "sampleSize": 3,
+        "since": "2021"
+      },
+      "iPhone 7|battery+charging+screen": {
+        "low": 110,
+        "high": 150,
+        "typical": 150,
+        "sampleSize": 3,
+        "since": "2021"
+      },
+      "iPhone 7|battery+screen": {
+        "low": 120,
+        "high": 150,
+        "typical": 130,
+        "sampleSize": 12,
+        "since": "2021"
+      },
+      "iPhone 8 Plus|back_glass+battery": {
+        "low": 120,
+        "high": 180,
+        "typical": 180,
+        "sampleSize": 3,
+        "since": "2021"
+      },
+      "iPhone 8 Plus|back_glass+battery+screen": {
+        "low": 200,
+        "high": 245,
+        "typical": 245,
+        "sampleSize": 3,
+        "since": "2021"
+      },
+      "iPhone 8 Plus|back_glass+camera+screen": {
+        "low": 230,
+        "high": 280,
+        "typical": 265,
+        "sampleSize": 4,
+        "since": "2021"
+      },
+      "iPhone 8 Plus|battery+charging": {
+        "low": 140,
+        "high": 140,
+        "typical": 140,
+        "sampleSize": 3,
+        "since": "2021"
+      },
+      "iPhone 8 Plus|battery+screen": {
+        "low": 100,
+        "high": 160,
+        "typical": 155,
+        "sampleSize": 4,
+        "since": "2021"
+      },
+      "iPhone 8 Plus|camera+screen": {
+        "low": 110,
+        "high": 120,
+        "typical": 120,
+        "sampleSize": 3,
+        "since": "2021"
+      },
+      "iPhone 8 Plus|charging+screen": {
+        "low": 175,
+        "high": 180,
+        "typical": 180,
+        "sampleSize": 4,
+        "since": "2021"
+      },
+      "iPhone 8|back_glass+battery": {
+        "low": 120,
+        "high": 150,
+        "typical": 150,
+        "sampleSize": 3,
+        "since": "2022"
+      },
+      "iPhone 8|back_glass+battery+screen": {
+        "low": 180,
+        "high": 200,
+        "typical": 200,
+        "sampleSize": 3,
+        "since": "2021"
+      },
+      "iPhone 8|battery+screen": {
+        "low": 130,
+        "high": 150,
+        "typical": 150,
+        "sampleSize": 7,
+        "since": "2021"
+      },
+      "iPhone 8|camera+screen": {
+        "low": 135,
+        "high": 160,
+        "typical": 160,
+        "sampleSize": 3,
+        "since": "2021"
+      },
+      "iPhone 8|charging+screen": {
+        "low": 140,
+        "high": 150,
+        "typical": 150,
+        "sampleSize": 3,
+        "since": "2021"
+      },
+      "iPhone SE|battery+charging": {
+        "low": 120,
+        "high": 150,
+        "typical": 150,
+        "sampleSize": 3,
+        "since": "2024"
+      },
+      "iPhone XR|camera+screen": {
+        "low": 195,
+        "high": 200,
+        "typical": 200,
+        "sampleSize": 4,
+        "since": "2021"
+      },
+      "iPhone XS Max|back_glass+camera": {
+        "low": 100,
+        "high": 230,
+        "typical": 230,
+        "sampleSize": 3,
+        "since": "2021"
+      },
+      "iPhone XS|back_glass+battery": {
+        "low": 200,
+        "high": 240,
+        "typical": 230,
+        "sampleSize": 5,
+        "since": "2021"
+      },
+      "iPhone XS|back_glass+camera": {
+        "low": 160,
+        "high": 190,
+        "typical": 190,
+        "sampleSize": 3,
+        "since": "2020"
+      },
+      "iPhone XS|battery+screen": {
+        "low": 200,
+        "high": 250,
+        "typical": 250,
+        "sampleSize": 7,
+        "since": "2021"
+      },
+      "iPhone XS|camera+screen": {
+        "low": 210,
+        "high": 260,
+        "typical": 250,
+        "sampleSize": 5,
+        "since": "2020"
+      },
+      "iPhone XS|screen+speaker": {
+        "low": 170,
+        "high": 250,
+        "typical": 225,
+        "sampleSize": 4,
+        "since": "2021"
+      },
+      "iPhone X|battery+charging": {
+        "low": 150,
+        "high": 150,
+        "typical": 150,
+        "sampleSize": 3,
+        "since": "2021"
+      },
+      "iPhone X|battery+screen": {
+        "low": 180,
+        "high": 280,
+        "typical": 220,
+        "sampleSize": 16,
+        "since": "2021"
+      },
+      "iPhone X|camera+screen": {
+        "low": 130,
+        "high": 180,
+        "typical": 180,
+        "sampleSize": 9,
+        "since": "2020"
+      },
+      "iPhone X|charging+screen": {
+        "low": 220,
+        "high": 230,
+        "typical": 225,
+        "sampleSize": 6,
+        "since": "2020"
+      }
     }
   },
   "policies": {
