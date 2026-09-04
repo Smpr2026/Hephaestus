@@ -16,7 +16,7 @@ const { createBrain } = require('./src/brain.js');
 // phrases Hope must never say, in any answer, on any path. "let me check" is
 // the stall-theatre line; the rest are the canned slip-ups and AI tells the
 // owner has banned outright.
-const BANNED = /i'?m your man|shop'?s shut|shop is shut|the shop is closed right now|let me check that|let me check for you|great question|as an ai|i'?m an ai|i am an ai|language model|i'?m just a bot|i am just a bot|cannot assist|unable to assist|i apologi[sz]e for any inconvenience/i;
+const BANNED = /i'?m your man|shop'?s shut|shop is shut|the shop is closed right now|let me check that|let me check for you|great question|as an ai|i'?m an ai|i am an ai|language model|i'?m just a bot|i am just a bot|cannot assist|unable to assist|i apologi[sz]e for any inconvenience|i want to make sure i get you the right answer/i;
 
 // a reply that grabs for the customer's number or pushes them offline
 const LEAD_GRAB = /\b(your (phone )?number|contact number|best number|leave (us )?your|we'?ll (call|ring|text) you)\b/i;
@@ -132,6 +132,56 @@ test('two misses in a cold chat stay conversational and varied', () => {
   assert.notStrictEqual(textOf(m1), textOf(m2), 'the two fallback lines must differ');
   assert.ok(!LEAD_GRAB.test(textOf(m1)) && !LEAD_GRAB.test(textOf(m2)),
     'a cold miss must never collect a number');
+});
+
+/* --------------------------------------- 7. slang, small talk, learning */
+
+test('small-talk openers get small talk back, not a template', () => {
+  for (const q of ['whats going on', "what's going on", 'hows it going', 'how are you']) {
+    const r = createBrain(KB).respond(q);
+    assert.ok(r.intent.startsWith('casual_greeting'), `"${q}" matched ${r.intent}`);
+    assert.ok(!BANNED.test(textOf(r)));
+  }
+  // the same words inside a real repair sentence still route to the repair
+  const real = createBrain(KB).respond('whats going on with my iphone battery, it dies by lunch');
+  assert.ok(!real.intent.startsWith('casual_greeting'), `repair sentence became small talk: ${real.intent}`);
+});
+
+test('Aussie slang lands like plain English', () => {
+  const blower = createBrain(KB).respond('me blower carked it');
+  assert.ok(/fault_dead|^triage$/.test(blower.intent),
+    `"me blower carked it" is a dead phone - expected the dead-phone answer or triage, got ${blower.intent}`);
+  assert.ok(!/fault_screen/.test(blower.intent), '"carked" must never be misread as "cracked"');
+  const cactus = createBrain(KB).respond('my phone is cactus');
+  assert.strictEqual(cactus.intent, 'triage', `"my phone is cactus" matched ${cactus.intent}`);
+  const cooked = createBrain(KB).respond('screen is cooked');
+  assert.ok(/fault_screen/.test(cooked.intent), `"screen is cooked" matched ${cooked.intent}`);
+});
+
+test('a missed phrasing is learned from the customer\'s own clarification', () => {
+  const b = createBrain(KB);
+  const miss = b.respond('the doovalacky is torched mate');
+  assert.ok(/^fallback/.test(miss.intent), `expected a miss first, got ${miss.intent}`);
+  const clar = b.respond('sorry - my phone screen is smashed');
+  assert.ok(/fault_screen/.test(clar.intent), `clarification matched ${clar.intent}`);
+  const again = b.respond('told ya, doovalacky is torched');
+  assert.ok(/fault_screen/.test(again.intent) && /\[learned\]/.test(again.intent),
+    `the repeated slang should hit the learned answer, got ${again.intent}`);
+  // and the learned map round-trips for persistence in the widget
+  const b2 = createBrain(KB);
+  b2.importLearned(b.exportLearned());
+  assert.ok(/\[learned\]/.test(b2.respond('doovalacky is torched again').intent),
+    'a fresh brain fed the exported map should answer the slang directly');
+});
+
+test('consoles are their own answer, never the phone spiel', () => {
+  for (const q of ['do you fix consoles', 'ps5 hdmi port repair', 'xbox repair',
+                   'nintendo switch not charging', 'playstation wont turn on']) {
+    const r = createBrain(KB).respond(q);
+    assert.ok(r.intent.startsWith('consoles'), `"${q}" matched ${r.intent}`);
+    assert.ok(/assess/i.test(textOf(r)), `console answer must promise assessment first: ${textOf(r).slice(0, 120)}`);
+    assert.ok(!/\$\d/.test(textOf(r)), 'console answer must never invent a price');
+  }
 });
 
 /* --------------------------------------------------- 6. identity holds */

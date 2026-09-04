@@ -12,6 +12,14 @@
   if (!KB || !KB.intents || !window.createBrain) return;
 
   var BRAIN = createBrain(KB);
+  // phrasings this browser taught the bot on earlier visits carry over
+  if (BRAIN.importLearned) {
+    try { BRAIN.importLearned(JSON.parse(localStorage.getItem('smprw.learn') || '{}')); } catch(e){}
+  }
+  function saveLearned(){
+    if (!BRAIN.exportLearned) return;
+    try { localStorage.setItem('smprw.learn', JSON.stringify(BRAIN.exportLearned())); } catch(e){}
+  }
   var B = KB.business, P = KB.persona || {};
   var AV = String(P.avatarUrl || '');
   function avInner(){ return AV ? '<img src="' + esc(AV) + '" alt="">' : esc(P.initials || 'S'); }
@@ -471,6 +479,7 @@
 
   function deliver(res){
     if (res && res.text) remember('assistant', res.text);
+    saveLearned();
     var text = lastAsked;
     var parts = split(res.text);
     var stall = res.card ? thinkingLine() : null;

@@ -3455,6 +3455,45 @@
   ],
   "intents": [
     {
+      "id": "casual_greeting",
+      "category": "Conversation",
+      "q": "What's going on?",
+      "patterns": [
+        "whats going on",
+        "hows it going",
+        "how are you",
+        "how you going",
+        "how ya going",
+        "whats happening",
+        "hows things",
+        "how is it going"
+      ],
+      "answer": "Good here - flat out with repairs as always! What can I do for you?",
+      "chips": []
+    },
+    {
+      "id": "consoles",
+      "category": "Repairs",
+      "q": "Do you fix game consoles?",
+      "patterns": [
+        "console repair",
+        "do you fix consoles",
+        "game console",
+        "playstation repair",
+        "ps5 repair",
+        "ps4 repair",
+        "xbox repair",
+        "nintendo switch repair",
+        "switch hdmi",
+        "console hdmi port"
+      ],
+      "answer": "Yeah, consoles come across the counter too - PlayStation, Xbox and Switch, mostly HDMI ports, power faults and drives. They're board-level jobs, so we assess the console first and give you a firm quote before any work starts. Bring it in to {{addressShort}}, or ring {{phone}} if you want to talk it through first.",
+      "chips": [
+        "How long does a repair take?",
+        "Where are you?"
+      ]
+    },
+    {
       "id": "greeting",
       "category": "Conversation",
       "q": "Hi",

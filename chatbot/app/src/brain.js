@@ -46,6 +46,27 @@ function createBrain(KB) {
       .replace(/ in cell /g, ' incell ');
   }
 
+  // Aussie counter slang, mapped BEFORE autocorrect - "carked" must never be
+  // one-edit "corrected" into "cracked" and send someone down the screen path
+  var SLANG = [
+    [/ carked it /g, ' dead '],
+    [/ carked /g, ' dead '],
+    [/ blower /g, ' phone '],
+    [/ dog and bone /g, ' phone '],
+    [/ cactus /g, ' broken '],
+    [/ cooked /g, ' broken '],
+    [/ buggered /g, ' broken '],
+    [/ knackered /g, ' broken '],
+    [/ munted /g, ' broken '],
+    [/ on the blink /g, ' faulty '],
+    [/ chucking a wobbly /g, ' playing up '],
+    [/ spat the dummy /g, ' stopped working ']
+  ];
+  function slang(t) {
+    for (var si = 0; si < SLANG.length; si++) t = t.replace(SLANG[si][0], SLANG[si][1]);
+    return t;
+  }
+
   function sigTokens(t) {
     var out = {};
     t.trim().split(' ').forEach(function (w) {
@@ -662,11 +683,40 @@ function createBrain(KB) {
     "That one hasn't changed - "
   ];
 
+  // The learning loop: when a phrasing misses and the customer's next message
+  // resolves to a real answer, the unknown words from the missed message are
+  // taught as pointers to that answer - so the same slang lands directly next
+  // time, this session and (via export/import) the next visit too.
+  var learned = {};            // unknown token -> knowledge-base intent id
+  var lastMissTokens = null;   // sig tokens of the message we just missed
+  var LEARN_CAP = 80;
+  var NO_LEARN = { greeting: 1, casual_greeting: 1, bot_identity: 1, offtopic: 1, human: 1 };
+
+  function baseIntentId(intentStr) {
+    var m = /^([a-z0-9_]+) \(/.exec(String(intentStr));
+    return m ? m[1] : null;
+  }
+
   function respond(raw) {
     var res = respondCore(raw);
     if (res && res.intent) {
       lastIntentId = String(res.intent);
-      missStreak = /^fallback/.test(lastIntentId) ? missStreak + 1 : 0;
+      var isMiss = /^fallback/.test(lastIntentId);
+      if (isMiss) {
+        lastMissTokens = sigTokens(canon(slang(norm(raw))));
+      } else {
+        var taughtId = baseIntentId(lastIntentId);
+        if (lastMissTokens && taughtId && !NO_LEARN[taughtId] &&
+            KB.intents.some(function (x) { return x.id === taughtId; })) {
+          for (var lw in lastMissTokens) {
+            if (!VOCAB[lw] && !learned[lw] && Object.keys(learned).length < LEARN_CAP) {
+              learned[lw] = taughtId;
+            }
+          }
+        }
+        lastMissTokens = null;
+      }
+      missStreak = isMiss ? missStreak + 1 : 0;
     }
     if (res && res.text) {
       if (res.text === lastReplyText) {
@@ -678,6 +728,19 @@ function createBrain(KB) {
       }
     }
     return res;
+  }
+
+  function exportLearned() { return learned; }
+  function importLearned(o) {
+    if (!o || typeof o !== 'object') return;
+    for (var k in o) {
+      if (typeof k === 'string' && k.length >= 3 && k.length <= 24 &&
+          typeof o[k] === 'string' && !NO_LEARN[o[k]] &&
+          KB.intents.some(function (x) { return x.id === o[k]; }) &&
+          Object.keys(learned).length < LEARN_CAP) {
+        learned[k] = o[k];
+      }
+    }
   }
 
   // When the conversation is stuck, hand it to George with the context
@@ -704,7 +767,7 @@ function createBrain(KB) {
   }
 
   function respondCore(raw) {
-    var t = canon(autocorrect(norm(raw)));
+    var t = canon(autocorrect(slang(norm(raw))));
 
     // check refusals against the corrected AND the raw text - a "correction"
     // must never turn a refusable ask into an answerable one
@@ -813,6 +876,22 @@ function createBrain(KB) {
       if (movedIntent) return fromIntent(movedIntent);
     }
 
+    // a short "what's going on" / "how's it going" is small talk, not a miss -
+    // answer like a person on the counter would. Longer sentences containing
+    // the same words ("whats going on with my battery") fall through.
+    if (t.trim().split(' ').length <= 4 &&
+        /\b(whats going on|hows it going|how are you|how (you|ya) going|whats happening|hows things|how is it going)\b/.test(t)) {
+      var cgIntent = KB.intents.filter(function (x) { return x.id === 'casual_greeting'; })[0];
+      if (cgIntent) return fromIntent(cgIntent);
+    }
+
+    // a games console named anywhere routes to the console answer - "nintendo
+    // switch not charging" must never get the phone charging-port lint spiel
+    if (/\b(playstation|ps[2-5]\b|xbox|nintendo|game console|consoles?)\b/.test(t)) {
+      var conIntent = KB.intents.filter(function (x) { return x.id === 'consoles'; })[0];
+      if (conIntent) return fromIntent(conIntent);
+    }
+
     // "are you a real person or a bot" is an identity question, not a request
     // to be put through to a person - "real person" would out-score it below.
     // Hope answers honestly and keeps helping; she never gets routed away.
@@ -825,6 +904,9 @@ function createBrain(KB) {
     var best = null, bestScore = 0;
     for (var i = 0; i < KB.intents.length; i++) {
       if (model && KB.intents[i].id === 'brands') continue;
+      // small talk only fires via the short-message guard above - its phrases
+      // ("whats going on") live inside real repair sentences too
+      if (KB.intents[i].id === 'casual_greeting') continue;
       var s = scoreIntent(KB.intents[i], t);
       if (s > bestScore) { bestScore = s; best = KB.intents[i]; }
     }
@@ -863,6 +945,7 @@ function createBrain(KB) {
       // "moved" only fires on a real ask about the move - loose word overlap
       // ("i moved my data...") must never answer "yes, we've moved!"
       if (KB.intents[k].id === 'moved') continue;
+      if (KB.intents[k].id === 'casual_greeting') continue;
       var n = 0;
       for (var w in toks) { if (KB.intents[k]._tokens[w]) n++; }
       if (n > tokScore) { tokScore = n; tokBest = KB.intents[k]; }
@@ -874,6 +957,25 @@ function createBrain(KB) {
     }
 
     if (model) return modelClarify(model);
+
+    // the conversation may already have taught us this phrasing - a miss the
+    // customer clarified earlier answers directly the second time around
+    var ltoks = sigTokens(t), lbest = null, lscore = 0, lcount = {};
+    for (var lw2 in ltoks) {
+      var lid = learned[lw2];
+      if (lid) {
+        lcount[lid] = (lcount[lid] || 0) + 1;
+        if (lcount[lid] > lscore) { lscore = lcount[lid]; lbest = lid; }
+      }
+    }
+    if (lbest) {
+      var lIntent = KB.intents.filter(function (x) { return x.id === lbest; })[0];
+      if (lIntent) {
+        var lres = fromIntent(lIntent);
+        lres.intent += ' [learned]';
+        return lres;
+      }
+    }
 
     // A broad "my phone's damaged" or a bare "i need help" is the start of a
     // conversation, not a dead end - ask what a counter tech would ask.
@@ -913,13 +1015,21 @@ function createBrain(KB) {
     }
 
     return {
-      text: "Hmm, I want to make sure I get you the right answer rather than guess. " +
-            "What device is it, and what's going on with it?",
+      text: FALLBACK_ASKS[fallbackIdx++ % FALLBACK_ASKS.length],
       card: null, contact: false,
       chips: ['What do you repair?', 'How much does a repair cost?', 'What are your hours?'],
       intent: 'fallback'
     };
   }
+
+  // a first miss sounds like a person who didn't quite catch it, never a
+  // hedge or a script - and never the same wording twice in a row
+  var fallbackIdx = 0;
+  var FALLBACK_ASKS = [
+    "Run that by me again? What device are we talking about, and what's it doing?",
+    "Righto - what have we got? Tell me what phone or gadget it is and what's going on with it.",
+    "You've lost me for a sec! What's the device, and what's it up to?"
+  ];
 
   /* ---------- the shop: find the thing, show the price, say if it's here ---- */
 
@@ -1076,7 +1186,7 @@ function createBrain(KB) {
 
   // Returns {terms, brand} when the customer is shopping, null when they aren't.
   function parseProductQuery(raw) {
-    var t = canon(autocorrect(norm(raw)));
+    var t = canon(autocorrect(slang(norm(raw))));
     var brand = null;
     for (var i = 0; i < BRANDS.length; i++) {
       if (t.indexOf(' ' + BRANDS[i]) !== -1) { brand = BRANDS[i]; break; }
@@ -1482,6 +1592,7 @@ function createBrain(KB) {
 
   return {
     respond: respond, fill: fill, norm: norm,
+    exportLearned: exportLearned, importLearned: importLearned,
     parsePriceQuery: parsePriceQuery, priceCard: priceCard,
     parseProductQuery: parseProductQuery, productAnswer: productAnswer, searchCatalogue: searchCatalogue,
     retailFromCost: retailFromCost, tierRows: tierRows
