@@ -131,9 +131,9 @@ get scraped and abused within a week of launch if it is uncapped.
 knowledge base show up as clusters of handoffs, and those clusters are your content roadmap —
 both for the bot and for the website's own FAQ and repair pages.
 
-**Presence.** The widget already shows *Online now* / *Away — back at 9am* on real Sydney time,
-and opens after-hours replies with a line acknowledging the shop is shut. Keep that behaviour —
-it's most of what makes the chat feel live.
+**Presence.** The widget shows *Online now* around the clock — Hope never tells a customer the
+shop is shut, because the chat itself is always answered. Opening hours only come up when the
+customer asks, or when they want to book a visit.
 
 **Opening hours awareness.** Pass the current Sydney time into the prompt as a variable and let
 the assistant say "we're open right now — walk in" or "we're closed at the moment, but you can

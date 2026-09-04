@@ -214,10 +214,10 @@ appearing the millisecond you hit send, which is the single biggest tell that so
 boundary and arrives as two messages, with the typing indicator between them. That rhythm — line,
 pause, line — is what a real conversation looks like on a phone.
 
-**It knows what time it is.** The status dot reads *Online now* during shop hours and *Away — back
-at 9am* outside them, on real Sydney time. After hours the first reply opens with "Shop's shut at
-the moment, but here you go —" and then answers anyway. A bot that's cheerfully "online" at 2am is
-obviously a bot; one that knows the shop is closed reads as someone checking their phone.
+**Always on.** The status dot reads *Online now* around the clock, and Hope never opens with
+"shop's shut" or any other canned status line — the chat is answered whenever a customer types.
+Opening hours only come up when the customer asks or wants to plan a visit. (This replaced the
+earlier "Away — back at 9am" design: the owner wants the counter to feel staffed, full stop.)
 
 **Where it stops.** If a customer asks straight out whether they're talking to a person, it tells
 them the truth — warmly, and without making a thing of it:

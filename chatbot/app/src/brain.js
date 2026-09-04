@@ -654,12 +654,28 @@ function createBrain(KB) {
   var lastModel = null;        // the device this conversation is about, across turns
   var repairDiscussed = false; // a specific issue has come up - handoffs are allowed now
   var missStreak = 0;          // consecutive answers we couldn't ground - 2 means stuck
+  var lastReplyText = '';      // what we last said - a repeat gets acknowledged, never echoed
+  var repeatIdx = 0;
+  var REPEAT_NUDGES = [
+    'Yep, same as before - ',
+    'Still stands - ',
+    "That one hasn't changed - "
+  ];
 
   function respond(raw) {
     var res = respondCore(raw);
     if (res && res.intent) {
       lastIntentId = String(res.intent);
       missStreak = /^fallback/.test(lastIntentId) ? missStreak + 1 : 0;
+    }
+    if (res && res.text) {
+      if (res.text === lastReplyText) {
+        // asked the same thing again: acknowledge warmly and move forward
+        // instead of parroting the identical message back
+        res.text = REPEAT_NUDGES[repeatIdx++ % REPEAT_NUDGES.length] + res.text;
+      } else {
+        lastReplyText = res.text;
+      }
     }
     return res;
   }
@@ -797,6 +813,15 @@ function createBrain(KB) {
       if (movedIntent) return fromIntent(movedIntent);
     }
 
+    // "are you a real person or a bot" is an identity question, not a request
+    // to be put through to a person - "real person" would out-score it below.
+    // Hope answers honestly and keeps helping; she never gets routed away.
+    if (/\b(are you|r u|is this|am i (talking|chatting|speaking) (to|with))\b/.test(t) &&
+        /\b(a )?(bot|robot|ai|chatbot|real person|actual person|human|a person|automated)\b/.test(t)) {
+      var idIntent = KB.intents.filter(function (x) { return x.id === 'bot_identity'; })[0];
+      if (idIntent) return fromIntent(idIntent);
+    }
+
     var best = null, bestScore = 0;
     for (var i = 0; i < KB.intents.length; i++) {
       if (model && KB.intents[i].id === 'brands') continue;
@@ -812,6 +837,23 @@ function createBrain(KB) {
         t.trim().split(' ').length <= 7) {
       var svcIntent = KB.intents.filter(function (x) { return x.id === 'services'; })[0];
       if (svcIntent) return fromIntent(svcIntent);
+    }
+
+    // "my phone is broken" names no actual symptom - a counter tech asks
+    // what's wrong, she doesn't assume it's the screen. Word overlap below
+    // would guess a fault, so the generic-damage triage must run first.
+    // Anything naming a real part or symptom ("screen cracked") skips this.
+    var genericDamage = !model && !repair &&
+      /\b(broken?|damaged?|busted|stuffed|cooked|wrecked|faulty|playing up|not working|wont work|stopped working|issues?|problems?|trouble)\b/.test(t) &&
+      /\b(phone|mobile|device|handset|ipad|tablet|laptop|macbook)\b/.test(t) &&
+      !/\b(screen|display|glass|battery|charg\w*|camera|speaker|mic|sound|audio|water|wet|liquid|button|port|face ?id|touch|back|data|software|virus)\b/.test(t) &&
+      t.trim().split(' ').length <= 8;
+    if (genericDamage) {
+      return {
+        text: "No dramas - what phone is it, and what's it doing?",
+        card: null, contact: false, products: null, options: null,
+        chips: [], intent: 'triage'
+      };
     }
 
     // nothing matched as a phrase - try word overlap before giving up
