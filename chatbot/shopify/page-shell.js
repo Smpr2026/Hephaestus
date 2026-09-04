@@ -268,6 +268,7 @@
         t.remove();
         addBot({ text: body, card: last ? res.card : null, products: last ? res.products : null,
                  contact: last ? res.contact : false, options: last ? res.options : null,
+                 links: last ? res.links : null,
                  chips: last ? res.chips : [], intent: last ? res.intent : null });
         step++;
         setTimeout(next, last ? 0 : PACE.between);
