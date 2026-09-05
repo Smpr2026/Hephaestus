@@ -33,6 +33,19 @@
   .hope { align-self: flex-start; background: #232b33; }
   .sys  { align-self: center; background: none; color: #6d7a86; font-size: 12.5px; }
   #unsupported { max-width: 480px; margin: 30px 16px; line-height: 1.5; display: none; }
+  #voiceRow {
+    display: flex; align-items: center; gap: 8px; margin-top: 14px;
+    font-size: 13px; color: #93a1ad;
+  }
+  #voiceSel {
+    max-width: min(300px, 60vw); background: #1a2129; color: #e8ecf0;
+    border: 1px solid #2c3742; border-radius: 8px; padding: 5px 8px; font-size: 13px;
+  }
+  #tryVoice {
+    background: #232b33; color: #e8ecf0; border: 1px solid #2c3742;
+    border-radius: 8px; padding: 5px 10px; font-size: 13px; cursor: pointer;
+  }
+  #voiceHint { font-size: 12px; color: #6d7a86; margin-top: 6px; max-width: 460px; text-align: center; padding: 0 16px; }
 </style>
 </head>
 <body>
@@ -43,6 +56,12 @@
 
 <button id="call" title="Start call">📞</button>
 <div id="state">Tap to start the call</div>
+<div id="voiceRow">
+  <label for="voiceSel">Hope's voice</label>
+  <select id="voiceSel"></select>
+  <button id="tryVoice" type="button">▶ try</button>
+</div>
+<div id="voiceHint"></div>
 <div id="log"></div>
 <div id="unsupported">
   This browser doesn't have the built-in speech engine the test line uses.
@@ -83,13 +102,69 @@
     stateEl.className = cls || '';
   }
 
-  // prefer an Australian voice; fall back to any English one
+  /* Voice quality varies enormously between what browsers ship. Edge's
+   * "Natural" voices (Natasha en-AU especially) are near-human; Chrome's
+   * "Google" voices are decent; the old local SAPI/eSpeak ones are the
+   * robots. Rank what this machine actually has, auto-pick the best, and
+   * let George audition the rest from the dropdown. */
+  var voiceSel = document.getElementById('voiceSel');
+  var chosenVoice = null;
+
+  function rankVoice(v) {
+    var s = 0, n = v.name;
+    if (/natural/i.test(n)) s += 16;               // Edge neural voices
+    if (/en[-_]AU/i.test(v.lang)) s += 8;          // Aussie accent
+    if (/natasha|karen|catherine|hayley|annette|olivia/i.test(n)) s += 3;
+    if (/google/i.test(n)) s += 6;                 // Chrome's better tier
+    if (/premium|enhanced|neural|online/i.test(n)) s += 4;
+    if (/^en/i.test(v.lang)) s += 1;
+    if (/male\)|james|william|duncan|lee\b/i.test(n)) s -= 3; // Hope's not a bloke
+    if (/espeak|compact/i.test(n)) s -= 10;        // the truly robotic ones
+    return s;
+  }
+
+  function englishVoices() {
+    return speechSynthesis.getVoices()
+      .filter(function (v) { return /^en/i.test(v.lang); })
+      .sort(function (a, b) { return rankVoice(b) - rankVoice(a); });
+  }
+
+  function refreshVoices() {
+    var vs = englishVoices();
+    if (!vs.length) return;
+    var saved = null;
+    try { saved = localStorage.getItem('hope.voice'); } catch (e) {}
+    voiceSel.innerHTML = '';
+    vs.forEach(function (v) {
+      var o = document.createElement('option');
+      o.value = v.name;
+      o.textContent = v.name.replace(/^Microsoft |^Google /, '') + ' (' + v.lang + ')';
+      voiceSel.appendChild(o);
+    });
+    var pick = vs.filter(function (v) { return v.name === saved; })[0] || vs[0];
+    voiceSel.value = pick.name;
+    chosenVoice = pick;
+    var hint = document.getElementById('voiceHint');
+    if (!vs.some(function (v) { return /natural/i.test(v.name); })) {
+      hint.textContent = 'Tip: open this page in Microsoft Edge for the most realistic voice — its "Natasha (Natural)" Australian voice sounds like a real person.';
+    } else {
+      hint.textContent = '';
+    }
+  }
+  refreshVoices();
+  speechSynthesis.onvoiceschanged = refreshVoices;
+
+  voiceSel.onchange = function () {
+    chosenVoice = englishVoices().filter(function (v) { return v.name === voiceSel.value; })[0] || null;
+    try { localStorage.setItem('hope.voice', voiceSel.value); } catch (e) {}
+  };
+
+  document.getElementById('tryVoice').onclick = function () {
+    if (!live) say("G'day, this is Hope - how's this voice sound to you?", function () {});
+  };
+
   function pickVoice() {
-    var vs = speechSynthesis.getVoices();
-    return vs.filter(function (v) { return /en[-_]AU/i.test(v.lang); })[0]
-        || vs.filter(function (v) { return /female|karen|catherine|zira|libby|natasha/i.test(v.name) && /^en/i.test(v.lang); })[0]
-        || vs.filter(function (v) { return /^en/i.test(v.lang); })[0]
-        || null;
+    return chosenVoice || englishVoices()[0] || null;
   }
 
   // cards don't read aloud well - flatten the essentials into speech
