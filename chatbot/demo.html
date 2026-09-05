@@ -982,6 +982,8 @@ function createBrain(KB) {
                      fault_camera: 'camera', fault_audio: 'speaker' };
   var pendingFault = null;     // {repair: key} for priceable faults, {generic: true} otherwise
   var awaitingTicket = false;  // we've asked for their ticket/name on a repair follow-up
+  var awaitingCallback = false; // we've asked for their name/number to pass to George
+  var customerName = null;     // whatever name they've given us this conversation
   var missStreak = 0;          // consecutive answers we couldn't ground - 2 means stuck
   var lastReplyText = '';      // what we last said - a repeat gets acknowledged, never echoed
   var repeatIdx = 0;
@@ -1105,6 +1107,54 @@ function createBrain(KB) {
         return resT;
       }
       // that wasn't ticket details - answer whatever they actually asked
+    }
+
+    // a name given anywhere sticks for the whole conversation
+    var nm = /\bmy name'?s? (?:is )?([a-z][a-z'-]{1,15})\b/i.exec(raw) ||
+             /\b(?:this is|it'?s) ([a-z][a-z'-]{1,15})\b/i.exec(raw);
+    if (nm && !/^(a|an|the|not|about|for|on|my|broken|cracked|dead|urgent)$/i.test(nm[1])) {
+      customerName = nm[1].charAt(0).toUpperCase() + nm[1].slice(1).toLowerCase();
+    }
+
+    // they've just been asked for their details so George can call back -
+    // take whatever they give, pull out a name and number, confirm it
+    if (awaitingCallback) {
+      awaitingCallback = false;
+      if (raw.indexOf('?') === -1 || /\d{6,}/.test(raw)) {
+        var phoneM = /(?:\+?61|0)[\d ()\-]{7,12}\d/.exec(raw);
+        var nameM = nm || /^\s*([a-z][a-z'-]{1,15})\b/i.exec(raw);
+        if (nameM && !customerName &&
+            !/^(hi|hey|yeah|yes|no|ok|okay|its|im|about|the|my|call|ring|george)$/i.test(nameM[1])) {
+          customerName = nameM[1].charAt(0).toUpperCase() + nameM[1].slice(1).toLowerCase();
+        }
+        var who = customerName ? ', ' + customerName : '';
+        return {
+          text: phoneM
+            ? 'Sweet' + who + ' - I’ve passed that straight on to George and he’ll give you a bell as soon as he’s free. If it’s urgent, the shop’s on ' + B.phone + '.'
+            : 'Sweet' + who + ' - I’ve passed that on to George. Flick me the best number to get you on and he’ll ring you back, or give the shop a bell on ' + B.phone + '.',
+          card: null, contact: false, products: null, options: null,
+          chips: [], intent: 'callback:taken',
+          leaveMessage: {
+            name: customerName || null,
+            phone: phoneM ? phoneM[0].replace(/[^\d+]/g, '') : null,
+            note: String(raw).trim().slice(0, 300),
+            model: lastModel || null
+          },
+          escalate: { model: lastModel, question: 'CALLBACK REQUEST: ' + String(raw).trim().slice(0, 300) }
+        };
+      }
+      // that was a question, not their details - answer it normally
+    }
+
+    // "tell him to call me back" / "leave a message for george" starts the
+    // message-taking flow a person at the counter would run
+    if (/\b(call (me|us) back|ring (me|us) back|call back|leave (him |george |them )?a message|leave a message|tell (him|george|them) (to|i|that)|pass (that|it|this|a message) on|get (him|george) to (call|ring|phone)|have (him|george) (call|ring|phone)|ask (him|george) to (call|ring))\b/.test(t)) {
+      awaitingCallback = true;
+      return {
+        text: 'Righto - what’s your name, the best number to get you on, and what it’s about? I’ll pass it straight to George.',
+        card: null, contact: false, products: null, options: null,
+        chips: [], intent: 'callback:ask'
+      };
     }
 
     // mid-booking answers (name, mobile) come before everything else

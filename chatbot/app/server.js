@@ -33,6 +33,8 @@ const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
 const GAPS_FILE = path.join(DATA_DIR, 'gaps.jsonl');
 const LEARNED_FILE = path.join(DATA_DIR, 'learned.json');
 const ANSWERS_FILE = path.join(DATA_DIR, 'answers.json');
+const CHATS_FILE = path.join(DATA_DIR, 'chats.jsonl');
+const MESSAGES_FILE = path.join(DATA_DIR, 'messages.jsonl');
 const PUBLIC = path.join(__dirname, 'public');
 
 // answers Claude has already worked out for questions the local engine
@@ -160,6 +162,25 @@ async function liveProducts(message) {
   return brain.productAnswer(q, brain.searchCatalogue(q.terms, items, { brand: q.brand, kind: q.kind }));
 }
 
+// Every conversation is recorded, so George can read back exactly what
+// customers asked and how Hope answered. One JSON line per turn, on the
+// persistent volume, grouped by session id.
+function appendLine(file, obj) {
+  fs.mkdir(path.dirname(file), { recursive: true }, err => {
+    if (err) return;
+    fs.appendFile(file, JSON.stringify(obj) + '\n', () => {});
+  });
+}
+
+function readLines(file, cb) {
+  fs.readFile(file, 'utf8', (err, data) => {
+    if (err) return cb([]);
+    cb(data.trim().split('\n').filter(Boolean)
+      .map(l => { try { return JSON.parse(l); } catch (e) { return null; } })
+      .filter(Boolean));
+  });
+}
+
 async function handleChat(req, res) {
   const body = await readBody(req);
   const message = String(body.message || '').slice(0, 2000).trim();
@@ -173,17 +194,33 @@ async function handleChat(req, res) {
     'ip:' + (req.socket.remoteAddress || 'unknown');
   const b = brainFor(sid);
 
+  // one exit for every engine: record the turn, save any message left for
+  // George, then answer
+  const reply = (answer, engine) => {
+    appendLine(CHATS_FILE, {
+      t: Date.now(), sid,
+      q: message.slice(0, 500),
+      a: String(answer.text || '').slice(0, 500),
+      intent: answer.intent || null, engine
+    });
+    if (answer.leaveMessage) {
+      appendLine(MESSAGES_FILE, { t: Date.now(), sid, ...answer.leaveMessage });
+      console.log('[message for George]', JSON.stringify(answer.leaveMessage));
+    }
+    return send(res, 200, { ...answer, engine });
+  };
+
   // a status ask with a ticket number gets the real job status when the
   // FixDesk connection is configured; otherwise the brain's honest
   // collect-and-hand-off flow answers
   const ticket = await tickets.ticketStatus(KB, message);
-  if (ticket) return send(res, 200, { ...ticket, engine: 'fixdesk-tickets' });
+  if (ticket) return reply(ticket, 'fixdesk-tickets');
 
   const live = await livePrice(message);
-  if (live) return send(res, 200, { ...live, engine: 'fixdesk' });
+  if (live) return reply(live, 'fixdesk');
 
   const shop = await liveProducts(message);
-  if (shop) return send(res, 200, { ...shop, engine: 'shopify' });
+  if (shop) return reply(shop, 'shopify');
 
   /* Layer 1: the local engine answers first - knowledge base, price book,
    * symptom handlers, policies. Instant, free, and it covers nearly
@@ -197,10 +234,10 @@ async function handleChat(req, res) {
      * an earlier customer? Then it's a local answer now - no API call. */
     const remembered = memory.match(message);
     if (remembered) {
-      return send(res, 200, {
+      return reply({
         text: remembered, card: null, contact: false, chips: [],
-        intent: 'learned-answer', engine: 'memory'
-      });
+        intent: 'learned-answer'
+      }, 'memory');
     }
 
     /* Layer 2: a genuinely new gap goes to Claude, in character, with the
@@ -213,7 +250,7 @@ async function handleChat(req, res) {
         const smart = await claude.ask(KB, history, message);
         memory.learn(message, smart.text);
         logGap(message, answer); // still a KB gap worth reviewing in admin
-        return send(res, 200, { ...smart, engine: 'claude-fallback' });
+        return reply(smart, 'claude-fallback');
       } catch (err) {
         console.error('[claude] gap fallback failed, using local answer:', err.message);
       }
@@ -222,7 +259,7 @@ async function handleChat(req, res) {
 
   logGap(message, answer);
   notifyEscalation(message, answer);
-  send(res, 200, { ...answer, engine: 'local' });
+  reply(answer, 'local');
 }
 
 // A stuck conversation (the brain sets `escalate`) pings George instantly
@@ -349,6 +386,24 @@ const server = http.createServer(async (req, res) => {
 
     if (urlPath === '/api/gaps' && req.method === 'GET') {
       return readGaps(rows => send(res, 200, rows));
+    }
+
+    // messages customers left for George - newest first
+    if (urlPath === '/api/messages' && req.method === 'GET') {
+      return readLines(MESSAGES_FILE, rows => send(res, 200, rows.slice(-100).reverse()));
+    }
+
+    // recorded conversations, grouped per customer session, newest first
+    if (urlPath === '/api/chats' && req.method === 'GET') {
+      return readLines(CHATS_FILE, rows => {
+        const bySid = {};
+        rows.slice(-1000).forEach(r => {
+          (bySid[r.sid] = bySid[r.sid] || { sid: r.sid, from: r.t, to: r.t, turns: [] });
+          bySid[r.sid].to = r.t;
+          bySid[r.sid].turns.push({ t: r.t, q: r.q, a: r.a, engine: r.engine });
+        });
+        send(res, 200, Object.values(bySid).sort((a, b) => b.to - a.to).slice(0, 50));
+      });
     }
 
     if (urlPath === '/api/status' && req.method === 'GET') {

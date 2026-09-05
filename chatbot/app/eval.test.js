@@ -409,6 +409,30 @@ test('asking for George gets a human answer, and water stays short and sharp', (
   assert.ok(w.text.length < 320, `water answer stays punchy (${w.text.length} chars)`);
 });
 
+test('"tell him to call me back" takes a message instead of falling over', () => {
+  // live transcript: this fell into "Run that by me again?"
+  const b = createBrain(KB);
+  b.respond('is goerge available to speak to');
+  const ask = b.respond('tell him to call me back ?');
+  assert.ok(ask.intent === 'callback:ask', `matched ${ask.intent}`);
+  assert.ok(/name/.test(ask.text) && /number/.test(ask.text), 'must ask who and what number');
+  const taken = b.respond('dave 0400 123 456 about my ipad quote');
+  assert.ok(taken.intent === 'callback:taken', `matched ${taken.intent}`);
+  assert.strictEqual(taken.leaveMessage.name, 'Dave', 'name captured');
+  assert.strictEqual(taken.leaveMessage.phone, '0400123456', 'number captured');
+  assert.ok(/Dave/.test(taken.text), 'confirmation uses their name');
+  // a question mid-flow gets answered, not swallowed as a message
+  const c = createBrain(KB);
+  c.respond('can you get george to call me');
+  assert.ok(c.respond('what are your hours?').intent.startsWith('hours'), 'questions escape the flow');
+  // a name given anywhere sticks
+  const d = createBrain(KB);
+  d.respond('hi my name is Sarah');
+  d.respond('leave a message for george');
+  const m = d.respond('its about the warranty on my repair, 0411 222 333');
+  assert.strictEqual(m.leaveMessage.name, 'Sarah', 'name remembered from earlier in the chat');
+});
+
 test('ticket-priced repairs show a clean price, not shop bookkeeping', () => {
   // the exact card George flagged: back glass priced from 21 real jobs
   const r = createBrain(KB).respond('i need the back glass on my iphone 15 pro max repaired');
