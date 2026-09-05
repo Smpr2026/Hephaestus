@@ -375,6 +375,40 @@ test('a repair ask with no phone named gets "which phone?", then a price', () =>
   assert.ok(h.intent.startsWith('turnaround'), `matched ${h.intent}`);
 });
 
+test('price pushback never gets an apology script - Hope holds the line', () => {
+  const b = createBrain(KB);
+  b.respond('how much for an iphone 14 screen');
+  for (const jab of ['thats a rip off', 'youre too expensive', 'found it cheaper at another shop']) {
+    const r = createBrain(KB).respond(jab);
+    assert.ok(r.intent.startsWith('price_objection'), `"${jab}" matched ${r.intent}`);
+    assert.ok(!/sorry|apolog|understand your frustration|how this should have gone/i.test(r.text),
+      `"${jab}" must not grovel`);
+    assert.ok(/look after you/i.test(r.text), 'must sound like the owner, not a script');
+  }
+  // a genuine service complaint still goes to the owner, minus the grovel
+  const c = createBrain(KB).respond('i want to make a complaint about my repair');
+  assert.ok(c.intent.startsWith('complaint'), `matched ${c.intent}`);
+  assert.ok(!/sorry|apolog/i.test(c.text), 'complaints handled direct, not with a sorry script');
+});
+
+test('one fault asked, one fault quoted - no fake upsells', () => {
+  const r = createBrain(KB).respond('15 pro max back glass cracked');
+  assert.ok(r.intent.startsWith('price:iPhone 15 Pro Max:back_glass'), `matched ${r.intent}`);
+  assert.ok(!/screen/i.test(JSON.stringify(r.card.rows)), 'no screen tacked onto a back-glass ask');
+  // but naming both faults still gets the one-visit bundle
+  const both = createBrain(KB).respond('screen and back glass cracked on my 15 pro max');
+  assert.ok(both.intent.startsWith('price-combo:iPhone 15 Pro Max'), `matched ${both.intent}`);
+});
+
+test('asking for George gets a human answer, and water stays short and sharp', () => {
+  const g = createBrain(KB).respond('can i speak to george');
+  assert.ok(g.intent.startsWith('ask_george'), `matched ${g.intent}`);
+  assert.ok(/floor or out the back/i.test(g.text) && /8957 1077/.test(g.text), 'George answered like a human');
+  const w = createBrain(KB).respond('my phone got wet');
+  assert.ok(/rice/i.test(w.text) && /ultrasonic/i.test(w.text) && /macro lens/i.test(w.text), 'the facts stay');
+  assert.ok(w.text.length < 320, `water answer stays punchy (${w.text.length} chars)`);
+});
+
 test('ticket-priced repairs show a clean price, not shop bookkeeping', () => {
   // the exact card George flagged: back glass priced from 21 real jobs
   const r = createBrain(KB).respond('i need the back glass on my iphone 15 pro max repaired');

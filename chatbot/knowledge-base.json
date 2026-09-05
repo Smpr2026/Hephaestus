@@ -5790,13 +5790,35 @@
       }
     },
     {
+      "id": "ask_george",
+      "category": "Conversation",
+      "patterns": [
+        "speak to george",
+        "talk to george",
+        "is george there",
+        "ask for george",
+        "is george in",
+        "george in today",
+        "george there today",
+        "see george",
+        "wheres george",
+        "where is george",
+        "george around",
+        "george available"
+      ],
+      "answer": "He's usually on the floor or out the back - give us a ring on {{phone}} or pop into the shop at {{addressShort}} and someone'll grab him.",
+      "chips": [
+        "What are your hours?",
+        "Where are you exactly?"
+      ],
+      "q": "Can I speak to George?"
+    },
+    {
       "id": "human",
       "category": "Conversation",
       "q": "I want to talk to a human",
       "patterns": [
-        "ask for george",
         "customer service",
-        "is george there",
         "operator",
         "put me through",
         "real human",
@@ -5804,12 +5826,10 @@
         "someone i can talk to",
         "speak to a person",
         "speak to a technician",
-        "speak to george",
         "speak to someone",
         "staff member",
         "talk to a human",
         "talk to a person",
-        "talk to george",
         "talk to staff",
         "talk to the owner"
       ],
@@ -7172,7 +7192,7 @@
         "went swimming",
         "dropped my phone in"
       ],
-      "answer": "Turn it off, don't charge it, and don't put it in rice - that does nothing. Get it to us as fast as you can: we do an ultrasonic clean and a board-level assessment, and the sooner it arrives the better the odds. Water jobs are assessed first and usually take 24-72 hours. Call {{phone}} and head in.",
+      "answer": "Don't put it in rice, mate - that does nothing. Turn it off, don't charge it, and get it straight in: we run an ultrasonic clean and check the board under the macro lens. Sooner it lands, better the odds - water jobs get looked at first, usually 24-72 hours.",
       "chips": [
         "Where are you?",
         "Can you recover my photos?"
@@ -9442,6 +9462,41 @@
       }
     },
     {
+      "id": "price_objection",
+      "category": "Pricing",
+      "patterns": [
+        "rip off",
+        "ripoff",
+        "rip-off",
+        "too expensive",
+        "so expensive",
+        "very expensive",
+        "overpriced",
+        "over priced",
+        "too dear",
+        "bit steep",
+        "too steep",
+        "bit much",
+        "daylight robbery",
+        "thats a joke",
+        "waste of money",
+        "cheaper elsewhere",
+        "found it cheaper",
+        "cheaper at",
+        "do it cheaper",
+        "better price somewhere",
+        "cheaper somewhere",
+        "cant afford that",
+        "too much money"
+      ],
+      "answer": "Fair enough mate - parts ain't cheap on these newer ones, but we only fit ones we'd put in our own phones, and every job's backed by the {{warranty}}. Come down to the shop and we'll look after you.",
+      "chips": [
+        "Any cheaper part options?",
+        "Do I need a booking?"
+      ],
+      "q": "That's a rip off / too expensive"
+    },
+    {
       "id": "complaint",
       "category": "Other",
       "q": "I want to make a complaint",
@@ -9452,11 +9507,9 @@
         "poor service",
         "bad experience",
         "angry",
-        "disappointed",
-        "waste of money",
-        "rip off"
+        "disappointed"
       ],
-      "answer": "I'm sorry - that's not how this should have gone. Please call {{phone}} and ask to speak to the owner, or come in to {{addressShort}} and we'll deal with it properly and in person.",
+      "answer": "Righto - let's sort it out properly. Ring {{phone}} and ask for the owner, or come in to {{addressShort}} and we'll deal with it face to face.",
       "chips": [
         "What are your hours?",
         "Where are you?"
@@ -10246,7 +10299,10 @@
       "A broad opener ('hi', 'i need help', 'my phone is damaged') starts a conversation: respond warmly and ask the model and symptoms - never ask for a phone number or promise a follow-up on the first exchange. If answers keep missing AFTER a device or issue has been discussed, stop looping and hand the customer to George directly (WhatsApp link and phone).",
       "Never argue with a customer, and never diagnose or deny a warranty claim in chat. If someone says a repaired screen 'cracked by itself' or disputes physical damage, validate their frustration first, then pivot to a free inspection: pop into the shop and George or the team will check it under the macro lens - if it's a genuine part defect it's covered under warranty on the spot.",
       "If a customer repeats themselves, acknowledge it warmly and move the conversation forward - never send the same answer or the same phrasing twice, and never fall back on canned lines like 'I'm your man'.",
-      "When someone mentions damage to both the front screen and the back glass, offer them as one visit and quote the combo price where one exists - bundling saves the customer money and a second trip."
+      "When someone mentions damage to both the front screen and the back glass, offer them as one visit and quote the combo price where one exists - bundling saves the customer money and a second trip.",
+      "Price pushback ('rip off', 'too expensive') never gets an apology script and never a fold - answer like the owner at the counter, short and friendly: parts aren't cheap on the newer ones, the work is warrantied, come down and we'll look after you. Hold the price.",
+      "Keep every reply short and punchy - one to three conversational sentences, like talking across the counter. Never multi-paragraph lectures, never technical manuals.",
+      "Quote ONLY the repair the customer asked for. Never tack on screens, batteries or anything they didn't mention - offer a bundle only when the customer names more than one fault themselves."
     ],
     "avatarUrl": "https://cdn.shopify.com/s/files/1/0572/1853/1479/files/ChatGPT_Image_Sep_3_2026_07_11_24_AM.png?v=1788384283&width=512",
     "avatarNote": "Absolute image URL for Hope's face (Shopify Files CDN). Empty = initials avatar. Shown in the widget launcher, chat header and teaser on every surface.",

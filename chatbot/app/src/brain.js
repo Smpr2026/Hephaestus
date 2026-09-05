@@ -690,6 +690,13 @@ function createBrain(KB) {
         if (t.indexOf(' ' + REPAIR_WORDS[k][i]) !== -1) { found.push(k); break; }
       }
     }
+    // "back glass cracked" is ONE fault: "cracked"/"smashed"/"glass" belong
+    // to the back-glass phrase, so screen only stays if it has evidence of
+    // its own - a customer asking for one repair is quoted one repair
+    if (found.indexOf('back_glass') !== -1 && found.indexOf('screen') !== -1 &&
+        !/\b(screen|display|lcd|front)\b/.test(t)) {
+      found.splice(found.indexOf('screen'), 1);
+    }
     return found;
   }
 
