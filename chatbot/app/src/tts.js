@@ -8,6 +8,11 @@
  * browser's built-in voices. Recent phrases are cached in memory - the
  * greeting and common answers synthesize once per deploy, not per call.
  */
+// msedge-tts expects the browser-style global crypto; Node 18 keeps it
+// under the module instead
+if (typeof globalThis.crypto === 'undefined') {
+  globalThis.crypto = require('node:crypto').webcrypto;
+}
 const { MsEdgeTTS, OUTPUT_FORMAT } = require('msedge-tts');
 
 const VOICE = process.env.HOPE_VOICE || 'en-AU-NatashaNeural';
