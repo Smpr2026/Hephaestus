@@ -1,0 +1,12 @@
+{
+  "name": "hephaestus",
+  "private": true,
+  "description": "Sydney Mobile Phone Repairs - Hope chat assistant (server in chatbot/app)",
+  "scripts": {
+    "start": "node chatbot/app/server.js",
+    "test": "node --test chatbot/app/"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
