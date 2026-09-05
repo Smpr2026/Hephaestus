@@ -283,7 +283,13 @@ function createBrain(KB) {
     [/ munted /g, ' broken '],
     [/ on the blink /g, ' faulty '],
     [/ chucking a wobbly /g, ' playing up '],
-    [/ spat the dummy /g, ' stopped working ']
+    [/ spat the dummy /g, ' stopped working '],
+    // typos the one-edit autocorrect can't settle on its own ("creen" is one
+    // edit from both "screen" and the colour "green", so it stays untouched)
+    [/ creen /g, ' screen '],
+    [/ scren /g, ' screen '],
+    [/ sceen /g, ' screen '],
+    [/ screan /g, ' screen ']
   ];
   function slang(t) {
     for (var si = 0; si < SLANG.length; si++) t = t.replace(SLANG[si][0], SLANG[si][1]);
@@ -1219,6 +1225,25 @@ function createBrain(KB) {
       }
       return priceAnswer(lastModel, repair);
     }
+    // "i need a screen repair" cold, no phone named yet - the counter move
+    // is a straight "sure - what phone?", remembering the fault so the next
+    // message ("iphone 13") gets priced without re-asking anything. Time,
+    // warranty and accessory questions keep their own answers.
+    if (!model && repair && !lastModel && !SERVICE_REPAIRS[repair] &&
+        !(shopQ && shopQ.shopping) &&
+        !/\b(protector|case\b|cover|charger\b|cable|long|take|takes|turnaround|warranty|guarantee|hours|open)\b/.test(t) &&
+        // a damage report ("my screen cracked by itself", "screen is broken")
+        // is a fault or a dispute, not a service ask - those paths handle it
+        !/\b(crack\w*|smash\w*|broke\w*|broken|shatter\w*|dead|cooked|by itself|on its own)\b/.test(t) &&
+        /\b(need|want|looking|book|how much|price|cost|quote|(do|can|could) (you|u|ya) (fix|repair|replace|do))\b/.test(t)) {
+      pendingFault = { repair: repair };
+      return {
+        text: 'Sure can — what phone is it? Soon as I’ve got the model I’ll give you an exact ' +
+              repairLabel(repair) + ' price.',
+        card: null, contact: false, products: null, options: null,
+        chips: [], intent: 'repair-clarify:' + repair
+      };
+    }
     var bare = bareDeviceClarify(t);
     if (bare && !(shopQ && shopQ.shopping)) return bare;
     if (shopQ) return productAnswer(shopQ);
@@ -1278,6 +1303,16 @@ function createBrain(KB) {
     // because both mention "phone"
     if (/\b(repairs?|fix|fixing|fixed)\b/.test(t) && !model && !repair &&
         t.trim().split(' ').length <= 7) {
+      // "need a repair" is a person with a broken phone, not a question about
+      // the menu - ask what it is and what it's doing, like the counter would.
+      // "what do you repair" / "do you fix ipads" keeps the services list.
+      if (/\b(i|my|me|need|want|book|get)\b/.test(t) && !/\b(what|which|do you|can you|list)\b/.test(t)) {
+        return {
+          text: "No dramas - what phone is it, and what's it doing?",
+          card: null, contact: false, products: null, options: null,
+          chips: [], intent: 'triage'
+        };
+      }
       var svcIntent = KB.intents.filter(function (x) { return x.id === 'services'; })[0];
       if (svcIntent) return fromIntent(svcIntent);
     }

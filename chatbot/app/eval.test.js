@@ -356,6 +356,25 @@ test('a phone switching itself off is a power fault, never a warranty dispute', 
   assert.ok(w.intent.startsWith('warranty_dispute'), `matched ${w.intent}`);
 });
 
+test('a repair ask with no phone named gets "which phone?", then a price', () => {
+  // live transcript: "i need a creen repair" got the services brochure
+  const b = createBrain(KB);
+  const ask = b.respond('i need a creen repair');
+  assert.ok(ask.intent.startsWith('repair-clarify:screen'), `matched ${ask.intent}`);
+  assert.ok(/what phone/i.test(ask.text), 'must ask which phone');
+  const priced = b.respond('iphone 13');
+  assert.ok(priced.intent.startsWith('price:iPhone 13:screen'), `matched ${priced.intent}`);
+  // "need a repair" is a person with a broken phone, not a menu question
+  const t = createBrain(KB).respond('need a repair');
+  assert.strictEqual(t.intent, 'triage');
+  // capability questions keep the services list
+  const s = createBrain(KB).respond('what do you repair');
+  assert.ok(s.intent.startsWith('services'), `matched ${s.intent}`);
+  // time questions are not hijacked by the clarify
+  const h = createBrain(KB).respond('how long does a screen repair take');
+  assert.ok(h.intent.startsWith('turnaround'), `matched ${h.intent}`);
+});
+
 test('ticket-priced repairs show a clean price, not shop bookkeeping', () => {
   // the exact card George flagged: back glass priced from 21 real jobs
   const r = createBrain(KB).respond('i need the back glass on my iphone 15 pro max repaired');
