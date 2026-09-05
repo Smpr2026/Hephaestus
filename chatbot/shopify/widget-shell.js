@@ -441,13 +441,20 @@
     try { sessionStorage.setItem('smprw.hist', JSON.stringify(hist)); } catch(e){}
   }
   // ask the hosted brain; any failure quietly falls back to the local one
+  // a stable per-browser id so the hosted brain keeps this customer's own
+  // conversation thread (device, quote) separate from everyone else's
+  var SID = '';
+  try {
+    SID = localStorage.getItem('smprw.sid') || '';
+    if (!SID){ SID = 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10); localStorage.setItem('smprw.sid', SID); }
+  } catch(e){ SID = 's' + Math.random().toString(36).slice(2, 12); }
   function apiAnswer(text){
     var ctl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
     var timer = setTimeout(function(){ if (ctl) ctl.abort(); }, 12000);
     return fetch(API, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ message: text, history: hist }),
+      body: JSON.stringify({ message: text, history: hist, sid: SID }),
       signal: ctl ? ctl.signal : undefined
     })
       .then(function(r){ if (!r.ok) throw new Error('http ' + r.status); return r.json(); })

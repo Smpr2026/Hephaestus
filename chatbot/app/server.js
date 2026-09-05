@@ -22,11 +22,76 @@ const tickets = require('./src/tickets.js');
 const catalogue = require('./src/catalogue.js');
 
 const PORT = process.env.PORT || 3000;
-const GAPS_FILE = path.join(__dirname, 'data', 'gaps.jsonl');
+// On Railway, DATA_DIR points at the mounted volume so gaps and learning
+// survive restarts and redeploys. Locally it's just ./data.
+const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
+const GAPS_FILE = path.join(DATA_DIR, 'gaps.jsonl');
+const LEARNED_FILE = path.join(DATA_DIR, 'learned.json');
 const PUBLIC = path.join(__dirname, 'public');
 
 let KB = kbStore.load();
 let brain = createBrain(KB);
+
+/* ---- one brain per customer, learning shared between all of them ----
+ * The brain keeps conversation state (their device, their quote) in a
+ * closure, so two customers must never share one. Each chat session gets
+ * its own brain, found by the sid the widget sends; idle sessions are
+ * swept after 30 minutes. What any customer TEACHES the bot (a missed
+ * phrasing they then clarified) is merged into one shared map, saved to
+ * disk, and seeded into every new session - one customer's lesson becomes
+ * everyone's. */
+const SESSION_TTL_MS = 30 * 60 * 1000;
+const SESSION_CAP = 500;
+const sessions = new Map(); // sid -> { brain, at }
+
+let sharedLearned = {};
+try { sharedLearned = JSON.parse(fs.readFileSync(LEARNED_FILE, 'utf8')); } catch (e) { /* first boot */ }
+
+let learnedDirty = false;
+function saveLearnedSoon() {
+  if (learnedDirty) return;
+  learnedDirty = true;
+  setTimeout(() => {
+    learnedDirty = false;
+    fs.mkdir(DATA_DIR, { recursive: true }, err => {
+      if (err) return;
+      fs.writeFile(LEARNED_FILE, JSON.stringify(sharedLearned), () => {});
+    });
+  }, 2000);
+}
+
+function brainFor(sid) {
+  const now = Date.now();
+  let s = sessions.get(sid);
+  if (!s) {
+    if (sessions.size >= SESSION_CAP) {
+      const oldest = [...sessions.entries()].sort((a, b) => a[1].at - b[1].at)[0];
+      if (oldest) sessions.delete(oldest[0]);
+    }
+    s = { brain: createBrain(KB), at: now };
+    sessions.set(sid, s);
+  }
+  s.at = now;
+  // top up every visit, not just creation - a lesson learned five minutes
+  // ago from another customer should work in this session right now
+  if (s.brain.importLearned) s.brain.importLearned(sharedLearned);
+  return s.brain;
+}
+
+function absorbLearning(b) {
+  if (!b.exportLearned) return;
+  const mine = b.exportLearned();
+  let grew = false;
+  for (const k in mine) {
+    if (!(k in sharedLearned)) { sharedLearned[k] = mine[k]; grew = true; }
+  }
+  if (grew) saveLearnedSoon();
+}
+
+setInterval(() => {
+  const cutoff = Date.now() - SESSION_TTL_MS;
+  for (const [sid, s] of sessions) if (s.at < cutoff) sessions.delete(sid);
+}, 5 * 60 * 1000).unref();
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -94,6 +159,10 @@ async function handleChat(req, res) {
     ? body.history.slice(-10).filter(m => m && (m.role === 'user' || m.role === 'assistant'))
     : [];
 
+  const sid = String(body.sid || '').replace(/[^A-Za-z0-9._-]/g, '').slice(0, 64) ||
+    'ip:' + (req.socket.remoteAddress || 'unknown');
+  const b = brainFor(sid);
+
   // a status ask with a ticket number gets the real job status when the
   // FixDesk connection is configured; otherwise the brain's honest
   // collect-and-hand-off flow answers
@@ -113,12 +182,14 @@ async function handleChat(req, res) {
     } catch (err) {
       // never leave a customer with nothing because an API call failed
       console.error('[claude] falling back to local matcher:', err.message);
-      const answer = brain.respond(message);
+      const answer = b.respond(message);
+      absorbLearning(b);
       return send(res, 200, { ...answer, engine: 'local (claude failed)' });
     }
   }
 
-  const answer = brain.respond(message);
+  const answer = b.respond(message);
+  absorbLearning(b);
   logGap(message, answer);
   notifyEscalation(message, answer);
   send(res, 200, { ...answer, engine: 'local' });
