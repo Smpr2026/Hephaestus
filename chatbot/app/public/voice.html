@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hope — voice call test</title>
+<style>
+  :root { color-scheme: light; }
+  body {
+    margin: 0; font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: #101418; color: #e8ecf0; min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  header { text-align: center; padding: 28px 16px 8px; }
+  header h1 { margin: 0 0 4px; font-size: 20px; font-weight: 600; }
+  header p { margin: 0; font-size: 13px; color: #93a1ad; }
+  #call {
+    margin: 22px 0 10px; width: 120px; height: 120px; border-radius: 50%;
+    border: none; font-size: 42px; cursor: pointer; color: #fff;
+    background: #1db954; transition: background .2s, transform .1s;
+  }
+  #call:active { transform: scale(.96); }
+  #call.live { background: #d33c3c; }
+  #state { font-size: 14px; min-height: 20px; color: #93a1ad; }
+  #state.listening { color: #1db954; }
+  #state.speaking { color: #f2b632; }
+  #log {
+    width: min(560px, calc(100vw - 32px)); flex: 1; margin: 18px 0 24px;
+    overflow-y: auto; max-height: 55vh; display: flex; flex-direction: column; gap: 8px;
+  }
+  .line { padding: 9px 13px; border-radius: 14px; font-size: 14.5px; line-height: 1.45; max-width: 85%; }
+  .me   { align-self: flex-end; background: #2b5cd9; }
+  .hope { align-self: flex-start; background: #232b33; }
+  .sys  { align-self: center; background: none; color: #6d7a86; font-size: 12.5px; }
+  #unsupported { max-width: 480px; margin: 30px 16px; line-height: 1.5; display: none; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Call Hope</h1>
+  <p>Sydney Mobile Phone Repairs — voice test line. Talk like it's a phone call; pause and she'll answer.</p>
+</header>
+
+<button id="call" title="Start call">📞</button>
+<div id="state">Tap to start the call</div>
+<div id="log"></div>
+<div id="unsupported">
+  This browser doesn't have the built-in speech engine the test line uses.
+  Open this page in <b>Chrome</b> or <b>Edge</b> on the computer, allow the
+  microphone, and it'll work like a phone call.
+</div>
+
+<script>
+(function () {
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var callBtn = document.getElementById('call');
+  var stateEl = document.getElementById('state');
+  var logEl = document.getElementById('log');
+
+  if (!SR || !window.speechSynthesis) {
+    document.getElementById('unsupported').style.display = 'block';
+    callBtn.disabled = true;
+    stateEl.textContent = '';
+    return;
+  }
+
+  var live = false;        // call in progress
+  var speaking = false;    // Hope is talking - mic paused so she can't hear herself
+  var rec = null;
+  var history = [];
+  var sid = 'voice-' + Math.random().toString(36).slice(2, 10);
+
+  function log(cls, text) {
+    var d = document.createElement('div');
+    d.className = 'line ' + cls;
+    d.textContent = text;
+    logEl.appendChild(d);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function setState(txt, cls) {
+    stateEl.textContent = txt;
+    stateEl.className = cls || '';
+  }
+
+  // prefer an Australian voice; fall back to any English one
+  function pickVoice() {
+    var vs = speechSynthesis.getVoices();
+    return vs.filter(function (v) { return /en[-_]AU/i.test(v.lang); })[0]
+        || vs.filter(function (v) { return /female|karen|catherine|zira|libby|natasha/i.test(v.name) && /^en/i.test(v.lang); })[0]
+        || vs.filter(function (v) { return /^en/i.test(v.lang); })[0]
+        || null;
+  }
+
+  // cards don't read aloud well - flatten the essentials into speech
+  function speakable(res) {
+    var parts = [res.text || ''];
+    if (res.card && res.card.rows) {
+      res.card.rows.forEach(function (r) {
+        if (r && r.length >= 2) parts.push(r[0] + ': ' + r[1] + '.');
+      });
+    }
+    return parts.join(' ').replace(/\s+/g, ' ').trim();
+  }
+
+  function say(text, done) {
+    speaking = true;
+    setState('Hope is talking…', 'speaking');
+    try { rec && rec.abort(); } catch (e) {}
+    var u = new SpeechSynthesisUtterance(text);
+    var v = pickVoice();
+    if (v) u.voice = v;
+    u.rate = 1.02; u.pitch = 1.0;
+    u.onend = u.onerror = function () {
+      speaking = false;
+      if (done) done();
+    };
+    speechSynthesis.cancel();
+    speechSynthesis.speak(u);
+  }
+
+  function listen() {
+    if (!live || speaking) return;
+    rec = new SR();
+    rec.lang = 'en-AU';
+    rec.interimResults = false;
+    rec.maxAlternatives = 1;
+    rec.onstart = function () { setState('Listening — go ahead', 'listening'); };
+    rec.onresult = function (ev) {
+      var said = ev.results[0][0].transcript.trim();
+      if (!said) return;
+      log('me', said);
+      ask(said);
+    };
+    rec.onerror = function (ev) {
+      if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') {
+        log('sys', 'Microphone blocked — allow it in the address bar and tap the button again.');
+        hangUp();
+      }
+      // 'no-speech' and 'aborted' just fall through to onend, which re-arms
+    };
+    rec.onend = function () {
+      // keep the line open: unless Hope is mid-sentence or we hung up,
+      // go straight back to listening, like a real call
+      if (live && !speaking) setTimeout(listen, 150);
+    };
+    try { rec.start(); } catch (e) { /* already running */ }
+  }
+
+  function ask(said) {
+    setState('Hope is thinking…');
+    try { rec && rec.abort(); } catch (e) {}
+    fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ message: said, history: history.slice(-10), sid: sid })
+    }).then(function (r) { return r.json(); }).then(function (res) {
+      var text = res.text || "Sorry, dropped out for a second there - say that again?";
+      history.push({ role: 'user', content: said }, { role: 'assistant', content: text });
+      log('hope', speakable(res));
+      if (!live) return;
+      say(speakable(res), listen);
+    }).catch(function () {
+      if (!live) return;
+      say("Sorry, the line dropped for a tick - give me that one more time?", listen);
+    });
+  }
+
+  function hangUp() {
+    live = false;
+    speaking = false;
+    try { rec && rec.abort(); } catch (e) {}
+    speechSynthesis.cancel();
+    callBtn.classList.remove('live');
+    callBtn.textContent = '📞';
+    callBtn.title = 'Start call';
+    setState('Call ended — tap to call again');
+    log('sys', '— call ended —');
+  }
+
+  callBtn.onclick = function () {
+    if (live) return hangUp();
+    live = true;
+    history = [];
+    callBtn.classList.add('live');
+    callBtn.textContent = '⏹';
+    callBtn.title = 'Hang up';
+    log('sys', '— calling Hope —');
+    // Chrome loads voices async; poke the list so the first reply has one
+    speechSynthesis.getVoices();
+    say("Sydney Mobile Phone Repairs, Hope speaking - what can I do for you?", listen);
+  };
+})();
+</script>
+</body>
+</html>
