@@ -1933,6 +1933,9 @@ if (typeof window !== 'undefined') window.createBrain = createBrain;
   + '.sw-in{flex:1;resize:none;border:1px solid var(--w-line);border-radius:12px;background:var(--w-bg2);color:var(--w-ink);padding:9px 12px;font:inherit;font-size:14px;max-height:92px;outline:none}'
   + '.sw-in:focus{border-color:var(--w-accent)}'
   + '.sw-send{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--w-accent),var(--w-accent2));color:#fff;display:flex;align-items:center;justify-content:center;flex:none}'
+  + '.sw-mic{width:38px;height:38px;border-radius:50%;background:none;border:1px solid var(--w-line);color:var(--w-mut);display:flex;align-items:center;justify-content:center;flex:none}'
+  + '.sw-mic.rec{background:#d33c3c;border-color:#d33c3c;color:#fff;animation:sw-pulse 1.1s infinite}'
+  + '@keyframes sw-pulse{0%,100%{box-shadow:0 0 0 0 rgba(211,60,60,.45)}50%{box-shadow:0 0 0 7px rgba(211,60,60,0)}}'
   + '.sw-send:hover{filter:brightness(1.1)}'
   + '.sw-note{font-size:10.5px;color:var(--w-ink2);text-align:center;padding:0 10px 8px;background:var(--w-bg);flex:none}';
 
@@ -1954,6 +1957,9 @@ if (typeof window !== 'undefined') window.createBrain = createBrain;
   var CHAT_SVG = '<svg class="sw-i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>';
   var X_SVG = '<svg class="sw-i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
   var SEND_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>';
+  var MIC_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8"/></svg>';
+  var SR_CTOR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var VOICE_OK = Boolean(SR_CTOR);
 
   var root = document.createElement('div');
   root.className = 'sw-wrap';
@@ -1989,6 +1995,7 @@ if (typeof window !== 'undefined') window.createBrain = createBrain;
       '<div class="sw-chips"></div>' +
       '<div class="sw-foot">' +
         '<textarea class="sw-in" rows="1" placeholder="Type a message..."></textarea>' +
+        (VOICE_OK ? '<button class="sw-mic" type="button" aria-label="Talk instead of typing">' + MIC_SVG + '</button>' : '') +
         '<button class="sw-send" type="button" aria-label="Send">' + SEND_SVG + '</button>' +
       '</div>' +
       '<div class="sw-note">Prices are a guide — confirmed in store</div>';
@@ -2014,6 +2021,30 @@ if (typeof window !== 'undefined') window.createBrain = createBrain;
     chipsEl.addEventListener('click', function(e){
       var b = e.target.closest ? e.target.closest('.sw-chip') : null;
       if (b) ask(b.textContent);
+    });
+
+    // talk instead of typing: one utterance in, and the reply is spoken
+    // back - typed messages stay silent, so voice never surprises anyone
+    var micBtn = panel.querySelector('.sw-mic');
+    if (micBtn) micBtn.addEventListener('click', function(){
+      if (rec){ try{ rec.abort(); }catch(e){} return; }
+      rec = new SR_CTOR();
+      rec.lang = 'en-AU';
+      rec.interimResults = true;
+      micBtn.classList.add('rec');
+      input.placeholder = 'Listening...';
+      rec.onresult = function(ev){
+        var said = '';
+        for (var i = 0; i < ev.results.length; i++) said += ev.results[i][0].transcript;
+        input.value = said;
+        if (ev.results[ev.results.length - 1].isFinal && said.trim()) ask(said, true);
+      };
+      rec.onerror = rec.onend = function(){
+        rec = null;
+        micBtn.classList.remove('rec');
+        input.placeholder = 'Type a message...';
+      };
+      try{ rec.start(); }catch(e){ rec = null; micBtn.classList.remove('rec'); }
     });
 
     var savedLog = read('log'), savedChips = read('chips');
@@ -2174,16 +2205,42 @@ if (typeof window !== 'undefined') window.createBrain = createBrain;
     return lines[Math.floor(Math.random() * lines.length)];
   }
 
-  var busy = false, lastAsked = '';
-  function ask(text){
+  var busy = false, lastAsked = '', rec = null, voiceTurn = false, player = null;
+  function ask(text, fromVoice){
     text = String(text || '').trim();
     if(!text || busy || !log) return;
     busy = true;
+    voiceTurn = Boolean(fromVoice);
     lastAsked = text;
     addUser(text);
     chipsEl.innerHTML = '';
     input.value = ''; input.style.height = 'auto';
     resolveAnswer(text).then(function(res){ deliver(res); });
+  }
+
+  // Hope's spoken reply: the server's neural Aussie voice first, the
+  // browser's best English voice when the server can't oblige
+  function speak(text){
+    text = String(text || '').trim();
+    if (!text) return;
+    if (player){ try{ player.pause(); }catch(e){} player = null; }
+    var ttsUrl = API ? API.replace(/\/api\/chat\/?$/, '/api/tts') : '';
+    var local = function(){
+      if (!window.speechSynthesis) return;
+      var u = new SpeechSynthesisUtterance(text);
+      var vs = speechSynthesis.getVoices().filter(function(v){ return /^en/i.test(v.lang); });
+      var v = vs.filter(function(x){ return /natural/i.test(x.name); })[0]
+           || vs.filter(function(x){ return /google uk english female/i.test(x.name); })[0]
+           || vs.filter(function(x){ return /en[-_]AU/i.test(x.lang); })[0] || vs[0];
+      if (v) u.voice = v;
+      speechSynthesis.cancel();
+      speechSynthesis.speak(u);
+    };
+    if (!ttsUrl) return local();
+    fetch(ttsUrl, { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ text: text }) })
+      .then(function(r){ if(!r.ok) throw new Error('tts'); return r.blob(); })
+      .then(function(b){ player = new Audio(URL.createObjectURL(b)); return player.play(); })
+      .catch(local);
   }
 
   /* ---------- live store search (same origin, no token) ---------- */
@@ -2282,6 +2339,7 @@ if (typeof window !== 'undefined') window.createBrain = createBrain;
       parts[0] = P.closedPrefix + parts[0].charAt(0).toLowerCase() + parts[0].slice(1);
       store('afterHours','1');
     }
+    if (voiceTurn){ voiceTurn = false; speak(res.text); }
     var step = 0;
     function next(){
       if(step >= parts.length){ busy = false; return; }
