@@ -6,6 +6,9 @@
     "start": "node chatbot/app/server.js",
     "test": "node --test chatbot/app/"
   },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.71.0"
+  },
   "engines": {
     "node": ">=18"
   }

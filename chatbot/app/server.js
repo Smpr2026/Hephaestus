@@ -5,7 +5,10 @@
  *
  * Runs with no credentials at all: without ANTHROPIC_API_KEY it answers from
  * the local matcher, so you can click through the whole thing before spending
- * a cent. Set the key and the same endpoints start using Claude instead.
+ * a cent. With the key set, the local engine still answers first - Claude is
+ * only asked about genuine gaps, and everything it works out is written to
+ * persistent memory so the same question is answered locally (free) forever
+ * after.
  *
  * Deliberately zero-dependency apart from the Anthropic SDK — this is the
  * shape that later becomes the Shopify app's backend.
@@ -17,6 +20,7 @@ const path = require('path');
 const kbStore = require('./src/kb.js');
 const { createBrain } = require('./src/brain.js');
 const claude = require('./src/claude.js');
+const { createMemory } = require('./src/memory.js');
 const quotes = require('./src/quotes.js');
 const tickets = require('./src/tickets.js');
 const catalogue = require('./src/catalogue.js');
@@ -27,7 +31,12 @@ const PORT = process.env.PORT || 3000;
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
 const GAPS_FILE = path.join(DATA_DIR, 'gaps.jsonl');
 const LEARNED_FILE = path.join(DATA_DIR, 'learned.json');
+const ANSWERS_FILE = path.join(DATA_DIR, 'answers.json');
 const PUBLIC = path.join(__dirname, 'public');
+
+// answers Claude has already worked out for questions the local engine
+// missed - checked before any API call, so each gap costs at most once
+const memory = createMemory(ANSWERS_FILE);
 
 let KB = kbStore.load();
 let brain = createBrain(KB);
@@ -175,21 +184,41 @@ async function handleChat(req, res) {
   const shop = await liveProducts(message);
   if (shop) return send(res, 200, { ...shop, engine: 'shopify' });
 
-  if (claude.available()) {
-    try {
-      const answer = await claude.ask(KB, history, message);
-      return send(res, 200, { ...answer, engine: 'claude' });
-    } catch (err) {
-      // never leave a customer with nothing because an API call failed
-      console.error('[claude] falling back to local matcher:', err.message);
-      const answer = b.respond(message);
-      absorbLearning(b);
-      return send(res, 200, { ...answer, engine: 'local (claude failed)' });
+  /* Layer 1: the local engine answers first - knowledge base, price book,
+   * symptom handlers, policies. Instant, free, and it covers nearly
+   * everything, so this is the answer for all but genuine misses. */
+  const answer = b.respond(message);
+  absorbLearning(b);
+
+  const missed = /^fallback/.test(String(answer.intent));
+  if (missed) {
+    /* Layer 3 first on a miss: has Claude already worked this one out for
+     * an earlier customer? Then it's a local answer now - no API call. */
+    const remembered = memory.match(message);
+    if (remembered) {
+      return send(res, 200, {
+        text: remembered, card: null, contact: false, chips: [],
+        intent: 'learned-answer', engine: 'memory'
+      });
+    }
+
+    /* Layer 2: a genuinely new gap goes to Claude, in character, with the
+     * knowledge base as its only source of truth. Whatever it works out is
+     * written back to memory so this question never costs again. Any
+     * failure falls straight through to the local clarifier - a customer
+     * is never left hanging on an API error. */
+    if (claude.available()) {
+      try {
+        const smart = await claude.ask(KB, history, message);
+        memory.learn(message, smart.text);
+        logGap(message, answer); // still a KB gap worth reviewing in admin
+        return send(res, 200, { ...smart, engine: 'claude-fallback' });
+      } catch (err) {
+        console.error('[claude] gap fallback failed, using local answer:', err.message);
+      }
     }
   }
 
-  const answer = b.respond(message);
-  absorbLearning(b);
   logGap(message, answer);
   notifyEscalation(message, answer);
   send(res, 200, { ...answer, engine: 'local' });
@@ -295,7 +324,8 @@ const server = http.createServer(async (req, res) => {
 
     if (urlPath === '/api/status' && req.method === 'GET') {
       return send(res, 200, {
-        engine: claude.available() ? 'claude' : 'local',
+        engine: claude.available() ? 'local + claude gap fallback' : 'local',
+        learnedAnswers: memory.size(),
         livePricing: quotes.configured() ? process.env.FIXDESK_URL : false,
         liveCatalogue: catalogue.configured() ? process.env.SHOPIFY_STORE_DOMAIN : false,
         catalogueSample: (KB.catalogue && KB.catalogue.items || []).length,
@@ -319,6 +349,8 @@ server.listen(PORT, () => {
   console.log('  ────────────────────────────────');
   console.log('  Storefront   http://localhost:' + PORT + '/');
   console.log('  Admin        http://localhost:' + PORT + '/admin.html');
-  console.log('  Engine       ' + (claude.available() ? 'Claude (' + claude.MODEL + ')' : 'local matcher — set ANTHROPIC_API_KEY to use Claude'));
+  console.log('  Engine       local matcher first' + (claude.available()
+    ? ', Claude (' + claude.MODEL + ') on gaps, answers remembered'
+    : ' — set ANTHROPIC_API_KEY to add the Claude gap fallback'));
   console.log('');
 });
