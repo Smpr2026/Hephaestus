@@ -1084,6 +1084,11 @@ function createBrain(KB) {
       // ("i moved my data...") must never answer "yes, we've moved!"
       if (KB.intents[k].id === 'moved') continue;
       if (KB.intents[k].id === 'casual_greeting') continue;
+      // every warranty_dispute phrase is about damage appearing by itself
+      // ("cracked on its own") - filler words like "just" and "its own" must
+      // not drag a power symptom ("turned off on its own") into that script
+      if (KB.intents[k].id === 'warranty_dispute' &&
+          !/\b(crack\w*|broke\w*|broken|smash\w*|shatter\w*|split)\b/.test(t)) continue;
       var n = 0;
       for (var w in toks) { if (KB.intents[k]._tokens[w]) n++; }
       if (n > tokScore) { tokScore = n; tokBest = KB.intents[k]; }

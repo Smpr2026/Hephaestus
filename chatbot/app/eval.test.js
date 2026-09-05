@@ -340,6 +340,22 @@ test('a fault pair the shop has done before is priced off its history, silently'
   assert.ok(!/combined jobs/i.test(JSON.stringify(s.card.rows)), 'no fabricated history');
 });
 
+test('a phone switching itself off is a power fault, never a warranty dispute', () => {
+  // live transcript: "it just turned off on its own" was riding the filler
+  // words ("just", "its own") into the cracked-by-itself warranty script
+  const b = createBrain(KB);
+  b.respond('my phone reboots');
+  const r = b.respond('it just turned off on its own');
+  assert.ok(r.intent.startsWith('fault_dead'), `matched ${r.intent}`);
+  assert.ok(!/after a repair|warranty/i.test(r.text), 'must not read as a post-repair dispute');
+  // cold open routes the same way
+  const cold = createBrain(KB).respond('it just turned off on its own');
+  assert.ok(cold.intent.startsWith('fault_dead'), `matched ${cold.intent}`);
+  // a real dispute still gets the de-escalation script
+  const w = createBrain(KB).respond('my screen cracked on its own after you fixed it');
+  assert.ok(w.intent.startsWith('warranty_dispute'), `matched ${w.intent}`);
+});
+
 test('ticket-priced repairs show a clean price, not shop bookkeeping', () => {
   // the exact card George flagged: back glass priced from 21 real jobs
   const r = createBrain(KB).respond('i need the back glass on my iphone 15 pro max repaired');
