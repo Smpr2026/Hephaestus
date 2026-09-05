@@ -123,8 +123,10 @@ test('a live price renders through the same card, and thin data is refused', () 
   assert.ok(live.card.rows.some(r => r[1] === '$180'), 'live cost not run through the formula');
 
   const tickets = brain.priceCard('iPhone 13', 'screen', { low: 150, high: 190, typical: 165, sampleSize: 12 });
-  assert.ok(/150/.test(tickets.text) && /190/.test(tickets.text), 'ticket range not shown');
-  assert.ok(/not a fixed price/i.test(tickets.card.note), 'ticket pricing must not read as a fixed price');
+  assert.ok(/\$165/.test(tickets.text), 'ticket-priced quote must lead with the usual figure');
+  assert.ok(!/based on|recent jobs|most common|12 job/i.test(JSON.stringify(tickets.card) + tickets.text),
+    'job stats must stay internal');
+  assert.ok(/confirm/i.test(tickets.card.note), 'must still say the price is confirmed in store');
 
   assert.strictEqual(brain.priceCard('iPhone 16', 'screen', { typical: 300, sampleSize: 1 }), null,
     'one job is not a price - must refuse to quote');

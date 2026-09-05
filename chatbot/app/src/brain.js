@@ -287,22 +287,19 @@ function createBrain(KB) {
     var range = (p.low != null && p.high != null && p.low !== p.high)
       ? '$' + p.low + '–$' + p.high
       : '$' + (p.typical != null ? p.typical : p.low);
-    var rows = [['Recent jobs', range]];
-    if (p.typical != null) rows.push(['Most common', '$' + p.typical]);
+    var rows = [['Price', p.typical != null ? '$' + p.typical : range]];
     if (p.turnaround) rows.push(['Time in store', p.turnaround]);
-    rows.push(['Based on', p.sampleSize + ' jobs']);
     lastQuote = { model: null, repair: repair, label: p.label || repairLabel(repair), priceLine: range };
     return {
       text: p.typical != null
-        ? 'A ' + repairLabel(repair) + ' is usually $' + p.typical + ' — recent jobs have run ' +
-          range + ', and we’ll confirm the exact price once we’ve had a look at what’s going on.'
-        : 'Most ' + repairLabel(repair) + ' jobs have come in around ' + range +
+        ? 'A ' + repairLabel(repair) + ' is usually $' + p.typical +
+          ' — we’ll confirm the exact price once we’ve had a look at what’s going on.'
+        : 'A ' + repairLabel(repair) + ' usually runs ' + range +
           ' — we’ll tell you the exact price once we’ve had a look at what’s going on.',
       card: {
         title: p.label || repairLabel(repair),
         rows: rows,
-        note: 'That’s what we’ve actually charged recently, not a fixed price. ' +
-              fill(KB.pricing.disclaimerShort) + ' Every repair includes the ' + B.warranty + '.'
+        note: fill(KB.pricing.disclaimerShort) + ' Every repair includes the ' + B.warranty + '.'
       },
       contact: false,
       chips: ['Lock this price in', 'Do I need a booking?', 'How long does a repair take?'],
@@ -567,11 +564,6 @@ function createBrain(KB) {
         var rows2 = tiers2.map(function (r) {
           return [r.label + ' + back glass', money(r.price + addon), r.blurb];
         });
-        var pkgR = (KB.pricing.combos || {})[model];
-        if (pkgR && pkgR.sampleSize >= 3) {
-          rows2.push(['Recent combined jobs', '$' + pkgR.low + '–$' + pkgR.high +
-                      ' (' + pkgR.sampleSize + ' done)']);
-        }
         rows2.push(['Time in store', 'Usually same day for both']);
         var fromP = money(tiers2[0].price + addon);
         lastQuote = {
@@ -604,21 +596,15 @@ function createBrain(KB) {
         priceLine: rangeT
       };
       var artT = /^[aeiou]/i.test(model) ? 'an ' : 'a ';
-      var rowsT = [['Screen + back glass together', rangeT]];
-      if (sRowR.typical != null) rowsT.push(['Most common', '$' + (sRowR.typical + addon)]);
-      var pkgT = (KB.pricing.combos || {})[model];
-      if (pkgT && pkgT.sampleSize >= 3) {
-        rowsT.push(['Recent combined jobs', '$' + pkgT.low + '–$' + pkgT.high +
-                    ' (' + pkgT.sampleSize + ' done)']);
-      }
+      var rowsT = [['Screen + back glass together',
+                    sRowR.typical != null ? '$' + (sRowR.typical + addon) : rangeT]];
       rowsT.push(['Time in store', 'Usually same day for both']);
       return {
         text: 'Front and back on ' + artT + model + ' \u2014 we do both in the one visit, and together it works out cheaper than two separate jobs: the back glass adds $' + addon + ' on top of the screen.',
         card: {
           title: model + ' \u2014 screen + back glass',
           rows: rowsT,
-          note: 'Screen price is what recent ' + model + ' screen jobs have gone for, plus the back glass. ' +
-                fill(KB.pricing.disclaimerShort) + ' Every repair includes the ' + B.warranty + '.'
+          note: fill(KB.pricing.disclaimerShort) + ' Every repair includes the ' + B.warranty + '.'
         },
         contact: false, products: null,
         chips: ['Lock this price in', 'Do I need a booking?', 'How long does a repair take?'],
@@ -641,13 +627,10 @@ function createBrain(KB) {
         card: {
           title: model + ' \u2014 screen + back glass',
           rows: [
-            ['Done together', range],
-            ['Most common', '$' + pkg.typical],
-            ['Time in store', 'Usually same day for both'],
-            ['Based on', pkg.sampleSize + ' jobs' + (pkg.since ? ' since ' + pkg.since : '')]
+            ['Done together', pkg.typical != null ? '$' + pkg.typical : range],
+            ['Time in store', 'Usually same day for both']
           ],
-          note: 'That\u2019s what we\u2019ve actually charged for the pair recently. ' +
-                fill(KB.pricing.disclaimerShort) + ' Every repair includes the ' + B.warranty + '.'
+          note: fill(KB.pricing.disclaimerShort) + ' Every repair includes the ' + B.warranty + '.'
         },
         contact: false, products: null,
         chips: ['Lock this price in', 'Do I need a booking?', 'How long does a repair take?'],
@@ -725,10 +708,10 @@ function createBrain(KB) {
     var hist = (KB.pricing.multiCombos || {})[model + '|' + keys.slice().sort().join('+')];
     var totalLine;
     if (hist && hist.sampleSize >= 3) {
-      totalLine = hist.low !== hist.high ? '$' + hist.low + '–$' + hist.high : '$' + hist.typical;
+      totalLine = hist.typical != null
+        ? '$' + hist.typical
+        : (hist.low !== hist.high ? '$' + hist.low + '–$' + hist.high : '$' + hist.low);
       items.push(['All together, one visit', totalLine]);
-      items.push(['Most common', '$' + hist.typical]);
-      items.push(['Based on', hist.sampleSize + ' combined jobs we’ve done']);
     } else {
       totalLine = (from ? 'from ' : '') + money(total);
       items.push(['All together, one visit', totalLine]);
@@ -1350,10 +1333,13 @@ function createBrain(KB) {
     for (var j = 0; j < SHOP_WORDS.length; j++) {
       if (t.indexOf(' ' + SHOP_WORDS[j]) !== -1) { shopping = true; break; }
     }
-    // "i want a phone" / "i need a handset" is shopping, not a fault report
+    // "i want a phone" / "i need a handset" is shopping, not a fault report -
+    // but "i need help with my phone, it keeps rebooting" is a fault report,
+    // never a sales pitch: any help-ask or symptom word vetoes the rule
     if (!shopping && /\b(want|wants|need|needs|after|buy|get|grab|looking)\b/.test(t) &&
         /\b(phones?|handsets?|mobiles?)\b/.test(t) &&
         !/(case|cover|protector|charger|cable|holder|mount|part|screen|repair|fix)/.test(t) &&
+        !/\b(help|hand|broken?|damaged?|cracked|smashed|dead|dying|drains?|reboot\w*|restart\w*|flicker\w*|glitch\w*|frozen|freezes?|stuck|wont|isnt|not working|playing up|issues?|problems?|trouble|hot|overheat\w*|wet|water)\b/.test(t) &&
         !detectRepair(t)) shopping = true;
     var colour = null;
     for (var c = 0; c < COLOURS.length; c++) {
@@ -1649,24 +1635,18 @@ function createBrain(KB) {
       ? '$' + p.low + '–$' + p.high
       : '$' + (p.typical != null ? p.typical : p.low);
     lastQuote = { model: model, repair: repair, label: label, priceLine: range };
-    var rows = [['Recent jobs', range]];
-    if (p.typical != null) rows.push(['Most common', '$' + p.typical]);
+    var rows = [['Price', p.typical != null ? '$' + p.typical : range]];
     rows.push(['Time in store', turnaround(model, repair)]);
-    rows.push(['Based on', p.sampleSize + ' job' + (p.sampleSize === 1 ? '' : 's') +
-                            (p.since ? ' since ' + p.since : '')]);
     return {
-      // lead with the exact figure - the range is context, not the answer
       text: p.typical != null
         ? 'A' + (art === 'an ' ? 'n' : '') + ' ' + model + ' ' + repairLabel(repair) +
-          ' is usually $' + p.typical + ' fitted — recent jobs have run ' + range +
-          ' depending on the part you go with.'
-        : 'Most ' + model + ' ' + repairLabel(repair) +
-          ' jobs have come in around ' + range + ' — it depends on the part you go with.',
+          ' is usually $' + p.typical + ' fitted — it can shift a little depending on the part you go with.'
+        : 'A' + (art === 'an ' ? 'n' : '') + ' ' + model + ' ' + repairLabel(repair) +
+          ' usually runs ' + range + ' fitted — it depends on the part you go with.',
       card: {
         title: label,
         rows: rows,
-        note: 'That’s what we’ve actually charged recently, not a fixed price. ' +
-              fill(KB.pricing.disclaimerShort) + ' Every repair includes the ' + B.warranty + '.'
+        note: fill(KB.pricing.disclaimerShort) + ' Every repair includes the ' + B.warranty + '.'
       },
       contact: false,
       chips: ['Lock this price in', 'Genuine or aftermarket?', 'Do I need a booking?'],

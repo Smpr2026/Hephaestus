@@ -150,6 +150,23 @@ test('small-talk openers get small talk back, not a template', () => {
   assert.ok(!real.intent.startsWith('casual_greeting'), `repair sentence became small talk: ${real.intent}`);
 });
 
+test('a fault report mentioning "need" and "phone" is never a sales pitch', () => {
+  // live transcript: "i need help with my phone it keeps rebootng" got
+  // phones-for-sale cards - the want/need+phone shopping rule fired over a
+  // fault report. Symptom or help words must veto it, in the widget's
+  // product parse AND the brain.
+  const b = createBrain(KB);
+  assert.strictEqual(b.parseProductQuery('i need help with my phone it keeps rebootng'), null,
+    'the widget product parse must not claim a fault report');
+  const r = createBrain(KB).respond('i need help with my phone it keeps rebootng');
+  assert.ok(/fault_dead|^triage$/.test(r.intent), `matched ${r.intent}`);
+  // genuine shopping keeps working
+  for (const q of ['i want a handset', 'i need a new phone']) {
+    const p = createBrain(KB).parseProductQuery(q);
+    assert.ok(p && p.shopping, `"${q}" must stay shopping`);
+  }
+});
+
 test('Aussie slang lands like plain English', () => {
   const blower = createBrain(KB).respond('me blower carked it');
   assert.ok(/fault_dead|^triage$/.test(blower.intent),
@@ -300,24 +317,36 @@ test("a second fault added 'with my repair' stacks onto the standing quote", () 
 
 /* -------------------------- 11. combos priced from real combined jobs */
 
-test('a fault pair the shop has done before quotes its real combined history', () => {
-  // iPhone X screen+battery: 16 real combined jobs in the line history
+test('a fault pair the shop has done before is priced off its history, silently', () => {
+  // iPhone X screen+battery: 16 real combined jobs in the line history feed
+  // the number, but the customer only sees the price - never the bookkeeping
+  const hist = KB.pricing.multiCombos['iPhone X|battery+screen'];
   const r = createBrain(KB).respond('iphone x screen and battery price');
   assert.ok(r.intent.startsWith('price-multi:iPhone X'), `matched ${r.intent}`);
   const rows = JSON.stringify(r.card.rows);
-  assert.ok(/combined jobs/i.test(rows), 'the total must come from real combined jobs');
-  assert.ok(/Most common/.test(rows), 'and show the most common combined charge');
-  // screen+back glass keeps George's rule but shows the history alongside
+  assert.ok(rows.includes('$' + hist.typical), 'the total must come from the real combined history');
+  assert.ok(!/combined jobs|based on|most common|recent jobs/i.test(rows),
+    'internal job stats must never reach the customer');
+  // screen+back glass keeps George's rule, again with no history rows on show
   const c = createBrain(KB).respond('samsung s20 ultra screen and back glass');
   assert.ok(c.intent.startsWith('price-combo:Galaxy S20 Ultra'), `matched ${c.intent}`);
-  assert.ok(/Recent combined jobs/.test(JSON.stringify(c.card.rows)),
-    'the combo card must show what recent combined jobs went for');
-  // a pair with no history still gets an honest sum, never an invented history line
+  assert.ok(!/combined jobs|based on|most common/i.test(JSON.stringify(c.card.rows)),
+    'the combo card must not show job-history rows');
+  // a pair with no history still gets an honest sum
   const KB2 = JSON.parse(JSON.stringify(KB));
   KB2.pricing.multiCombos = {};
   const s = createBrain(KB2).respond('iphone 11 battery and charging port price');
   assert.ok(s.intent.startsWith('price-multi:iPhone 11'), `matched ${s.intent}`);
   assert.ok(!/combined jobs/i.test(JSON.stringify(s.card.rows)), 'no fabricated history');
+});
+
+test('ticket-priced repairs show a clean price, not shop bookkeeping', () => {
+  // the exact card George flagged: back glass priced from 21 real jobs
+  const r = createBrain(KB).respond('i need the back glass on my iphone 15 pro max repaired');
+  assert.ok(r.card, 'must still quote a price card');
+  const visible = JSON.stringify(r.card) + ' ' + r.text;
+  assert.ok(!/based on|jobs since|recent jobs|most common|actually charged|sample/i.test(visible),
+    'no internal stats anywhere the customer can see');
 });
 
 /* --------------------------------------------------- 6. identity holds */
