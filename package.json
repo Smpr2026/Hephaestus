@@ -7,7 +7,8 @@
     "test": "node --test chatbot/app/"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.71.0"
+    "@anthropic-ai/sdk": "^0.71.0",
+    "msedge-tts": "^2.0.7"
   },
   "engines": {
     "node": ">=18"

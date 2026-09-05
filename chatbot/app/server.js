@@ -21,6 +21,7 @@ const kbStore = require('./src/kb.js');
 const { createBrain } = require('./src/brain.js');
 const claude = require('./src/claude.js');
 const { createMemory } = require('./src/memory.js');
+const tts = require('./src/tts.js');
 const quotes = require('./src/quotes.js');
 const tickets = require('./src/tickets.js');
 const catalogue = require('./src/catalogue.js');
@@ -318,6 +319,34 @@ const server = http.createServer(async (req, res) => {
       });
     }
 
+    /* Hope's realistic voice: neural en-AU speech synthesized server-side,
+     * free. The voice page asks here first and falls back to the browser's
+     * built-in voices on any failure, so this endpoint is best-effort. */
+    if (urlPath === '/api/tts' && req.method === 'POST') {
+      const body = await readBody(req);
+      try {
+        const audio = await tts.synth(String(body.text || ''));
+        res.writeHead(200, {
+          'Content-Type': 'audio/mpeg',
+          'Access-Control-Allow-Origin': '*',
+          'Cache-Control': 'no-store'
+        });
+        return res.end(audio);
+      } catch (err) {
+        console.error('[tts]', err.message);
+        return send(res, 503, { error: 'tts unavailable' });
+      }
+    }
+
+    if (urlPath === '/api/tts/status' && req.method === 'GET') {
+      try {
+        await tts.synth("g'day");
+        return send(res, 200, { ok: true, voice: tts.VOICE });
+      } catch (err) {
+        return send(res, 200, { ok: false, error: err.message });
+      }
+    }
+
     if (urlPath === '/api/gaps' && req.method === 'GET') {
       return readGaps(rows => send(res, 200, rows));
     }
@@ -352,5 +381,10 @@ server.listen(PORT, () => {
   console.log('  Engine       local matcher first' + (claude.available()
     ? ', Claude (' + claude.MODEL + ') on gaps, answers remembered'
     : ' — set ANTHROPIC_API_KEY to add the Claude gap fallback'));
+  // warm the neural voice and report honestly - the voice page falls back
+  // to browser voices when this line says unavailable
+  tts.synth("G'day, Hope here.")
+    .then(() => console.log('  Voice        ' + tts.VOICE + ' ready (server neural TTS)'))
+    .catch(err => console.log('  Voice        server TTS unavailable (' + err.message + ') — browser voices only'));
   console.log('');
 });

@@ -113,6 +113,7 @@
   function rankVoice(v) {
     var s = 0, n = v.name;
     if (/natural/i.test(n)) s += 16;               // Edge neural voices
+    if (/google uk english female/i.test(n)) s += 12; // George's pick of the browser voices
     if (/en[-_]AU/i.test(v.lang)) s += 8;          // Aussie accent
     if (/natasha|karen|catherine|hayley|annette|olivia/i.test(n)) s += 3;
     if (/google/i.test(n)) s += 6;                 // Chrome's better tier
@@ -123,6 +124,17 @@
     return s;
   }
 
+  /* The most realistic option doesn't live in the browser at all: the
+   * server synthesizes neural Aussie speech (same voice Edge's Read Aloud
+   * uses) and streams it back as audio. Probed once; when it's up it goes
+   * to the top of the list and becomes the default. */
+  var SERVER_VOICE = '__server';
+  var serverVoiceOk = false;
+  fetch('/api/tts/status').then(function (r) { return r.json(); }).then(function (st) {
+    serverVoiceOk = !!st.ok;
+    if (serverVoiceOk) refreshVoices();
+  }).catch(function () {});
+
   function englishVoices() {
     return speechSynthesis.getVoices()
       .filter(function (v) { return /^en/i.test(v.lang); })
@@ -131,32 +143,38 @@
 
   function refreshVoices() {
     var vs = englishVoices();
-    if (!vs.length) return;
+    if (!vs.length && !serverVoiceOk) return;
+    // fresh storage key: the server voice resets old picks so it can take
+    // over as the default; an explicit pick from here on still sticks
     var saved = null;
-    try { saved = localStorage.getItem('hope.voice'); } catch (e) {}
+    try { saved = localStorage.getItem('hope.voice2'); } catch (e) {}
     voiceSel.innerHTML = '';
+    if (serverVoiceOk) {
+      var so = document.createElement('option');
+      so.value = SERVER_VOICE;
+      so.textContent = 'Natasha — Aussie, most realistic (server)';
+      voiceSel.appendChild(so);
+    }
     vs.forEach(function (v) {
       var o = document.createElement('option');
       o.value = v.name;
       o.textContent = v.name.replace(/^Microsoft |^Google /, '') + ' (' + v.lang + ')';
       voiceSel.appendChild(o);
     });
-    var pick = vs.filter(function (v) { return v.name === saved; })[0] || vs[0];
-    voiceSel.value = pick.name;
-    chosenVoice = pick;
+    var def = serverVoiceOk ? SERVER_VOICE : (vs[0] && vs[0].name);
+    var valid = saved === SERVER_VOICE ? serverVoiceOk : vs.some(function (v) { return v.name === saved; });
+    voiceSel.value = valid ? saved : def;
+    chosenVoice = vs.filter(function (v) { return v.name === voiceSel.value; })[0] || null;
     var hint = document.getElementById('voiceHint');
-    if (!vs.some(function (v) { return /natural/i.test(v.name); })) {
-      hint.textContent = 'Tip: open this page in Microsoft Edge for the most realistic voice — its "Natasha (Natural)" Australian voice sounds like a real person.';
-    } else {
-      hint.textContent = '';
-    }
+    hint.textContent = (serverVoiceOk || vs.some(function (v) { return /natural/i.test(v.name); })) ? '' :
+      'Tip: open this page in Microsoft Edge for its "Natasha (Natural)" Australian voice.';
   }
   refreshVoices();
   speechSynthesis.onvoiceschanged = refreshVoices;
 
   voiceSel.onchange = function () {
     chosenVoice = englishVoices().filter(function (v) { return v.name === voiceSel.value; })[0] || null;
-    try { localStorage.setItem('hope.voice', voiceSel.value); } catch (e) {}
+    try { localStorage.setItem('hope.voice2', voiceSel.value); } catch (e) {}
   };
 
   document.getElementById('tryVoice').onclick = function () {
@@ -178,18 +196,44 @@
     return parts.join(' ').replace(/\s+/g, ' ').trim();
   }
 
+  var player = null;
+
   function say(text, done) {
     speaking = true;
     setState('Hope is talking…', 'speaking');
     try { rec && rec.abort(); } catch (e) {}
+    if (player) { try { player.pause(); } catch (e) {} player = null; }
+
+    var finish = function () { speaking = false; if (done) done(); };
+
+    if (serverVoiceOk && voiceSel.value === SERVER_VOICE) {
+      fetch('/api/tts', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ text: text })
+      }).then(function (r) {
+        if (!r.ok) throw new Error('tts ' + r.status);
+        return r.blob();
+      }).then(function (blob) {
+        if (!speaking) return; // hung up while synthesizing
+        player = new Audio(URL.createObjectURL(blob));
+        player.onended = player.onerror = finish;
+        return player.play();
+      }).catch(function () {
+        // server voice hiccup - fall straight back to the browser voice
+        if (speaking) speakLocal(text, finish);
+      });
+      return;
+    }
+    speakLocal(text, finish);
+  }
+
+  function speakLocal(text, finish) {
     var u = new SpeechSynthesisUtterance(text);
     var v = pickVoice();
     if (v) u.voice = v;
     u.rate = 1.02; u.pitch = 1.0;
-    u.onend = u.onerror = function () {
-      speaking = false;
-      if (done) done();
-    };
+    u.onend = u.onerror = finish;
     speechSynthesis.cancel();
     speechSynthesis.speak(u);
   }
@@ -245,6 +289,7 @@
     live = false;
     speaking = false;
     try { rec && rec.abort(); } catch (e) {}
+    if (player) { try { player.pause(); } catch (e) {} player = null; }
     speechSynthesis.cancel();
     callBtn.classList.remove('live');
     callBtn.textContent = '📞';
