@@ -192,7 +192,6 @@
   }
   ::selection{background:var(--gold-200)}
 
-  /* ── Real phones: drop the mockup, be the app ────────────── */
   @media (max-width: 700px){
     body{display:block; padding:0; gap:0; background:var(--ground); min-height:auto}
     .stage-note{display:none}
@@ -344,7 +343,7 @@
 
   /* ───────── state ───────── */
   const S = {
-    screen:'menu', meal:'breakfast', lines:[], hole:6, gpsHole:6, holeSheet:false,
+    screen:'menu', meal:'breakfast', cat:0, search:'', lines:[], hole:6, gpsHole:6, holeSheet:false,
     mode:'come', targetHole:8, pay:'apple', order:null, toast:null,
     itemSheet:null, sheetSel:[], sheetNote:'', sheetQty:1, editLine:null,
     dietSheet:false, diet:['Egg allergy'],
@@ -377,6 +376,9 @@
   }
   const initials = n => (n.split(' ').map(w => w[0]).join('').replace(/[^A-Z]/g,'').slice(0,2)) || n.slice(0,2);
 
+  let pendingJump = false;
+  function jumpToList(){ pendingJump = true; }
+
   let toastTimer = null;
   function showToast(msg){
     clearTimeout(toastTimer);
@@ -401,9 +403,12 @@
   /* ───────── screens ───────── */
   function menuScreen(){
     const tints = [['#f7e7b8','#7a5e15'],['#e1eecc','#3d472b'],['#eee7db','#645c50']];
-    let ti = 0, h = '';
+    const cats = mealCats(S.meal);
+    if (S.cat >= cats.length) S.cat = 0;
+    const q = S.search.trim().toLowerCase();
+    let h = '<div class="screen" style="padding-top:0">';
 
-    h += '<div class="screen">';
+    h += '<div style="padding-top:72px">';
     h += '<div class="row" style="gap:12px">'
       +  '<div class="avatar" style="width:44px;height:44px;background:var(--gold);color:var(--gold-100);font-size:16px">PG</div>'
       +  '<div style="flex:1"><div class="d1">Par &amp; Grill</div>'
@@ -414,52 +419,92 @@
     h += '<div class="row" style="margin-top:14px;background:var(--sand);border-radius:999px;padding:4px;gap:4px">';
     [{id:'breakfast',label:'Breakfast'},{id:'lunch',label:'Lunch'},{id:'dinner',label:'Dinner'}].forEach(ml => {
       const sel = S.meal === ml.id;
-      h += '<button ' + on(() => { S.meal = ml.id; render(); }) + ' class="pill" style="flex:1;padding:9px 0;background:'
+      h += '<button ' + on(() => { S.meal = ml.id; S.cat = 0; S.search=''; jumpToList(); render(); }) + ' class="pill" style="flex:1;padding:9px 0;background:'
         + (sel ? 'var(--gold)' : 'transparent') + ';color:' + (sel ? '#fff' : 'var(--n700)')
         + ';font-weight:700;font-size:13px">' + ml.label + '</button>';
     });
     h += '</div>';
 
-    h += '<div class="row" style="margin-top:12px;background:var(--sage-200);border-radius:28px;padding:16px 18px;gap:12px">'
+    h += '<div class="row" style="margin-top:12px;background:var(--sage-200);border-radius:28px;padding:14px 16px;gap:11px">'
       +  '<div style="width:10px;height:10px;border-radius:999px;background:var(--sage-700);position:relative;flex:none">'
       +  '<div class="pulse" style="position:absolute;inset:0;border-radius:999px;background:var(--sage-700)"></div></div>'
       +  '<div style="font-size:13.5px;line-height:1.45;color:var(--sage-800)"><strong>We can see you on hole ' + S.hole
-      +  '.</strong> Order now and we\'ll bring it to you on the course — no need to stop playing.</div></div>';
+      +  '.</strong> Order now and we\'ll bring it to you on the course.</div></div>';
 
     const dietStr = S.diet.length ? S.diet.join(' · ') : 'No allergies set';
     h += '<button ' + on(() => { S.dietSheet = true; render(); }) + ' class="row" style="margin-top:10px;width:100%;gap:10px;border:1px solid var(--n300);background:var(--surface);border-radius:999px;padding:11px 16px;text-align:left">'
       +  warnSvg('#7a5e15', 15)
-      +  '<span style="flex:1;font-size:13px;color:var(--n800)"><strong style="color:var(--gold-700)">' + esc(dietStr) + '</strong> — unsafe items are flagged below</span>'
+      +  '<span style="flex:1;font-size:13px;color:var(--n800)"><strong style="color:var(--gold-700)">' + esc(dietStr) + '</strong> — unsafe items are flagged</span>'
       +  '<span style="font-size:12.5px;font-weight:700;color:var(--gold-700)">Edit</span></button>';
+    h += '</div>';
 
-    mealCats(S.meal).forEach(cat => {
-      h += '<div style="margin-top:26px"><div class="d3" style="margin-bottom:4px">' + esc(cat.name) + '</div>';
-      cat.items.forEach(it => {
-        const tint = tints[(ti++) % 3];
-        const conflicts = conflictsFor(it, []);
-        const fixable = conflicts.length > 0 && conflicts.every(a => it.mods.some(m => m.clears === a));
-        const openSheet = () => { S.itemSheet = it.id; S.sheetSel = []; S.sheetNote = ''; S.sheetQty = 1; S.editLine = null; render(); };
-
-        h += '<div ' + on(openSheet) + ' class="item" role="button" tabindex="0">'
-          +  '<div class="avatar" style="background:' + tint[0] + ';color:' + tint[1] + '">' + esc(initials(it.name)) + '</div>'
-          +  '<div style="flex:1;min-width:0">'
-          +  '<div style="font-weight:600;font-size:15px">' + esc(it.name) + '</div>'
-          +  '<div style="font-size:12.5px;color:var(--n700);margin-top:1px">' + esc(it.desc) + '</div>';
-        if (conflicts.length)
-          h += '<div class="flag">' + warnSvg('currentColor', 11) + ' Contains ' + esc(conflicts.join(' & ').toLowerCase()) + ' — not for you</div>';
-        if (fixable)
-          h += '<div style="font-size:11.5px;color:var(--sage-700);font-weight:600;margin-top:3px">Can be made safe — tap to customise</div>';
-        h += '</div><div style="font-weight:600;font-size:14px">' + fmt(it.price) + '</div>'
-          +  '<button aria-label="Add ' + esc(it.name) + '" ' + on(e => {
-               e.stopPropagation();
-               addLine(it.id, 1, [], '');
-               showToast(conflicts.length
-                 ? it.name + ' added — contains ' + conflicts.join(' & ').toLowerCase() + ', kitchen flagged'
-                 : it.name + ' added');
-             }) + ' class="addbtn" style="background:var(--gold)">+</button></div>';
+    h += '<div id="catbar" style="position:sticky;top:0;z-index:15;background:var(--ground);margin:14px -20px 0;padding:10px 20px 0;box-shadow:0 6px 12px -8px rgba(46,43,37,.35)">';
+    h += '<div class="row" style="gap:8px;background:var(--sand);border-radius:999px;padding:9px 14px">'
+      +  '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#82796a" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5"></path></svg>'
+      +  '<input id="search" value="' + esc(S.search) + '" placeholder="Search the menu" '
+      +  'style="flex:1;min-width:0;border:none;background:none;font-family:var(--body);font-size:14px;color:var(--ink);outline:none">'
+      +  (S.search ? '<button ' + on(()=>{ S.search=''; render(); }) + ' aria-label="Clear search" style="border:none;background:none;color:var(--n600);font-size:17px;line-height:1;padding:0 2px">×</button>' : '')
+      +  '</div>';
+    if (!q){
+      h += '<div id="catrail" style="display:flex;gap:7px;overflow-x:auto;padding:10px 0 9px;scrollbar-width:none">';
+      cats.forEach((c,i) => {
+        const sel = i === S.cat;
+        h += '<button ' + on(()=>{ S.cat = i; jumpToList(); render(); }) + ' data-cat="' + i + '"'
+          +  ' style="flex:none;border:none;background:' + (sel?'var(--gold)':'var(--surface)') + ';color:' + (sel?'#fff':'var(--n700)')
+          +  ';border-radius:999px;padding:9px 15px;font-weight:700;font-size:13px;white-space:nowrap;box-shadow:0 1px 2px rgba(46,43,37,.12)">'
+          +  esc(c.name) + '</button>';
       });
       h += '</div>';
-    });
+    } else { h += '<div style="height:10px"></div>'; }
+    h += '</div>';
+
+    let ti = 0;
+    const rowFor = (it, catName) => {
+      const tint = tints[(ti++) % 3];
+      const conflicts = conflictsFor(it, []);
+      const fixable = conflicts.length > 0 && conflicts.every(a => it.mods.some(m => m.clears === a));
+      const openSheet = () => { S.itemSheet = it.id; S.sheetSel = []; S.sheetNote = ''; S.sheetQty = 1; S.editLine = null; render(); };
+      let r = '<div ' + on(openSheet) + ' class="item" role="button" tabindex="0">'
+        + '<div class="avatar" style="background:' + tint[0] + ';color:' + tint[1] + '">' + esc(initials(it.name)) + '</div>'
+        + '<div style="flex:1;min-width:0">'
+        + (catName ? '<div style="font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--n500);margin-bottom:2px">' + esc(catName) + '</div>' : '')
+        + '<div style="font-weight:600;font-size:15px">' + esc(it.name) + '</div>'
+        + '<div style="font-size:12.5px;color:var(--n700);margin-top:1px">' + esc(it.desc) + '</div>';
+      if (conflicts.length) r += '<div class="flag">' + warnSvg('currentColor', 11) + ' Contains ' + esc(conflicts.join(' & ').toLowerCase()) + ' — not for you</div>';
+      if (fixable)          r += '<div style="font-size:11.5px;color:var(--sage-700);font-weight:600;margin-top:3px">Can be made safe — tap to customise</div>';
+      r += '</div><div style="font-weight:600;font-size:14px">' + fmt(it.price) + '</div>'
+        + '<button aria-label="Add ' + esc(it.name) + '" ' + on(e => {
+            e.stopPropagation();
+            addLine(it.id, 1, [], '');
+            showToast(conflicts.length
+              ? it.name + ' added — contains ' + conflicts.join(' & ').toLowerCase() + ', kitchen flagged'
+              : it.name + ' added');
+          }) + ' class="addbtn" style="background:var(--gold)">+</button></div>';
+      return r;
+    };
+
+    if (q){
+      const hits = [];
+      allCats().forEach(c => c.items.forEach(it => {
+        if ((it.name + ' ' + it.desc).toLowerCase().indexOf(q) >= 0) hits.push([it, c.name]);
+      }));
+      h += '<div style="padding-top:14px"><div style="font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--n600)">'
+        +  hits.length + ' result' + (hits.length===1?'':'s') + ' for \u201c' + esc(S.search) + '\u201d</div>';
+      if (!hits.length) h += '<div style="padding:26px 0;text-align:center;color:var(--n600);font-size:14px">Nothing matched. Try \u201cfrappe\u201d, \u201cpita\u201d or \u201cwrap\u201d.</div>';
+      hits.forEach(([it,cn]) => { h += rowFor(it, cn); });
+      h += '</div>';
+    } else {
+      const c = cats[S.cat];
+      h += '<div id="catpane" style="padding-top:14px">'
+        +  '<div class="d3" style="margin-bottom:4px">' + esc(c.name) + '</div>';
+      c.items.forEach(it => { h += rowFor(it, null); });
+      h += '<div class="row" style="gap:9px;margin-top:18px">';
+      if (S.cat > 0)
+        h += '<button ' + on(()=>{ S.cat--; jumpToList(); render(); }) + ' style="flex:1;border:none;background:var(--surface);color:var(--n700);border-radius:999px;padding:12px 14px;font-weight:700;font-size:13px;text-align:left;box-shadow:0 1px 2px rgba(46,43,37,.12)">\u2039 ' + esc(cats[S.cat-1].name) + '</button>';
+      if (S.cat < cats.length-1)
+        h += '<button ' + on(()=>{ S.cat++; jumpToList(); render(); }) + ' style="flex:1;border:none;background:var(--surface);color:var(--n700);border-radius:999px;padding:12px 14px;font-weight:700;font-size:13px;text-align:right;box-shadow:0 1px 2px rgba(46,43,37,.12)">' + esc(cats[S.cat+1].name) + ' \u203a</button>';
+      h += '</div><div style="text-align:center;font-size:12px;color:var(--n500);margin-top:12px">Swipe left or right to change section</div></div>';
+    }
     return h + '</div>';
   }
 
@@ -883,9 +928,11 @@
     if (lastScreen === S.screen) scrollTops[S.screen] = scrollEl.scrollTop;
 
     /* preserve the kitchen note field across re-renders */
-    const noteEl = document.getElementById('note');
-    const noteFocused = noteEl && document.activeElement === noteEl;
-    const caret = noteFocused ? noteEl.selectionStart : null;
+    const act = document.activeElement;
+    const focusedId = act && act.tagName === 'INPUT' ? act.id : null;
+    const caret = focusedId ? act.selectionStart : null;
+    const noteEl = focusedId ? act : null;
+    const noteFocused = !!focusedId;
 
     H = {}; hid = 0;
     const body =
@@ -902,8 +949,19 @@
     scrollEl.scrollTop = lastScreen === S.screen ? (scrollTops[S.screen] || 0) : 0;
     lastScreen = S.screen;
 
-    const fresh = document.getElementById('note');
+    const fresh = focusedId ? document.getElementById(focusedId) : null;
     if (fresh && noteFocused){ fresh.focus(); try { fresh.setSelectionRange(caret, caret); } catch(e){} }
+
+    const rail = document.getElementById('catrail');
+    if (rail){
+      const chip = rail.querySelector('[data-cat="' + S.cat + '"]');
+      if (chip) rail.scrollLeft = Math.max(0, chip.offsetLeft - 16);
+    }
+    if (pendingJump){
+      pendingJump = false;
+      const bar = document.getElementById('catbar');
+      if (bar) scrollEl.scrollTop = bar.offsetTop;
+    }
   }
 
   /* one delegated listener for the whole app */
@@ -920,7 +978,37 @@
   }
   document.addEventListener('click', dispatch);
   document.addEventListener('keydown', dispatch);
-  document.addEventListener('input', e => { if (e.target.id === 'note') S.sheetNote = e.target.value; });
+  document.addEventListener('input', e => {
+    if (e.target.id === 'note') S.sheetNote = e.target.value;
+    if (e.target.id === 'search') { S.search = e.target.value; render(); }
+  });
+
+  let tsx = 0, tsy = 0, tracking = false;
+  document.addEventListener('touchstart', e => {
+    if (S.screen !== 'menu' || S.search.trim() || S.itemSheet || S.dietSheet || S.holeSheet) { tracking = false; return; }
+    if (!(e.target.closest && e.target.closest('#catpane'))) { tracking = false; return; }
+    tsx = e.touches[0].clientX; tsy = e.touches[0].clientY; tracking = true;
+  }, {passive:true});
+  document.addEventListener('touchend', e => {
+    if (!tracking) return;
+    tracking = false;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - tsx, dy = t.clientY - tsy;
+    if (Math.abs(dx) < 55 || Math.abs(dx) < Math.abs(dy) * 1.6) return;
+    const cats = mealCats(S.meal);
+    const next = dx < 0 ? S.cat + 1 : S.cat - 1;
+    if (next < 0 || next >= cats.length) return;
+    S.cat = next; jumpToList(); render();
+  }, {passive:true});
+  document.addEventListener('keydown', e => {
+    if (S.screen !== 'menu' || S.search.trim()) return;
+    if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    const cats = mealCats(S.meal);
+    const next = e.key === 'ArrowRight' ? S.cat + 1 : S.cat - 1;
+    if (next < 0 || next >= cats.length) return;
+    S.cat = next; jumpToList(); render();
+  });
 
   /* Order auto-advances, same cadence as the design. Re-rendering replaces
      the whole screen, so only do it when the visible screen actually shows
