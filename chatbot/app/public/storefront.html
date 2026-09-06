@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>iPhone Screen Replacement — Sydney Mobile Phone Repairs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/widget.css">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,-apple-system,sans-serif;color:#111827;background:#fff;line-height:1.6}
+  .bar{background:#0A4FA0;color:#fff;text-align:center;padding:8px;font-size:13px}
+  header{border-bottom:1px solid #E5E7EB;padding:16px 24px;display:flex;align-items:center;gap:28px;flex-wrap:wrap}
+  .logo{font-weight:700;font-size:17px;letter-spacing:-.01em}
+  nav a{color:#4B5563;text-decoration:none;font-size:14px;margin-right:20px}
+  nav a:hover{color:#0A4FA0}
+  .head-contact{margin-left:auto;font-size:14px;font-weight:600}
+  main{max-width:1080px;margin:0 auto;padding:36px 24px 80px}
+  .crumb{font-size:12px;color:#9CA3AF;margin-bottom:20px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:44px}
+  @media (max-width:820px){.grid{grid-template-columns:1fr;gap:28px}}
+  .shot{background:#F3F4F6;border-radius:14px;aspect-ratio:1;display:grid;place-items:center;color:#9CA3AF;font-size:13px}
+  h1{font-size:27px;margin:0 0 8px;letter-spacing:-.02em}
+  .price{font-size:26px;font-weight:700;margin:14px 0 4px}
+  .gst{font-size:13px;color:#6B7280;margin:0 0 18px}
+  label{display:block;font-size:13px;font-weight:600;margin:14px 0 6px}
+  select{width:100%;padding:11px;border:1px solid #E5E7EB;border-radius:9px;font:inherit;background:#fff}
+  .buy{width:100%;margin-top:18px;padding:14px;border:0;border-radius:10px;background:#111827;color:#fff;font:600 15px Inter,sans-serif;cursor:pointer}
+  .buy:hover{background:#000}
+  .points{margin-top:22px;padding-top:20px;border-top:1px solid #E5E7EB;font-size:14px;color:#4B5563}
+  .points div{margin-bottom:7px}
+  footer{border-top:1px solid #E5E7EB;padding:32px 24px;font-size:13px;color:#6B7280;text-align:center}
+  .demo-note{max-width:1080px;margin:0 auto 28px;padding:12px 16px;background:#FEF3C7;color:#92400E;border-radius:10px;font-size:13px}
+</style>
+</head>
+<body>
+
+<div class="bar">Walk in — no appointment needed · Open Mon–Fri 9am–6pm, Sat 9am–2pm</div>
+
+<header>
+  <span class="logo">Sydney Mobile Phone Repairs</span>
+  <nav>
+    <a href="#">Repairs</a><a href="#">Phones</a><a href="#">Accessories</a><a href="#">Contact</a>
+  </nav>
+  <span class="head-contact">(02) 8957 1077</span>
+</header>
+
+<main>
+  <div class="demo-note">
+    <strong>Local test page.</strong> This is a stand-in for a real Shopify product page, here so you can see the
+    chat widget in the place it will actually live. The widget is added with one script tag at the bottom of this
+    file — the same tag the Shopify theme app extension will render. Knowledge base editor:
+    <a href="/admin.html">/admin.html</a>
+  </div>
+
+  <p class="crumb">Home / Repairs / iPhone screen replacement</p>
+
+  <div class="grid">
+    <div class="shot">product photo</div>
+    <div>
+      <h1>iPhone Screen Replacement</h1>
+      <p style="color:#6B7280;margin:0">iPhone 11 through 16 · Pro, Pro Max and Plus</p>
+      <p class="price">From $150</p>
+      <p class="gst">GST included. Fitted while you wait.</p>
+
+      <label for="model">Model</label>
+      <select id="model">
+        <option>iPhone 13</option><option>iPhone 13 Pro</option><option>iPhone 14</option>
+        <option>iPhone 14 Pro</option><option>iPhone 15</option><option>iPhone 15 Pro Max</option>
+      </select>
+
+      <label for="part">Part</label>
+      <select id="part">
+        <option>Aftermarket</option><option>Genuine OEM</option>
+      </select>
+
+      <button class="buy">Add to cart</button>
+
+      <div class="points">
+        <div>✓ 3-month warranty on parts and labour</div>
+        <div>✓ Most screens done in under an hour</div>
+        <div>✓ Walk in to 290 Kingsgrove Road, Kingsgrove</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  Sydney Mobile Phone Repairs · 290 Kingsgrove Road, Kingsgrove NSW 2208 · (02) 8957 1077
+</footer>
+
+<!-- This one tag is the whole integration. -->
+<script src="/widget.js" data-api="/api"></script>
+</body>
+</html>

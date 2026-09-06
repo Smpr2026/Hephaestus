@@ -1,0 +1,551 @@
+{% layout none %}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>SMPR Assistant — test</title>
+</head>
+<body>
+{% raw %}<title>SMPR Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+  /* ---- tokens: light is the base, both dark paths redefine only these ---- */
+  :root{
+    --ground:#EEF1F5;
+    --surface:#FFFFFF;
+    --surface-2:#F7F9FB;
+    --line:#DCE2EA;
+    --line-soft:#EAEFF4;
+    --ink:#16202B;
+    --ink-2:#4A5766;
+    --ink-3:#8494A6;
+    --accent:#0A4FA0;
+    --accent-ink:#FFFFFF;
+    --accent-soft:#E3EDF9;
+    --signal:#B45309;
+    --signal-soft:#FBF0DC;
+    --good:#0F7B43;
+    --shadow:0 1px 2px rgba(22,32,43,.05), 0 12px 32px rgba(22,32,43,.07);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#0E141B;
+      --surface:#18212B;
+      --surface-2:#131C25;
+      --line:#2A3745;
+      --line-soft:#212C38;
+      --ink:#E6EDF4;
+      --ink-2:#A9B8C7;
+      --ink-3:#6F8093;
+      --accent:#5B9CF0;
+      --accent-ink:#0B1620;
+      --accent-soft:#1B2C42;
+      --signal:#E0A548;
+      --signal-soft:#2C2417;
+      --good:#48C98A;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0E141B;
+    --surface:#18212B;
+    --surface-2:#131C25;
+    --line:#2A3745;
+    --line-soft:#212C38;
+    --ink:#E6EDF4;
+    --ink-2:#A9B8C7;
+    --ink-3:#6F8093;
+    --accent:#5B9CF0;
+    --accent-ink:#0B1620;
+    --accent-soft:#1B2C42;
+    --signal:#E0A548;
+    --signal-soft:#2C2417;
+    --good:#48C98A;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 12px 32px rgba(0,0,0,.35);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:var(--ground);
+    color:var(--ink);
+    font:400 15px/1.6 "IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+
+  .page{max-width:1120px;margin:0 auto;padding:32px 20px 64px}
+
+  /* ---- masthead ---- */
+  .top{display:flex;flex-wrap:wrap;align-items:flex-start;gap:14px 20px;margin-bottom:28px}
+  .top h1{margin:0;font-size:26px;font-weight:600;letter-spacing:-.02em;text-wrap:balance}
+  .top p{margin:5px 0 0;color:var(--ink-2);max-width:60ch;font-size:14.5px}
+  .flag{
+    display:inline-flex;align-items:center;gap:7px;flex:none;
+    background:var(--signal-soft);color:var(--signal);
+    font-size:12px;font-weight:600;padding:6px 12px;border-radius:6px;
+    border:1px solid color-mix(in srgb, var(--signal) 22%, transparent);
+  }
+
+  /* ---- layout ---- */
+  .cols{display:grid;grid-template-columns:1fr 392px;gap:26px;align-items:start}
+  @media (max-width:940px){.cols{grid-template-columns:1fr}}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  .card-h{padding:13px 18px;border-bottom:1px solid var(--line);display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+  .card-h h2{margin:0;font-size:13px;font-weight:600;letter-spacing:.01em}
+  .card-h span{font-size:12px;color:var(--ink-3)}
+
+  /* ---- stats: four facts about coverage ---- */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border-bottom:1px solid var(--line)}
+  .stat{background:var(--surface);padding:15px 16px}
+  .stat b{display:block;font-family:"IBM Plex Mono",monospace;font-size:21px;font-weight:500;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .stat span{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);margin-top:3px}
+  .stat.flagged b{color:var(--signal)}
+
+  .prose{padding:18px;font-size:14px;color:var(--ink-2)}
+  .prose p{margin:0 0 11px}
+  .prose p:last-child{margin-bottom:0}
+  .prose strong{color:var(--ink);font-weight:600}
+  .prose code{font-family:"IBM Plex Mono",monospace;font-size:12.5px;background:var(--surface-2);border:1px solid var(--line-soft);padding:1px 5px;border-radius:4px}
+  .prose ul{margin:0;padding-left:18px}
+  .prose li{margin-bottom:7px}
+  .prose li:last-child{margin-bottom:0}
+
+  /* ---- question bank ---- */
+  .filters{display:flex;flex-wrap:wrap;gap:5px;padding:12px 14px;border-bottom:1px solid var(--line)}
+  .filters button{
+    font:inherit;font-size:12px;padding:5px 11px;border-radius:6px;cursor:pointer;
+    border:1px solid var(--line);background:var(--surface);color:var(--ink-2);
+  }
+  .filters button:hover{border-color:var(--accent);color:var(--accent)}
+  .filters button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  .bank{max-height:430px;overflow-y:auto}
+  .qitem{
+    display:block;width:100%;text-align:left;font:inherit;font-size:13.5px;
+    padding:10px 18px;background:none;border:0;border-bottom:1px solid var(--line-soft);
+    cursor:pointer;color:var(--ink);
+  }
+  .qitem:last-child{border-bottom:0}
+  .qitem:hover{background:var(--accent-soft)}
+  .qitem em{
+    display:block;font-style:normal;font-size:10px;text-transform:uppercase;
+    letter-spacing:.08em;color:var(--ink-3);margin-bottom:1px;
+  }
+
+  /* ---- the phone ---- */
+  .phone-wrap{position:sticky;top:24px}
+  @media (max-width:940px){.phone-wrap{position:static}}
+  .phone{
+    background:var(--surface);border:1px solid var(--line);border-radius:20px;
+    box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;height:648px;
+  }
+  .chat-head{background:var(--accent);color:var(--accent-ink);padding:15px 17px;display:flex;align-items:center;gap:12px;flex:none}
+  .chat-avatar{width:37px;height:37px;border-radius:9px;background:color-mix(in srgb, var(--accent-ink) 18%, transparent);display:grid;place-items:center;font-weight:600;font-size:14px;flex:none}
+  .chat-head h3{margin:0;font-size:15px;font-weight:600}
+  .chat-head p{margin:1px 0 0;font-size:11.5px;opacity:.9;display:flex;align-items:center;gap:6px}
+  .live{width:7px;height:7px;border-radius:50%;background:#4ADE80;flex:none}
+
+  .log{flex:1;overflow-y:auto;padding:18px 15px 6px;background:var(--surface-2)}
+  .row{display:flex;margin-bottom:11px}
+  .row.me{justify-content:flex-end}
+  .bub{max-width:83%;padding:10px 13px;border-radius:15px;font-size:14px;white-space:pre-wrap;word-wrap:break-word}
+  .row.bot .bub{background:var(--surface);border:1px solid var(--line);border-bottom-left-radius:4px;color:var(--ink)}
+  .row.me .bub{background:var(--accent);color:var(--accent-ink);border-bottom-right-radius:4px}
+  .tag{font-family:"IBM Plex Mono",monospace;font-size:10px;color:var(--ink-3);margin:-5px 0 11px 4px}
+
+  .pricecard{margin-top:9px;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--surface)}
+  .pc-h{background:var(--accent-soft);color:var(--accent);padding:7px 11px;font-size:11.5px;font-weight:600}
+  .pc-row{display:flex;justify-content:space-between;gap:10px;padding:8px 11px;border-top:1px solid var(--line-soft);font-size:13px}
+  .pc-row b{font-family:"IBM Plex Mono",monospace;font-weight:500;font-variant-numeric:tabular-nums}
+  .pc-row .none{color:var(--ink-3)}
+  .pc-blurb{display:block;font-style:normal;font-size:11px;color:var(--ink-3);margin-top:1px;line-height:1.35}
+  .pc-note{padding:8px 11px;border-top:1px solid var(--line-soft);font-size:11.5px;color:var(--ink-2);background:var(--surface-2)}
+
+
+  .products{margin-top:9px;display:flex;flex-direction:column;gap:7px}
+  .prod{display:flex;gap:10px;align-items:baseline;border:1px solid var(--line, #E5E7EB);border-radius:9px;padding:9px 11px;background:var(--surface, #fff);text-decoration:none;color:inherit}
+  .prod:hover{border-color:var(--accent, #0A4FA0)}
+  .prod-t{flex:1;font-size:13px;line-height:1.35}
+  .prod-p{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:13px;font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .prod-s{display:block;font-size:10.5px;margin-top:2px;color:var(--good, #0F7B43);font-weight:600}
+  .prod-s.low{color:var(--signal, #B45309)}
+  .prod-s.out{color:var(--ink-3, #9CA3AF)}
+
+  .prod-pic{position:relative;flex:none;width:46px;height:46px;border-radius:8px;overflow:hidden;
+    display:grid;place-items:center;font-size:20px;background:var(--accent-soft,#E3EDF9)}
+  .prod-pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#fff}
+  .prod{align-items:center}
+  .prod-m{display:block;font-size:11px;color:var(--ink-3,#8494A6);margin-top:1px}
+  .prod-wrap{display:flex;flex-direction:column;gap:0}
+  .prod-cart{align-self:stretch;text-align:center;padding:7px 10px;margin-top:-1px;
+    border:1px solid var(--accent,#0A4FA0);border-top:0;border-radius:0 0 9px 9px;
+    background:var(--accent,#0A4FA0);color:var(--accent-ink,#fff);
+    font-size:12px;font-weight:600;text-decoration:none}
+  .prod-cart:hover{opacity:.9}
+  .prod-wrap .prod{border-radius:9px 9px 0 0}
+  .contact{margin-top:9px;display:flex;flex-direction:column;gap:6px}
+  .contact a{display:flex;align-items:center;justify-content:center;gap:7px;padding:9px 13px;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none}
+  .c-call{background:var(--good);color:#fff}
+  .c-map{background:var(--surface);border:1px solid var(--line);color:var(--ink)}
+
+  .chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 15px 11px;background:var(--surface-2)}
+  .chip{font:inherit;font-size:12.5px;padding:6px 12px;border-radius:16px;border:1px solid var(--accent);background:var(--surface);color:var(--accent);cursor:pointer}
+  .chip:hover{background:var(--accent);color:var(--accent-ink)}
+  .opts{margin-top:9px;display:flex;flex-direction:column;gap:6px}
+  .optbtn{font:inherit;font-size:13.5px;text-align:left;padding:10px 13px;border-radius:9px;border:1px solid var(--accent);background:var(--surface);color:var(--accent);cursor:pointer;font-weight:600}
+  .optbtn:hover{background:var(--accent);color:var(--accent-ink)}
+
+
+  .typing{display:flex;gap:4px;padding:12px 14px}
+  .typing i{width:6px;height:6px;border-radius:50%;background:var(--ink-3);animation:blink 1.2s infinite}
+  .typing i:nth-child(2){animation-delay:.18s}
+  .typing i:nth-child(3){animation-delay:.36s}
+  @keyframes blink{0%,60%,100%{opacity:.25;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+  @media (prefers-reduced-motion: reduce){
+    .typing i{animation:none;opacity:.5}
+  }
+
+  .foot{border-top:1px solid var(--line);padding:10px 12px;background:var(--surface);flex:none}
+  .inputrow{display:flex;gap:8px;align-items:flex-end}
+  .inputrow textarea{
+    flex:1;resize:none;font:inherit;font-size:14px;color:var(--ink);
+    background:var(--surface);border:1px solid var(--line);border-radius:11px;
+    padding:9px 12px;max-height:92px;outline:none;
+  }
+  .inputrow textarea:focus{border-color:var(--accent)}
+  .send{flex:none;width:39px;height:39px;border-radius:10px;border:0;background:var(--accent);color:var(--accent-ink);cursor:pointer;display:grid;place-items:center}
+  .send svg{width:17px;height:17px}
+  .disclaim{font-size:10.5px;color:var(--ink-3);text-align:center;margin:6px 0 0}
+
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+  .toggle{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);cursor:pointer;padding:14px 18px;border-top:1px solid var(--line-soft)}
+</style>
+
+<div class="page">
+
+  <div class="top">
+    <div style="flex:1;min-width:260px">
+      <h1>SMPR Assistant</h1>
+      <p>The customer chatbot for Sydney Mobile Phone Repairs. Ask it anything a customer would ask — or tap a question from the bank below.</p>
+    </div>
+    <span class="flag">Prototype · confirm prices &amp; address before launch</span>
+  </div>
+
+  <div class="cols">
+    <div style="display:flex;flex-direction:column;gap:20px">
+
+      <div class="card">
+        <div class="stats" id="stats"></div>
+        <div class="prose">
+          <p><strong>What it does.</strong> Every answer comes from one knowledge base file — the shop's hours, services, policies, warranty and a model-by-model price table. It never invents a price: where a price isn't filled in, it says so and gives the phone number.</p>
+          <ul>
+            <li><strong>Prices</strong> are quoted as a guide, with aftermarket beside genuine, always confirmed in store.</li>
+            <li><strong>Anything it can't answer</strong> goes to <span class="mono">(02) 8957 1077</span> or a walk-in. A handoff beats a wrong answer.</li>
+            <li><strong>iCloud bypass, stolen devices and spyware</strong> are refused by design.</li>
+            <li><strong>Asked outright if it's a person</strong>, it says so honestly and keeps helping.</li>
+          </ul>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="showTag"> Show which answer was matched
+        </label>
+      </div>
+
+      <div class="card">
+        <div class="card-h">
+          <h2>Question bank</h2>
+          <span id="qcount"></span>
+        </div>
+        <div class="filters" id="filters"></div>
+        <div class="bank" id="bank"></div>
+      </div>
+
+    </div>
+
+    <div class="phone-wrap">
+      <div class="phone">
+        <div class="chat-head">
+          <div class="chat-avatar" id="avatar">H</div>
+          <div>
+            <h3 id="who">Hope</h3>
+            <p><span class="live" id="live"></span><span id="presence"></span></p>
+          </div>
+        </div>
+        <div class="log" id="log"></div>
+        <div class="chips" id="chips"></div>
+        <div class="foot">
+          <div class="inputrow">
+            <textarea id="input" rows="1" placeholder="Type a message…" aria-label="Message"></textarea>
+            <button class="send" id="send" aria-label="Send">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
+          </div>
+          <p class="disclaim">Prices are a guide — confirmed in store</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endraw %}{% endraw %}<script src="{{ 'smpr-bot-p1.js' | asset_url }}"></script>
+<script src="{{ 'smpr-bot-p2.js' | asset_url }}"></script>
+<script src="{{ 'smpr-bot-p3.js' | asset_url }}"></script>
+<script src="{{ 'smpr-bot-p4.js' | asset_url }}"></script>
+<script src="{{ 'smpr-bot-loader.js' | asset_url }}"></script>{% raw %}
+
+<script>
+(function(){
+  "use strict";
+  var KB = window.SMPR_KB || null;
+  if(!KB || !KB.intents){ document.body.innerHTML = '<p style="padding:40px">Knowledge base missing — run build.sh.</p>'; return; }
+
+  var BRAIN = createBrain(KB);
+  var B = KB.business, P = KB.persona || {};
+
+  var log = document.getElementById('log');
+  var chips = document.getElementById('chips');
+  var input = document.getElementById('input');
+  var showTag = document.getElementById('showTag');
+
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function scroll(){ log.scrollTop = log.scrollHeight; }
+
+  /* presence, on real Sydney time */
+  function shopOpen(){
+    try{
+      var parts = {};
+      new Intl.DateTimeFormat('en-AU',{timeZone:'Australia/Sydney',weekday:'long',hour:'2-digit',minute:'2-digit',hour12:false})
+        .formatToParts(new Date()).forEach(function(p){ parts[p.type] = p.value; });
+      var today = B.hours.filter(function(d){ return d.day === parts.weekday; })[0];
+      if(!today || !today.open) return false;
+      function m(s){ var x=/^(\d+):(\d+)(am|pm)$/.exec(s.toLowerCase()); return x ? (parseInt(x[1],10)%12 + (x[3]==='pm'?12:0))*60 + parseInt(x[2],10) : null; }
+      var now = parseInt(parts.hour,10)*60 + parseInt(parts.minute,10), o = m(today.open), c = m(today.close);
+      return o!=null && c!=null && now>=o && now<c;
+    } catch(e){ return true; }
+  }
+  var IS_OPEN = shopOpen();
+
+  document.getElementById('who').textContent = P.name || B.name;
+  document.getElementById('avatar').textContent = P.initials || 'S';
+  document.getElementById('presence').textContent =
+    (P.role ? P.role + ' · ' : '') + (IS_OPEN ? (P.openHoursStatus || 'Online now') : (P.closedStatus || 'Away'));
+  if(!IS_OPEN) document.getElementById('live').style.background = 'var(--signal)';
+
+  /* stats */
+  var topics = {}; KB.intents.forEach(function(i){ topics[i.category] = 1; });
+  var filled = KB.pricing.repairs.filter(function(r){ return (r.costs && Object.keys(r.costs).length) || r.sampleSize >= 3; }).length;
+  document.getElementById('stats').innerHTML =
+    '<div class="stat"><b>' + KB.intents.length + '</b><span>Answers</span></div>' +
+    '<div class="stat"><b>' + Object.keys(topics).length + '</b><span>Topics</span></div>' +
+    '<div class="stat' + (filled < KB.pricing.repairs.length ? ' flagged' : '') + '"><b>' + filled + '/' + KB.pricing.repairs.length + '</b><span>Prices filled</span></div>' +
+    '<div class="stat"><b>' + KB.refusals.length + '</b><span>Refusals</span></div>';
+
+  /* rendering */
+  function addUser(t){
+    var d = document.createElement('div');
+    d.className = 'row me';
+    d.innerHTML = '<div class="bub">' + esc(t) + '</div>';
+    log.appendChild(d); scroll();
+  }
+
+  function addBot(res){
+    var html = '<div class="bub">' + esc(res.text);
+    if(res.card){
+      html += '<div class="pricecard"><div class="pc-h">' + esc(res.card.title) + '</div>';
+      res.card.rows.forEach(function(r){
+        var num = String(r[1]).charAt(0) === '$';
+        html += '<div class="pc-row"><span>' + esc(r[0]) +
+                (r[2] ? '<em class="pc-blurb">' + esc(r[2]) + '</em>' : '') + '</span>' +
+                (num ? '<b>' + esc(r[1]) + '</b>' : '<span class="none">' + esc(r[1]) + '</span>') + '</div>';
+      });
+      html += '<div class="pc-note">' + esc(res.card.note) + '</div></div>';
+    }
+
+    if(res.products && res.products.length){
+      var KIND_ICON = { earbuds:'\uD83C\uDFA7', headphones:'\uD83C\uDFA7', speaker:'\uD83D\uDD0A',
+        'power bank':'\uD83D\uDD0B', charger:'\uD83D\uDD0C', cable:'\uD83D\uDD0C',
+        protector:'\uD83D\uDEE1\uFE0F', 'case':'\uD83D\uDCF1', phone:'\uD83D\uDCF1' };
+      html += '<div class="products">';
+      res.products.forEach(function(p){
+        var cls = p.stock > 3 ? '' : (p.stock > 0 ? ' low' : ' out');
+        var label = p.stock > 3 ? 'In stock' : (p.stock > 0 ? 'Only ' + p.stock + ' left' : 'Out of stock');
+        var meta = [p.cond, p.colour ? p.colour.charAt(0).toUpperCase() + p.colour.slice(1) : null]
+          .filter(Boolean).join(' \u00B7 ');
+        var icon = KIND_ICON[p.kind] || '\uD83D\uDECD\uFE0F';
+        // the photo swaps to the icon tile if it can't load (the Claude test
+        // panel blocks outside images; the real site shows the photo)
+        var pic = '<span class="prod-pic">' + icon +
+                  (p.img ? '<img src="' + esc(p.img) + '" alt="" loading="lazy" ' +
+                           'onerror="this.remove()">' : '') + '</span>';
+        html += '<div class="prod-wrap">' +
+                '<a class="prod" href="' + esc(p.url) + '" target="_blank" rel="noopener">' + pic +
+                '<span class="prod-t">' + esc(p.title) +
+                (meta ? '<span class="prod-m">' + esc(meta) + '</span>' : '') +
+                '<span class="prod-s' + cls + '">' + label + '</span></span>' +
+                '<span class="prod-p">$' + esc(p.price) + '</span></a>' +
+                (p.cart && p.stock > 0
+                  ? '<a class="prod-cart" href="' + esc(p.cart) + '" target="_blank" rel="noopener">Add to cart</a>'
+                  : '') +
+                '</div>';
+      });
+      html += '</div>';
+    }
+    if(res.options && res.options.length){
+      html += '<div class="opts">';
+      res.options.forEach(function(o){
+        html += '<button class="optbtn" type="button" data-q="' + esc(o.q) + '">' + esc(o.label) + '</button>';
+      });
+      html += '</div>';
+    }
+    if(res.contact){
+      html += '<div class="contact">' +
+        '<a class="c-call" href="tel:' + esc(B.phoneDial) + '">Call ' + esc(B.phone) + '</a>' +
+        '<a class="c-map" href="' + esc(B.mapsUrl) + '" target="_blank" rel="noopener">' + esc(B.addressShort) + '</a>' +
+        '</div>';
+    }
+    var d = document.createElement('div');
+    d.className = 'row bot';
+    d.innerHTML = html + '</div>';
+    log.appendChild(d);
+    Array.prototype.forEach.call(d.querySelectorAll('.optbtn'), function(b){
+      b.addEventListener('click', function(){ ask(b.getAttribute('data-q')); });
+    });
+
+    if(showTag.checked && res.intent){
+      var t = document.createElement('div');
+      t.className = 'tag';
+      t.textContent = '↳ ' + res.intent;
+      log.appendChild(t);
+    }
+
+    chips.innerHTML = '';
+    (res.chips || []).forEach(function(c){
+      var b = document.createElement('button');
+      b.className = 'chip'; b.type = 'button'; b.textContent = c;
+      b.addEventListener('click', function(){ ask(c); });
+      chips.appendChild(b);
+    });
+    scroll();
+  }
+
+  function typingRow(){
+    var d = document.createElement('div');
+    d.className = 'row bot';
+    d.innerHTML = '<div class="bub" style="padding:0"><div class="typing"><i></i><i></i><i></i></div></div>';
+    log.appendChild(d); scroll();
+    return d;
+  }
+
+  /* a person sends a line, then another */
+  function split(text){
+    if(text.length < 150) return [text];
+    for(var i = Math.floor(text.length * 0.3); i < text.length - 30; i++){
+      if(/[.!?]/.test(text[i]) && text[i+1] === ' ') return [text.slice(0,i+1).trim(), text.slice(i+1).trim()];
+    }
+    return [text];
+  }
+  // Pace comes from the knowledge base so it can be tuned without touching code.
+  var PACE = {
+    read: P.readPauseMs || 900,
+    perChar: P.typePerCharMs || 30,
+    min: P.minTypeMs || 1300,
+    max: P.maxTypeMs || 4500,
+    between: P.betweenBubblesMs || 500
+  };
+  function typeTime(t){ return Math.max(PACE.min, Math.min(PACE.max, t.length * PACE.perChar)); }
+
+  // Looking a price up takes a person a moment, so say so first.
+  function thinkingLine(){
+    var lines = P.thinkingLines || [];
+    if (!lines.length) return null;
+    return lines[Math.floor(Math.random() * lines.length)];
+  }
+
+  var busy = false, afterHours = false;
+  function ask(text){
+    text = String(text || '').trim();
+    if(!text || busy) return;
+    busy = true;
+    addUser(text);
+    chips.innerHTML = '';
+    input.value = ''; input.style.height = 'auto';
+
+    var res = BRAIN.respond(text);
+    var parts = split(res.text);
+    // a price means a lookup - stall the way someone checking a list would
+    var stall = res.card ? thinkingLine() : null;
+    if (stall) parts.unshift(stall);
+    if(!IS_OPEN && !afterHours && P.closedPrefix){
+      parts[0] = P.closedPrefix + parts[0].charAt(0).toLowerCase() + parts[0].slice(1);
+      afterHours = true;
+    }
+
+    var step = 0;
+    function next(){
+      if(step >= parts.length){ busy = false; return; }
+      var last = step === parts.length - 1, body = parts[step], t = typingRow();
+      setTimeout(function(){
+        t.remove();
+        addBot({ text: body, card: last ? res.card : null, products: last ? res.products : null,
+                 contact: last ? res.contact : false, options: last ? res.options : null,
+                 chips: last ? res.chips : [], intent: last ? res.intent : null });
+        step++;
+        setTimeout(next, last ? 0 : PACE.between);
+      }, typeTime(body));
+    }
+    setTimeout(next, PACE.read + Math.min(1600, text.length * 18));
+  }
+
+  document.getElementById('send').addEventListener('click', function(){ ask(input.value); });
+  input.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); ask(input.value); }
+  });
+  input.addEventListener('input', function(){
+    input.style.height = 'auto';
+    input.style.height = Math.min(92, input.scrollHeight) + 'px';
+  });
+
+  /* question bank */
+  var bank = KB.testBank || [], active = 'All';
+  var cats = ['All'].concat(Object.keys(bank.reduce(function(a,q){ a[q.c] = 1; return a; }, {})));
+  var filters = document.getElementById('filters'), list = document.getElementById('bank'), count = document.getElementById('qcount');
+
+  function renderBank(){
+    var items = bank.filter(function(q){ return active === 'All' || q.c === active; });
+    count.textContent = items.length + ' questions';
+    list.innerHTML = '';
+    items.forEach(function(q){
+      var b = document.createElement('button');
+      b.className = 'qitem'; b.type = 'button';
+      b.innerHTML = '<em>' + esc(q.c) + '</em>' + esc(q.q);
+      b.addEventListener('click', function(){ ask(q.q); });
+      list.appendChild(b);
+    });
+  }
+  cats.forEach(function(c){
+    var b = document.createElement('button');
+    b.type = 'button'; b.textContent = c;
+    b.setAttribute('aria-pressed', c === 'All' ? 'true' : 'false');
+    b.addEventListener('click', function(){
+      active = c;
+      Array.prototype.forEach.call(filters.children, function(x){ x.setAttribute('aria-pressed','false'); });
+      b.setAttribute('aria-pressed','true');
+      renderBank();
+    });
+    filters.appendChild(b);
+  });
+  renderBank();
+
+  /* open with the greeting */
+  var greeting = KB.intents.filter(function(i){ return i.id === 'greeting'; })[0];
+  addBot({ text: BRAIN.fill(greeting.answer), chips: greeting.chips, intent: null });
+})();
+</script>
+{% endraw %}
+</body>
+</html>

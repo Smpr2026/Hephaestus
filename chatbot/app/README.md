@@ -1,0 +1,147 @@
+# SMPR chatbot — local test app
+
+Run the whole thing on your own machine before spending a cent or signing up for anything.
+
+```bash
+cd chatbot/app
+npm install          # only dependency is the Anthropic SDK
+npm start
+```
+
+Then open:
+
+| | |
+|---|---|
+| **http://localhost:3000/** | A stand-in shop page with the chat widget on it — this is what a customer sees |
+| **http://localhost:3000/admin.html** | Edit prices, answers and shop details, then save |
+
+**It runs with no credentials.** Without an API key the server answers from the built-in matcher,
+so you can click through every screen straight away. Set `ANTHROPIC_API_KEY` and the exact same
+endpoints start using Claude instead — nothing else changes.
+
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...
+npm start            # header in the admin now reads "Claude · claude-opus-5"
+```
+
+`claude-opus-5` is the default. For a storefront widget answering hundreds of simple questions a
+day, `SMPR_MODEL=claude-haiku-4-5` is far cheaper and plenty capable — worth trying both and
+seeing whether you can tell the difference.
+
+## What to try
+
+1. Open the storefront, click **Chat with us**, ask *"how much for an iPhone 13 screen"*.
+   You get a price card, and the header shows George online or away depending on the real time in
+   Sydney.
+2. Ask *"how much to replace an iPhone 14 battery"*. It says it doesn't know and gives the phone
+   number — because that row is empty.
+3. Go to **/admin.html → Prices**, find the highlighted `iPhone 14 / battery` row, type the real
+   price, tick **Checked**, hit **Save changes**.
+4. Ask the same question again. It now quotes your price. That loop — empty row, fill it in, bot
+   starts answering — is the whole maintenance story.
+5. **Try it** tab lets you fire questions at the bot without opening the widget.
+
+## How it fits together
+
+```
+  storefront page
+    └── <script src="/widget.js"></script>     ← one tag, the whole integration
+          │  POST /api/chat
+          ▼
+      server.js
+          ├── ANTHROPIC_API_KEY set?  → src/claude.js → Claude, knowledge base cached in the prompt
+          └── no key, or the call failed → src/brain.js → local matcher
+                                                │
+                                     knowledge-base.json
+```
+
+The widget holds no answers and no API key — it posts a message and renders what comes back. That
+matters: it's why the same file can be dropped into a Shopify theme app extension unchanged.
+
+`src/brain.js` is the same engine the offline `demo.html` runs, injected at build time. Edit it
+once, run `../build.sh`, and both stay in step.
+
+## Files
+
+| File | What it does |
+|---|---|
+| `server.js` | Zero-dependency HTTP server. Static files + `/api/chat`, `/api/kb`, `/api/config`, `/api/status`. |
+| `src/claude.js` | The Claude call. Builds the system prompt from the knowledge base and caches it as a prompt prefix. |
+| `src/brain.js` | The offline matcher. Also the fallback if a Claude call fails mid-conversation. |
+| `src/kb.js` | Loads and saves `knowledge-base.json`, with a sanity check before writing. |
+| `public/widget.js` | The embeddable widget. This is the file that becomes the Shopify theme app extension. |
+| `public/storefront.html` | Fake shop page so you can see the widget in place. |
+| `public/admin.html` | The knowledge base editor — previews the embedded Shopify admin page. |
+
+## Testing it
+
+```bash
+npm test
+```
+
+15 checks, about a quarter of a second. They cover the three things a repair shop's bot must not
+get wrong: that it answers what customers actually ask (all 119 bank questions), that it never
+invents a price (every blank row must hand off, every filled row must match the table exactly), and
+that it never says something that lands you in trouble — no claiming to be Apple authorised, no
+promising same-day on water damage, no asking for a passcode, and iCloud bypass, stolen devices and
+spyware always refused.
+
+Run it before anything goes live, and after any edit to the knowledge base. It caught two real
+faults the first time it ran.
+
+## Live prices from FixDesk
+
+The repair techs keep prices in FixDesk, so the bot asks FixDesk rather than carrying its own
+copy:
+
+```bash
+export FIXDESK_URL=https://fixdesk.pro
+export FIXDESK_TOKEN=...            # sent as Authorization: Bearer
+npm start                           # admin header now shows live pricing is on
+```
+
+A price question goes to FixDesk first. If FixDesk has no price for that combination, is slow, or
+is down, the bot quietly uses the knowledge-base table instead — the failure is logged for you and
+the customer never sees it. Unset `FIXDESK_URL` and nothing about today's behaviour changes.
+
+`src/quotes.js` assumes one shape:
+
+```
+GET {FIXDESK_URL}/api/quotes?model=iPhone%2013&repair=screen
+  200 → { "aftermarket": 160, "genuine": 260 }    (either may be null)
+  404 → no price on file
+```
+
+It also accepts a ticket-derived shape, which is what FixDesk's imported repair tickets give you:
+
+```
+  200 → { "median": 165, "min": 150, "max": 190, "ticketCount": 12, "since": "January" }
+```
+
+Then the bot quotes a range off real jobs rather than a fixed price, and shows the sample size.
+Under three tickets it won't quote at all — it falls through to the price table, then to the phone
+number. An average of one job isn't a price.
+
+If the real route or field names differ, change `mapResponse()` in that file. It's the only place
+the shape is assumed — nothing else needs touching.
+
+## Turning this into the Shopify app
+
+What's here already maps onto it one-to-one:
+
+- `public/widget.js` + `widget.css` → **theme app extension** (an app block you switch on in the
+  theme editor — no theme code edits, survives theme updates).
+- `public/admin.html` → **embedded admin page** inside Shopify.
+- `server.js` → the app backend, deployed as its own Railway service, separate from FixDesk.
+- `knowledge-base.json` → a **shop metafield**, so the data lives in Shopify and there's no second
+  database to run.
+
+The one thing that changes is auth: Shopify session tokens on the admin routes. The chat endpoint
+stays exactly as it is.
+
+## Before it goes live
+
+- Rate-limit `/api/chat` per session and per IP. A public chat widget gets abused within a week.
+- Log conversations. Clusters of handoffs are the gaps in the knowledge base.
+- Work through `meta.verifyBeforeLaunch` in `knowledge-base.json` — the address, the returns
+  window and the prices all need confirming.
