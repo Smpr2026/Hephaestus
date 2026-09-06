@@ -1,0 +1,883 @@
+<title>Par &amp; Grill</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    /* Organic design system — gold-shifted. Brand-constant inside the phone. */
+    --ground:#f5ead8; --surface:#f9f4ed; --sand:#eee7db; --ink:#201e1d;
+    --gold-100:#fdf6e3; --gold-200:#f7e7b8; --gold-300:#eed389;
+    --gold:#b8922e; --gold-600:#997723; --gold-700:#7a5e15; --gold-800:#57430f;
+    --sage-100:#f0fae1; --sage-200:#e1eecc; --sage-300:#ccdbb2; --sage-400:#aebf92;
+    --sage:#7a8a5e; --sage-600:#728157; --sage-700:#56633f; --sage-800:#3d472b;
+    --n300:#dcd3c4; --n400:#c0b6a5; --n500:#a19786; --n600:#82796a; --n700:#645c50; --n800:#474238; --n900:#2e2b25;
+    /* Page surround — the only thing that answers the viewer's theme. */
+    --stage:#e7ddcb; --stage-ink:#645c50;
+    --display:'Caprasimo', Georgia, serif;
+    --body:'Figtree', system-ui, -apple-system, sans-serif;
+  }
+  :root:not([data-theme="light"]){
+    @media (prefers-color-scheme: dark){ --stage:#221f1a; --stage-ink:#a19786; }
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --stage:#221f1a; --stage-ink:#a19786; }
+  }
+  :root[data-theme="dark"]{ --stage:#221f1a; --stage-ink:#a19786; }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--stage); color:var(--ink);
+    font-family:var(--body); -webkit-font-smoothing:antialiased;
+    min-height:100vh; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:18px; padding:28px 16px;
+  }
+  .stage-note{
+    font-size:12.5px; color:var(--stage-ink); letter-spacing:.02em; text-align:center;
+    max-width:402px; line-height:1.5;
+  }
+  .stage-note b{color:var(--stage-ink); font-weight:700}
+
+  /* ── iOS device frame ─────────────────────────────── */
+  .device{
+    width:402px; height:874px; max-width:100%; border-radius:48px; overflow:hidden;
+    position:relative; background:var(--ground); flex:none;
+    box-shadow:0 40px 80px rgba(0,0,0,.18), 0 0 0 1px rgba(0,0,0,.12);
+  }
+  @media (max-height:940px){ .device{height:min(874px, calc(100vh - 120px))} }
+  .island{
+    position:absolute; top:11px; left:50%; transform:translateX(-50%);
+    width:126px; height:37px; border-radius:24px; background:#000; z-index:50;
+  }
+  .statusbar{
+    position:absolute; top:0; left:0; right:0; z-index:10; display:flex;
+    align-items:center; justify-content:center; gap:154px;
+    padding:21px 24px 19px; pointer-events:none;
+  }
+  .statusbar .time{
+    flex:1; text-align:center; font-family:-apple-system,'SF Pro',system-ui;
+    font-weight:590; font-size:17px; line-height:22px; color:#000;
+  }
+  .statusbar .icons{flex:1; display:flex; align-items:center; justify-content:center; gap:7px}
+  .homebar{
+    position:absolute; bottom:0; left:0; right:0; z-index:60; height:34px;
+    display:flex; justify-content:center; align-items:flex-end; padding-bottom:8px; pointer-events:none;
+  }
+  .homebar i{display:block; width:139px; height:5px; border-radius:100px; background:rgba(0,0,0,.25)}
+
+  .app{height:100%; display:flex; flex-direction:column; background:var(--ground); color:var(--ink); position:relative}
+  .scroll{flex:1; overflow:auto; min-height:0; -webkit-overflow-scrolling:touch}
+  .screen{padding:72px 20px 130px}
+
+  /* ── type ─────────────────────────────────────────── */
+  .d1{font-family:var(--display); font-size:22px; line-height:1.1}
+  .d2{font-family:var(--display); font-size:20px}
+  .d3{font-family:var(--display); font-size:18px}
+  .kicker{font-size:12px; font-weight:700; letter-spacing:.04em; color:var(--n600)}
+
+  /* ── controls ─────────────────────────────────────── */
+  button{font-family:var(--body); cursor:pointer}
+  button:focus-visible, input:focus-visible, [tabindex]:focus-visible{
+    outline:2px solid var(--gold-700); outline-offset:2px; border-radius:999px;
+  }
+  .pill{border:none; border-radius:999px; display:inline-flex; align-items:center; justify-content:center}
+  .card{background:var(--surface); border-radius:28px; box-shadow:0 1px 2px rgba(46,43,37,.14)}
+  .row{display:flex; align-items:center}
+
+  .primary{
+    width:100%; border:none; background:var(--gold); color:#fff; border-radius:999px;
+    padding:16px; font-weight:700; font-size:16px; box-shadow:0 3px 10px rgba(46,43,37,.16);
+    transition:background .15s;
+  }
+  .primary:hover{background:var(--gold-600)} .primary:active{background:var(--gold-700)}
+
+  .item{
+    display:flex; align-items:center; gap:13px; padding:12px 0; width:100%;
+    border:none; background:none; text-align:left;
+    border-bottom:1px solid rgba(32,30,29,.08); cursor:pointer;
+  }
+  .item:hover{background:rgba(32,30,29,.02)}
+  .avatar{
+    width:50px; height:50px; border-radius:999px; display:flex; align-items:center;
+    justify-content:center; font-family:var(--display); font-size:15px; flex:none;
+  }
+  .addbtn{
+    width:34px; height:34px; border-radius:999px; border:none; color:#fff; font-size:20px;
+    line-height:1; flex:none; display:flex; align-items:center; justify-content:center; padding-bottom:2px;
+  }
+  .addbtn:active{background:var(--gold-700)!important}
+  .flag{
+    display:inline-flex; align-items:center; gap:5px; margin-top:4px; background:var(--gold-200);
+    color:var(--gold-700); border-radius:999px; padding:3px 10px; font-size:11.5px; font-weight:700;
+  }
+
+  .stepper{display:flex; align-items:center; gap:10px; background:var(--sand); border-radius:999px; padding:4px}
+  .stepper button{width:28px; height:28px; border-radius:999px; border:none; background:#fff; font-size:16px; color:var(--n800)}
+  .stepper span{font-weight:700; font-size:14px; min-width:14px; text-align:center; font-variant-numeric:tabular-nums}
+
+  .chip{
+    border-radius:999px; font-weight:700; cursor:pointer; border:none;
+    font-size:14px; font-family:var(--body);
+  }
+  .toggle{
+    border-radius:999px; padding:8px 14px; font-size:13px; font-weight:600;
+    font-family:var(--body); cursor:pointer;
+  }
+
+  /* ── overlays ─────────────────────────────────────── */
+  .overlay{
+    position:absolute; inset:0; background:rgba(32,30,29,.4); z-index:40;
+    display:flex; flex-direction:column; justify-content:flex-end;
+  }
+  .sheet{
+    background:var(--surface); border-radius:28px 28px 0 0; padding:24px 22px 40px;
+    animation:pgsheet .25s ease-out; max-height:78%; overflow:auto;
+  }
+  .toast{
+    position:absolute; left:50%; bottom:120px; transform:translateX(-50%);
+    background:var(--n900); color:var(--ground); border-radius:999px; padding:11px 20px;
+    font-size:13px; font-weight:600; z-index:50; white-space:nowrap;
+    animation:pgtoast .22s ease-out; box-shadow:0 12px 32px rgba(46,43,37,.3);
+  }
+  .cartbar{position:absolute; left:16px; right:16px; bottom:104px; z-index:30}
+  .nav{
+    flex:none; display:flex; background:var(--surface);
+    border-top:1px solid rgba(32,30,29,.1); padding:10px 8px 30px; z-index:20;
+  }
+  .nav button{
+    flex:1; border:none; background:none; display:flex; flex-direction:column;
+    align-items:center; gap:3px; padding:4px 0; position:relative;
+  }
+  .nav span{font-size:10.5px; font-weight:700}
+  .badge{position:absolute; top:0; right:24%; width:8px; height:8px; border-radius:999px; background:var(--gold)}
+
+  /* ── course map ───────────────────────────────────── */
+  .map{
+    margin-top:14px; position:relative; height:430px; border-radius:28px;
+    background:var(--sage-200); overflow:hidden; box-shadow:0 1px 2px rgba(46,43,37,.14);
+  }
+  .blob{position:absolute; border-radius:999px; background:var(--sage-300)}
+  .bunker{position:absolute; border-radius:999px; background:var(--ground)}
+  .holedot{
+    position:absolute; transform:translate(-50%,-50%); width:26px; height:26px; border-radius:999px;
+    display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:700;
+    box-shadow:0 1px 2px rgba(46,43,37,.2);
+  }
+  .courier{transition:left .6s linear, top .6s linear}
+
+  @keyframes pgpulse{0%{transform:scale(1);opacity:.55}100%{transform:scale(2.4);opacity:0}}
+  @keyframes pgtoast{from{transform:translate(-50%,14px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+  @keyframes pgsheet{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .pulse{animation:pgpulse 1.6s ease-out infinite}
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.001ms!important; animation-iteration-count:1!important; transition-duration:.001ms!important}
+  }
+  ::selection{background:var(--gold-200)}
+</style>
+
+<div class="stage-note">
+  <b>Par &amp; Grill</b> — tap through it like a phone. Menu → add an item → checkout → watch the cart cross the course.
+  Staff queue lives under <b>Me → Kitchen</b>.
+</div>
+
+<div class="device">
+  <div class="island"></div>
+  <div class="statusbar">
+    <div class="time">9:41</div>
+    <div class="icons">
+      <svg width="19" height="12" viewBox="0 0 19 12" aria-hidden="true">
+        <rect x="0" y="7.5" width="3.2" height="4.5" rx=".7" fill="#000"/>
+        <rect x="4.8" y="5" width="3.2" height="7" rx=".7" fill="#000"/>
+        <rect x="9.6" y="2.5" width="3.2" height="9.5" rx=".7" fill="#000"/>
+        <rect x="14.4" y="0" width="3.2" height="12" rx=".7" fill="#000"/>
+      </svg>
+      <svg width="17" height="12" viewBox="0 0 17 12" aria-hidden="true">
+        <path d="M8.5 3.2C10.8 3.2 12.9 4.1 14.4 5.6L15.5 4.5C13.7 2.7 11.2 1.5 8.5 1.5C5.8 1.5 3.3 2.7 1.5 4.5L2.6 5.6C4.1 4.1 6.2 3.2 8.5 3.2Z" fill="#000"/>
+        <path d="M8.5 6.8C9.9 6.8 11.1 7.3 12 8.2L13.1 7.1C11.8 5.9 10.2 5.1 8.5 5.1C6.8 5.1 5.2 5.9 3.9 7.1L5 8.2C5.9 7.3 7.1 6.8 8.5 6.8Z" fill="#000"/>
+        <circle cx="8.5" cy="10.5" r="1.5" fill="#000"/>
+      </svg>
+      <svg width="27" height="13" viewBox="0 0 27 13" aria-hidden="true">
+        <rect x=".5" y=".5" width="23" height="12" rx="3.5" stroke="#000" stroke-opacity=".35" fill="none"/>
+        <rect x="2" y="2" width="20" height="9" rx="2" fill="#000"/>
+        <path d="M25 4.5V8.5C25.8 8.2 26.5 7.2 26.5 6.5C26.5 5.8 25.8 4.8 25 4.5Z" fill="#000" fill-opacity=".4"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="app">
+    <div class="scroll" id="scroll"></div>
+    <div id="chrome"></div>
+  </div>
+
+  <div class="homebar"><i></i></div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  /* ───────── data ───────── */
+  const BREAKFAST = [
+    { name:'Mediterranean bites', items:[
+      { id:'tiro', name:'Tiropita', desc:'Golden cheese pie, flaky filo — one-handed', price:7.5, allergens:['Dairy','Gluten','Egg'],
+        mods:[{l:'Extra crispy'},{l:'Cut in halves'}] },
+      { id:'spana', name:'Spanakopita', desc:'Spinach and feta in filo', price:7.5, allergens:['Dairy','Gluten'],
+        mods:[{l:'Light on feta'},{l:'Cut in halves'}] },
+      { id:'halou', name:'Halloumi & Egg Roll', desc:'Grilled halloumi, fried egg, oregano roll', price:10, allergens:['Dairy','Egg','Gluten'],
+        mods:[{l:'No egg',clears:'Egg'},{l:'Gluten-free roll',clears:'Gluten'},{l:'No sauce'}] },
+      { id:'souv', name:'Souvlaki Wrap', desc:'Chicken, pita, tzatziki — walks 18 holes', price:12, allergens:['Gluten','Dairy'],
+        mods:[{l:'No tzatziki',clears:'Dairy'},{l:'Gluten-free pita',clears:'Gluten'},{l:'No onion'},{l:'Extra chicken'}] },
+      { id:'yog', name:'Greek Yoghurt & Honey', desc:'Thick yoghurt, honey, crushed walnuts', price:6.5, allergens:['Dairy','Nuts'],
+        mods:[{l:'No walnuts',clears:'Nuts'},{l:'Extra honey'}] } ] },
+    { name:'Greek breakfast', items:[
+      { id:'boug', name:'Bougatsa', desc:'Warm custard filo, cinnamon sugar — Thessaloniki style', price:8, allergens:['Dairy','Gluten','Egg'],
+        mods:[{l:'No cinnamon sugar'},{l:'Cut in bites'}] },
+      { id:'koul', name:'Koulouri', desc:'Sesame bread ring — Athens street breakfast', price:4.5, allergens:['Gluten','Sesame'],
+        mods:[{l:'With feta'},{l:'With honey'}] },
+      { id:'strap', name:'Strapatsada Pita', desc:'Tomato-scrambled eggs, feta, folded pita', price:11, allergens:['Egg','Dairy','Gluten'],
+        mods:[{l:'No feta',clears:'Dairy'},{l:'Gluten-free pita',clears:'Gluten'},{l:'Extra tomato'}] },
+      { id:'louk', name:'Loukoumades', desc:'Honey doughnuts, walnuts, cinnamon — box of 6', price:9, allergens:['Gluten','Nuts','Egg'],
+        mods:[{l:'No walnuts',clears:'Nuts'},{l:'Chocolate drizzle instead'}] } ] }
+  ];
+  const LUNCH = [
+    { name:'Lunch — off the grill', items:[
+      { id:'gyros', name:'Gyros Pita', desc:'Pork gyros, tzatziki, tomato, chips inside', price:13.5, allergens:['Gluten','Dairy'],
+        mods:[{l:'No tzatziki',clears:'Dairy'},{l:'Gluten-free pita',clears:'Gluten'},{l:'Chicken instead'},{l:'No onion'}] },
+      { id:'skew', name:'Souvlaki Skewers ×2', desc:'Chargrilled chicken, lemon, oregano', price:12, allergens:[],
+        mods:[{l:'Extra lemon'},{l:'Add pita'}] },
+      { id:'gsalad', name:'Greek Salad', desc:'Tomato, cucumber, olives, barrel feta', price:11, allergens:['Dairy'],
+        mods:[{l:'No feta',clears:'Dairy'},{l:'Extra olives'},{l:'No onion'}] },
+      { id:'hburg', name:'Halloumi Burger', desc:'Grilled halloumi, roast pepper, rocket', price:14, allergens:['Dairy','Gluten'],
+        mods:[{l:'Gluten-free bun',clears:'Gluten'},{l:'Add chicken'}] },
+      { id:'pchips', name:'Loaded Pita Chips', desc:'Crumbled feta, oregano, lemon salt', price:8, allergens:['Gluten','Dairy'],
+        mods:[{l:'No feta',clears:'Dairy'}] } ] }
+  ];
+  const DINNER = [
+    { name:'Dinner — from the kitchen', items:[
+      { id:'mous', name:'Moussaka', desc:'Eggplant, lamb, bechamel — baked to order', price:18, allergens:['Dairy','Gluten','Egg'],
+        mods:[{l:'Side salad instead of chips'}] },
+      { id:'klef', name:'Lamb Kleftiko', desc:'Slow lamb shoulder, lemon potatoes', price:24, allergens:[],
+        mods:[{l:'Extra lemon potatoes'}] },
+      { id:'octo', name:'Grilled Octopus', desc:'Charred, olive oil, capers', price:19, allergens:['Shellfish'],
+        mods:[{l:'No capers'}] },
+      { id:'sagan', name:'Prawn Saganaki', desc:'Prawns, tomato, ouzo, baked feta', price:21, allergens:['Shellfish','Dairy'],
+        mods:[{l:'No feta',clears:'Dairy'},{l:'Extra bread'}] },
+      { id:'bakl', name:'Baklava', desc:'Walnut, honey syrup, filo', price:7.5, allergens:['Nuts','Gluten'],
+        mods:[{l:'With yoghurt'}] } ] }
+  ];
+  const DRINKS = [
+    { name:'Coffee & frappes', items:[
+      { id:'frappe', name:'Greek Frappe', desc:'Iced, frothy, strong — the classic', price:6, allergens:['Dairy'],
+        mods:[{l:'No milk (sketos)',clears:'Dairy'},{l:'Oat milk',clears:'Dairy'},{l:'No sugar'},{l:'Extra sweet (glykos)'}] },
+      { id:'freddo', name:'Freddo Espresso', desc:'Double shot over ice', price:5.5, allergens:[],
+        mods:[{l:'Decaf'},{l:'No sugar'}] },
+      { id:'fcap', name:'Freddo Cappuccino', desc:'Cold espresso, cold milk foam', price:6, allergens:['Dairy'],
+        mods:[{l:'Oat milk',clears:'Dairy'},{l:'Decaf'},{l:'No sugar'}] },
+      { id:'fw', name:'Flat White', desc:'Double shot, lidded cup', price:5, allergens:['Dairy'],
+        mods:[{l:'Oat milk',clears:'Dairy'},{l:'Soy milk',clears:'Dairy'},{l:'Decaf'},{l:'Extra shot'}] } ] },
+    { name:'Cold & fresh', items:[
+      { id:'lemon', name:'Homemade Lemonade', desc:'Lemon, mint, lightly sparkling', price:5, allergens:[], mods:[{l:'No mint'},{l:'No ice'}] },
+      { id:'oj', name:'Fresh OJ', desc:'Squeezed this morning', price:5.5, allergens:[], mods:[{l:'No ice'}] },
+      { id:'water', name:'Sparkling Water', desc:'Cold bottle, 500ml', price:4, allergens:[], mods:[] } ] }
+  ];
+  const DIETS = [
+    {label:'Egg allergy',avoid:['Egg']}, {label:'Gluten-free',avoid:['Gluten']},
+    {label:'Dairy-free',avoid:['Dairy']}, {label:'Nut allergy',avoid:['Nuts']},
+    {label:'Sesame allergy',avoid:['Sesame']}, {label:'Shellfish allergy',avoid:['Shellfish']},
+    {label:'Vegetarian',avoid:['Meat']}
+  ];
+  const HOLES = [{x:20,y:78},{x:12,y:58},{x:22,y:38},{x:14,y:16},{x:38,y:9},{x:62,y:14},{x:82,y:27},{x:74,y:50},{x:85,y:72}];
+  const BISTRO = {x:50,y:90};
+  const GOLFER = 'Marcus';
+
+  const MODE_DEFS = [
+    {id:'come',  title:'Bring it to me',    sub:'We track your GPS and meet you wherever you are on the course', fee:'$2.50'},
+    {id:'hole',  title:'Meet me at a hole', sub:'Pick the hole — we time it so it lands as you walk up',          fee:'$2.50'},
+    {id:'turn',  title:'Pickup at the turn',sub:'Ready at the halfway house after hole 9',                        fee:'Free'},
+    {id:'18th',  title:'Ready at the 18th', sub:'Hot and waiting when you finish the round',                      fee:'Free'}
+  ];
+  const STEP_LABELS = ['Order received','Kitchen is preparing it','On its way across the course','Delivered'];
+  const K_LABELS = ['New','Preparing','Out for delivery','Done'];
+  const K_TAGS = [['#f7e7b8','#7a5e15'],['#f7e7b8','#7a5e15'],['#e1eecc','#3d472b'],['#eee7db','#645c50']];
+  const K_BTNS = ['Accept','Send it out','Mark delivered'];
+  const TAB_DEFS = [
+    {id:'menu',  label:'Menu',   d1:'M5 8h11v7a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5z', d2:'M16 9h2a2.5 2.5 0 0 1 0 5h-2M8 4v1M12 4v1'},
+    {id:'course',label:'Course', d1:'M8 21V4', d2:'M8 5h9l-2.5 3L17 11H8'},
+    {id:'track', label:'Orders', d1:'M6 4h12v16H6z', d2:'M9 9h6M9 13h4'},
+    {id:'me',    label:'Me',     d1:'M12 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z', d2:'M5.5 20a6.5 6.5 0 0 1 13 0'}
+  ];
+  const HISTORY = [
+    {what:'Greek Frappe ×2, Tiropita', when:'Tue · delivered hole 7', total:'$19.50'},
+    {what:'Souvlaki Wrap (no egg roll swap), OJ', when:'Last Sat · halfway house', total:'$17.50'},
+    {what:'Freddo Cappuccino ×4 (oat)', when:'Aug 22 · delivered hole 5', total:'$24.00'}
+  ];
+
+  /* ───────── state ───────── */
+  const S = {
+    screen:'menu', meal:'breakfast', lines:[], hole:6, gpsHole:6, holeSheet:false,
+    mode:'come', targetHole:8, pay:'apple', order:null, toast:null,
+    itemSheet:null, sheetSel:[], sheetNote:'', sheetQty:1,
+    dietSheet:false, diet:['Egg allergy'],
+    kitchen:[
+      {num:'#212', who:'Dave P. · single rider', hole:3, items:'2× Greek Frappe · 1× Tiropita', note:'Frappe with oat milk — dairy allergy', status:1, placed:4},
+      {num:'#213', who:'Jenny + 3 · two carts', hole:8, items:'4× Souvlaki Wrap · 2× Homemade Lemonade', note:'1 wrap gluten-free pita — coeliac', status:0, placed:1},
+      {num:'#210', who:'Club comp group', hole:0, items:'6× Freddo Espresso · 3× Spanakopita', note:'', status:2, placed:11}
+    ]
+  };
+
+  /* ───────── helpers ───────── */
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const fmt = n => '$' + n.toFixed(2);
+  const allCats = () => [].concat(BREAKFAST, LUNCH, DINNER, DRINKS);
+  const allItems = () => allCats().reduce((a,c) => a.concat(c.items), []);
+  const findItem = id => allItems().find(i => i.id === id);
+  const mealCats = meal => (meal === 'lunch' ? LUNCH : meal === 'dinner' ? DINNER : BREAKFAST).concat(DRINKS);
+  const avoided = () => S.diet.reduce((a,d) => a.concat((DIETS.find(x => x.label === d) || {avoid:[]}).avoid), []);
+  function conflictsFor(item, mods){
+    const av = avoided();
+    const cleared = (mods || []).map(m => { const md = item.mods.find(x => x.l === m); return md && md.clears; }).filter(Boolean);
+    return item.allergens.filter(a => av.indexOf(a) >= 0 && cleared.indexOf(a) < 0);
+  }
+  const statusIdx = p => p >= 1 ? 3 : p > 0.45 ? 2 : p > 0.15 ? 1 : 0;
+  function destLabel(){
+    const o = S.order; if (!o) return '';
+    return o.mode === 'come' ? 'hole ' + S.hole
+      : o.mode === 'hole' ? 'hole ' + o.targetHole
+      : o.mode === 'turn' ? 'the halfway house' : 'the 18th green';
+  }
+  const initials = n => (n.split(' ').map(w => w[0]).join('').replace(/[^A-Z]/g,'').slice(0,2)) || n.slice(0,2);
+
+  let toastTimer = null;
+  function showToast(msg){
+    clearTimeout(toastTimer);
+    S.toast = msg; render();
+    toastTimer = setTimeout(() => { S.toast = null; render(); }, 2400);
+  }
+  function addLine(id, qty, mods, note){
+    const key = mods.join('|') + '::' + note;
+    const same = S.lines.findIndex(l => l.id === id && l.mods.join('|') + '::' + l.note === key);
+    if (same >= 0) S.lines[same] = Object.assign({}, S.lines[same], {qty: S.lines[same].qty + qty});
+    else S.lines.push({id, qty, mods, note});
+  }
+
+  /* handler registry — rebuilt each render */
+  let H = {}, hid = 0;
+  const on = fn => { const k = 'h' + (++hid); H[k] = fn; return 'data-h="' + k + '"'; };
+  const warnSvg = (stroke, size) =>
+    '<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="'+stroke+'" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 17H3z"></path><path d="M12 10v4M12 17.5v.5"></path></svg>';
+  const flagSvg = (size) =>
+    '<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" aria-hidden="true"><path d="M6 21V4"></path><path d="M6 5h9l-2.5 3L15 11H6"></path></svg>';
+
+  /* ───────── screens ───────── */
+  function menuScreen(){
+    const tints = [['#f7e7b8','#7a5e15'],['#e1eecc','#3d472b'],['#eee7db','#645c50']];
+    let ti = 0, h = '';
+
+    h += '<div class="screen">';
+    h += '<div class="row" style="gap:12px">'
+      +  '<div class="avatar" style="width:44px;height:44px;background:var(--gold);color:var(--gold-100);font-size:16px">PG</div>'
+      +  '<div style="flex:1"><div class="d1">Par &amp; Grill</div>'
+      +  '<div style="font-size:12.5px;color:var(--n700)">Mediterranean course bistro · 7am til late</div></div>'
+      +  '<button ' + on(() => { S.holeSheet = true; render(); }) + ' class="pill" style="gap:6px;background:var(--sage-200);color:var(--sage-800);padding:9px 14px;font-size:13.5px;font-weight:600;border:none">'
+      +  flagSvg(14) + ' Hole ' + S.hole + '</button></div>';
+
+    h += '<div class="row" style="margin-top:14px;background:var(--sand);border-radius:999px;padding:4px;gap:4px">';
+    [{id:'breakfast',label:'Breakfast'},{id:'lunch',label:'Lunch'},{id:'dinner',label:'Dinner'}].forEach(ml => {
+      const sel = S.meal === ml.id;
+      h += '<button ' + on(() => { S.meal = ml.id; render(); }) + ' class="pill" style="flex:1;padding:9px 0;background:'
+        + (sel ? 'var(--gold)' : 'transparent') + ';color:' + (sel ? '#fff' : 'var(--n700)')
+        + ';font-weight:700;font-size:13px">' + ml.label + '</button>';
+    });
+    h += '</div>';
+
+    h += '<div class="row" style="margin-top:12px;background:var(--sage-200);border-radius:28px;padding:16px 18px;gap:12px">'
+      +  '<div style="width:10px;height:10px;border-radius:999px;background:var(--sage-700);position:relative;flex:none">'
+      +  '<div class="pulse" style="position:absolute;inset:0;border-radius:999px;background:var(--sage-700)"></div></div>'
+      +  '<div style="font-size:13.5px;line-height:1.45;color:var(--sage-800)"><strong>We can see you on hole ' + S.hole
+      +  '.</strong> Order now and we\'ll bring it to you on the course — no need to stop playing.</div></div>';
+
+    const dietStr = S.diet.length ? S.diet.join(' · ') : 'No allergies set';
+    h += '<button ' + on(() => { S.dietSheet = true; render(); }) + ' class="row" style="margin-top:10px;width:100%;gap:10px;border:1px solid var(--n300);background:var(--surface);border-radius:999px;padding:11px 16px;text-align:left">'
+      +  warnSvg('#7a5e15', 15)
+      +  '<span style="flex:1;font-size:13px;color:var(--n800)"><strong style="color:var(--gold-700)">' + esc(dietStr) + '</strong> — unsafe items are flagged below</span>'
+      +  '<span style="font-size:12.5px;font-weight:700;color:var(--gold-700)">Edit</span></button>';
+
+    mealCats(S.meal).forEach(cat => {
+      h += '<div style="margin-top:26px"><div class="d3" style="margin-bottom:4px">' + esc(cat.name) + '</div>';
+      cat.items.forEach(it => {
+        const tint = tints[(ti++) % 3];
+        const conflicts = conflictsFor(it, []);
+        const fixable = conflicts.length > 0 && conflicts.every(a => it.mods.some(m => m.clears === a));
+        const openSheet = () => { S.itemSheet = it.id; S.sheetSel = []; S.sheetNote = ''; S.sheetQty = 1; render(); };
+
+        h += '<div ' + on(openSheet) + ' class="item" role="button" tabindex="0" style="opacity:' + (conflicts.length ? '.88' : '1') + '">'
+          +  '<div class="avatar" style="background:' + tint[0] + ';color:' + tint[1] + '">' + esc(initials(it.name)) + '</div>'
+          +  '<div style="flex:1;min-width:0">'
+          +  '<div style="font-weight:600;font-size:15px">' + esc(it.name) + '</div>'
+          +  '<div style="font-size:12.5px;color:var(--n700);margin-top:1px">' + esc(it.desc) + '</div>';
+        if (conflicts.length)
+          h += '<div class="flag">' + warnSvg('currentColor', 11) + ' Contains ' + esc(conflicts.join(' & ').toLowerCase()) + ' — not for you</div>';
+        if (fixable)
+          h += '<div style="font-size:11.5px;color:var(--sage-700);font-weight:600;margin-top:3px">Can be made safe — tap to customise</div>';
+        h += '</div><div style="font-weight:600;font-size:14px">' + fmt(it.price) + '</div>'
+          +  '<button aria-label="Add ' + esc(it.name) + '" ' + on(e => {
+               e.stopPropagation();
+               if (conflicts.length){ openSheet(); showToast('Check the allergy flag first'); return; }
+               addLine(it.id, 1, [], ''); showToast(it.name + ' added');
+             }) + ' class="addbtn" style="background:' + (conflicts.length ? 'var(--n400)' : 'var(--gold)') + '">+</button></div>';
+      });
+      h += '</div>';
+    });
+    return h + '</div>';
+  }
+
+  function cartScreen(){
+    const cartCount = S.lines.reduce((a,l) => a + l.qty, 0);
+    const subtotal = S.lines.reduce((a,l) => a + findItem(l.id).price * l.qty, 0);
+    const fee = (S.mode === 'come' || S.mode === 'hole') ? 2.5 : 0;
+    let h = '<div class="screen">';
+
+    h += '<div class="row" style="gap:10px">'
+      +  '<button ' + on(() => { S.screen = 'menu'; render(); }) + ' aria-label="Back to menu" class="pill" style="width:36px;height:36px;background:var(--sand);font-size:17px;color:var(--n800);border:none">←</button>'
+      +  '<div class="d1">Your order</div></div>';
+
+    h += '<div class="card" style="margin-top:16px;padding:6px 18px">';
+    S.lines.forEach((l, li) => {
+      const it = findItem(l.id);
+      const modsStr = l.mods.concat([l.note]).filter(Boolean).join(' · ');
+      h += '<div class="row" style="gap:12px;padding:13px 0;border-bottom:1px solid rgba(32,30,29,.07)">'
+        +  '<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:14.5px">' + esc(it.name) + '</div>'
+        +  (modsStr ? '<div style="font-size:12px;color:var(--gold-700);font-weight:600;margin-top:1px">' + esc(modsStr) + '</div>' : '')
+        +  '<div style="font-size:12.5px;color:var(--n700)">' + fmt(it.price) + ' each</div></div>'
+        +  '<div class="stepper">'
+        +  '<button aria-label="One fewer" ' + on(() => { S.lines = S.lines.map((x,i) => i === li ? Object.assign({},x,{qty:x.qty-1}) : x).filter(x => x.qty > 0); render(); }) + '>−</button>'
+        +  '<span>' + l.qty + '</span>'
+        +  '<button aria-label="One more" ' + on(() => { S.lines = S.lines.map((x,i) => i === li ? Object.assign({},x,{qty:x.qty+1}) : x); render(); }) + '>+</button>'
+        +  '</div></div>';
+    });
+    if (!cartCount) h += '<div style="padding:20px 0;font-size:14px;color:var(--n600);text-align:center">Cart is empty — head back to the menu.</div>';
+    h += '</div>';
+
+    h += '<div class="d3" style="margin:24px 0 10px">Where should it go?</div><div style="display:flex;flex-direction:column;gap:9px">';
+    MODE_DEFS.forEach(m => {
+      const sel = S.mode === m.id;
+      h += '<button ' + on(() => { S.mode = m.id; render(); }) + ' style="display:flex;gap:12px;align-items:flex-start;text-align:left;border:2px solid '
+        + (sel ? 'var(--gold)' : 'rgba(32,30,29,.1)') + ';background:' + (sel ? 'var(--gold-100)' : 'var(--surface)')
+        + ';border-radius:16px;padding:13px 15px;width:100%">'
+        + '<div style="width:20px;height:20px;border-radius:999px;border:2px solid ' + (sel ? 'var(--gold)' : 'var(--n400)')
+        + ';background:' + (sel ? 'var(--gold)' : 'var(--surface)') + ';flex:none;margin-top:1px;box-shadow:inset 0 0 0 3px #f9f4ed"></div>'
+        + '<div style="flex:1"><div style="font-weight:700;font-size:14.5px;color:var(--ink)">' + esc(m.title) + '</div>'
+        + '<div style="font-size:12.5px;color:var(--n700);margin-top:2px;line-height:1.4">' + esc(m.sub) + '</div></div>'
+        + '<div style="font-size:12px;font-weight:700;color:var(--gold-700)">' + m.fee + '</div></button>';
+    });
+    h += '</div>';
+
+    if (S.mode === 'hole'){
+      h += '<div style="margin-top:12px;display:flex;gap:8px;overflow-x:auto;padding-bottom:4px">';
+      HOLES.forEach((_, i) => {
+        const n = i + 1, sel = S.targetHole === n;
+        h += '<button ' + on(() => { S.targetHole = n; render(); }) + ' class="chip" style="flex:none;width:40px;height:40px;background:'
+          + (sel ? 'var(--gold)' : 'var(--sand)') + ';color:' + (sel ? '#fff' : 'var(--n800)') + '">' + n + '</button>';
+      });
+      h += '</div>';
+    }
+
+    h += '<div class="d3" style="margin:24px 0 10px">Payment</div><div style="display:flex;gap:8px">'
+      +  '<button ' + on(() => { S.pay = 'apple'; render(); }) + ' class="pill" style="flex:1;border:2px solid '
+      +  (S.pay === 'apple' ? 'var(--gold)' : 'rgba(32,30,29,0)') + ';background:var(--ink);color:var(--ground);padding:12px;font-weight:700;font-size:14px">Apple&nbsp;Pay</button>'
+      +  '<button ' + on(() => { S.pay = 'card'; render(); }) + ' class="pill" style="flex:1;border:2px solid '
+      +  (S.pay === 'card' ? 'var(--gold)' : 'rgba(32,30,29,.12)') + ';background:var(--surface);color:var(--ink);padding:12px;font-weight:700;font-size:14px">Card ·· 4021</button></div>';
+
+    h += '<div style="margin-top:22px;border-top:1px solid rgba(32,30,29,.12);padding-top:14px;font-size:14px;display:flex;flex-direction:column;gap:7px;font-variant-numeric:tabular-nums">'
+      +  '<div class="row" style="justify-content:space-between;color:var(--n700)"><span>Subtotal</span><span>' + fmt(subtotal) + '</span></div>'
+      +  '<div class="row" style="justify-content:space-between;color:var(--n700)"><span>On-course delivery</span><span>' + (fee ? fmt(fee) : 'Free') + '</span></div>'
+      +  '<div class="row" style="justify-content:space-between;font-weight:700;font-size:16px"><span>Total</span><span>' + fmt(subtotal + fee) + '</span></div></div>';
+
+    h += '<button ' + on(() => {
+      if (!cartCount){ showToast('Add something first'); return; }
+      const oi = S.lines.map(l => { const it = findItem(l.id); return {
+        name: it.name, qty: l.qty,
+        modsStr: l.mods.concat([l.note]).filter(Boolean).join(' · '),
+        lineStr: fmt(it.price * l.qty) }; });
+      S.order = {num:'#214', items:oi, total:subtotal + fee, mode:S.mode, targetHole:S.targetHole, progress:0};
+      S.lines = []; S.screen = 'track';
+      showToast('Order in — kitchen has it');
+    }) + ' class="primary" style="margin-top:16px">Place order · ' + fmt(subtotal + fee) + '</button>';
+
+    return h + '</div>';
+  }
+
+  function trackScreen(){
+    const o = S.order;
+    let h = '<div class="screen"><div class="d1">Your order</div>';
+    if (!o){
+      h += '<div style="margin-top:60px;text-align:center">'
+        +  '<div class="pill" style="width:72px;height:72px;background:var(--sand);margin:0 auto 14px">'
+        +  '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#a19786" stroke-width="2.75" stroke-linecap="round" aria-hidden="true"><rect x="6" y="4" width="12" height="16" rx="3"></rect><path d="M9 9h6M9 13h4"></path></svg></div>'
+        +  '<div style="font-weight:600;font-size:15px">No active order</div>'
+        +  '<div style="font-size:13px;color:var(--n600);margin:6px 0 18px">Order from the menu and track the cart here.</div>'
+        +  '<button ' + on(() => { S.screen = 'menu'; render(); }) + ' class="pill" style="border:none;background:var(--gold);color:#fff;padding:12px 26px;font-weight:700;font-size:14px">Browse menu</button></div>';
+      return h + '</div>';
+    }
+
+    const idx = statusIdx(o.progress);
+    const etaMin = Math.max(1, Math.round((1 - o.progress) * 14));
+    const cartOut = idx === 2;
+    const etaBig = o.progress >= 1 ? 'Delivered'
+      : o.mode === '18th' ? 'Ready at the 18th'
+      : o.mode === 'turn' ? 'Ready in ~' + etaMin + ' min'
+      : 'Arriving in ~' + etaMin + ' min';
+
+    h += '<div class="card" style="margin-top:14px;padding:20px;box-shadow:0 3px 10px rgba(46,43,37,.16)">'
+      +  '<div class="row" style="justify-content:space-between;align-items:baseline">'
+      +  '<span style="font-size:12.5px;font-weight:700;color:var(--gold-700);letter-spacing:.04em">ORDER ' + o.num + '</span>'
+      +  '<span style="font-size:12px;color:var(--n600)">' + esc(MODE_DEFS.find(m => m.id === o.mode).title) + '</span></div>'
+      +  '<div class="d1" style="font-size:30px;margin-top:8px;color:' + (o.progress >= 1 ? 'var(--sage-700)' : 'var(--ink)') + '">' + etaBig + '</div>'
+      +  '<div style="font-size:13.5px;color:var(--n700);margin-top:2px">'
+      +  (o.progress >= 1 ? 'Dropped at ' + destLabel() + '. See you next round.' : STEP_LABELS[idx] + ' · heading for ' + destLabel()) + '</div>'
+      +  '<div style="margin-top:18px;height:8px;border-radius:999px;background:var(--sand);overflow:hidden">'
+      +  '<div style="height:100%;border-radius:999px;background:var(--gold);transition:width .5s;width:' + Math.round(o.progress * 100) + '%"></div></div>'
+      +  '<div style="margin-top:16px;display:flex;flex-direction:column">';
+    STEP_LABELS.forEach((label, i) => {
+      h += '<div style="display:flex;gap:12px;align-items:flex-start">'
+        +  '<div style="display:flex;flex-direction:column;align-items:center">'
+        +  '<div style="width:14px;height:14px;border-radius:999px;background:' + (i < idx ? 'var(--sage)' : i === idx ? 'var(--gold)' : 'var(--sand)')
+        +  ';border:2px solid ' + (i < idx ? 'var(--sage)' : i === idx ? 'var(--gold-300)' : 'var(--n300)') + ';flex:none"></div>'
+        +  (i < 3 ? '<div style="width:2px;height:22px;background:var(--n300)"></div>' : '')
+        +  '</div><div style="font-size:13.5px;font-weight:' + (i === idx ? 700 : 500) + ';color:' + (i <= idx ? 'var(--ink)' : 'var(--n500)') + ';margin-top:-1px">' + label + '</div></div>';
+    });
+    h += '</div></div>';
+
+    if (cartOut){
+      h += '<div class="row" style="margin-top:12px;background:var(--sage-200);border-radius:28px;padding:16px 18px;gap:13px">'
+        +  '<div class="avatar" style="width:44px;height:44px;background:var(--sage);color:var(--sage-100);font-size:16px">S</div>'
+        +  '<div style="flex:1"><div style="font-weight:700;font-size:14px;color:#272e1b">Sam · beverage cart 2</div>'
+        +  '<div style="font-size:12.5px;color:var(--sage-700)">Heading to ' + destLabel() + ' now</div></div>'
+        +  '<button ' + on(() => { S.screen = 'course'; render(); }) + ' class="pill" style="border:none;background:var(--sage-100);color:var(--sage-800);padding:9px 15px;font-weight:700;font-size:12.5px">Find on map</button></div>';
+    }
+
+    h += '<div class="card" style="margin-top:12px;padding:16px 18px;box-shadow:none">'
+      +  '<div class="kicker" style="margin-bottom:8px">ITEMS</div>';
+    o.items.forEach(oi => {
+      h += '<div style="padding:4px 0"><div class="row" style="justify-content:space-between;font-size:14px">'
+        +  '<span>' + oi.qty + '× ' + esc(oi.name) + '</span><span style="color:var(--n700)">' + oi.lineStr + '</span></div>'
+        +  (oi.modsStr ? '<div style="font-size:12px;color:var(--gold-700);font-weight:600">' + esc(oi.modsStr) + '</div>' : '') + '</div>';
+    });
+    h += '<div class="row" style="justify-content:space-between;font-weight:700;font-size:14.5px;border-top:1px solid rgba(32,30,29,.1);margin-top:8px;padding-top:10px">'
+      +  '<span>Total paid</span><span>' + fmt(o.total) + '</span></div></div>';
+
+    return h + '</div>';
+  }
+
+  function courseScreen(){
+    const o = S.order;
+    const idx = o ? statusIdx(o.progress) : 0;
+    const cartOut = !!o && idx === 2;
+    const etaMin = o ? Math.max(1, Math.round((1 - o.progress) * 14)) : 0;
+    const golfer = HOLES[(o && o.mode === 'hole' ? o.targetHole : S.hole) - 1];
+    const dest = o && o.mode === 'turn' ? {x:50,y:45} : o && o.mode === '18th' ? BISTRO : golfer;
+    const dp = o ? Math.min(1, Math.max(0, (o.progress - 0.45) / 0.45)) : 0;
+    const cart = {x: BISTRO.x + (dest.x - BISTRO.x) * dp, y: BISTRO.y + (dest.y - BISTRO.y) * dp};
+
+    let h = '<div class="screen">';
+    h += '<div class="row" style="align-items:baseline;justify-content:space-between">'
+      +  '<div class="d1">On the course</div>'
+      +  '<span style="font-size:12px;font-weight:700;color:var(--sage-700);background:var(--sage-200);border-radius:999px;padding:5px 11px">Front nine</span></div>';
+
+    h += '<div class="map">'
+      +  '<div class="blob" style="left:6%;top:8%;width:34%;height:64%;transform:rotate(14deg)"></div>'
+      +  '<div class="blob" style="left:44%;top:2%;width:46%;height:34%;transform:rotate(-18deg)"></div>'
+      +  '<div class="blob" style="left:58%;top:36%;width:32%;height:48%;transform:rotate(24deg)"></div>'
+      +  '<div class="blob" style="left:30%;top:52%;width:26%;height:30%;background:var(--sage-400);opacity:.5;transform:rotate(-30deg)"></div>'
+      +  '<div class="bunker" style="left:20%;top:30%;width:26px;height:18px"></div>'
+      +  '<div class="bunker" style="left:70%;top:20%;width:20px;height:14px"></div>'
+      +  '<div class="bunker" style="left:64%;top:66%;width:30px;height:20px"></div>';
+    HOLES.forEach((mp, i) => {
+      const sel = i + 1 === S.hole;
+      h += '<div class="holedot" style="left:' + mp.x + '%;top:' + mp.y + '%;background:'
+        + (sel ? 'var(--gold)' : 'var(--surface)') + ';color:' + (sel ? '#fff' : 'var(--n800)') + '">' + (i + 1) + '</div>';
+    });
+    h += '<div style="position:absolute;left:' + golfer.x + '%;top:' + golfer.y + '%;transform:translate(-50%,-50%)">'
+      +  '<div class="pulse" style="position:absolute;inset:-4px;border-radius:999px;background:var(--gold)"></div>'
+      +  '<div style="position:relative;width:22px;height:22px;border-radius:999px;background:var(--gold);border:3px solid var(--gold-100);box-shadow:0 3px 10px rgba(46,43,37,.3)"></div></div>';
+    if (cartOut){
+      h += '<div class="courier" style="position:absolute;left:' + cart.x + '%;top:' + cart.y + '%;transform:translate(-50%,-50%)">'
+        +  '<div style="width:18px;height:18px;border-radius:999px;background:var(--ink);border:3px solid var(--surface);box-shadow:0 3px 10px rgba(46,43,37,.3)"></div></div>';
+    }
+    h += '<div style="position:absolute;left:50%;bottom:12px;transform:translateX(-50%);background:var(--ink);color:var(--ground);border-radius:999px;padding:7px 14px;font-size:12px;font-weight:700;white-space:nowrap">Par &amp; Grill · clubhouse</div>';
+    h += '</div>';
+
+    h += '<div class="row card" style="margin-top:12px;padding:16px 18px;gap:13px">'
+      +  '<div style="width:12px;height:12px;border-radius:999px;background:var(--gold);flex:none"></div>'
+      +  '<div style="flex:1;font-size:13.5px"><strong>You — hole ' + S.hole + '</strong><span style="color:var(--n700)"> · GPS live, updated just now</span></div>'
+      +  '<button ' + on(() => { S.holeSheet = true; render(); }) + ' class="pill" style="border:none;background:var(--sand);color:var(--n800);padding:8px 14px;font-weight:700;font-size:12.5px">Set hole</button></div>';
+
+    if (cartOut){
+      h += '<div class="row card" style="margin-top:10px;padding:16px 18px;gap:13px">'
+        +  '<div style="width:12px;height:12px;border-radius:999px;background:var(--ink);flex:none"></div>'
+        +  '<div style="flex:1;font-size:13.5px"><strong>Sam — cart 2</strong><span style="color:var(--n700)"> · your order, ~' + etaMin + ' min away</span></div></div>';
+    }
+    return h + '</div>';
+  }
+
+  function kitchenScreen(){
+    const o = S.order;
+    const live = o ? [{
+      num:o.num, who:GOLFER + ' M. · walking',
+      hole: o.mode === 'hole' ? o.targetHole : (o.mode === 'come' ? S.hole : 0),
+      items: o.items.map(i => i.qty + '× ' + i.name).join(' · '),
+      note: [ o.items.filter(i => i.modsStr).map(i => i.name + ': ' + i.modsStr).join(' · '),
+              S.diet.length ? 'Guest profile: ' + S.diet.join(', ') : '' ].filter(Boolean).join(' — '),
+      status: statusIdx(o.progress), placed:2, live:true
+    }] : [];
+    const all = live.concat(S.kitchen);
+    const waiting = all.filter(k => k.status < 2).length;
+
+    let h = '<div class="screen">';
+    h += '<div class="row" style="gap:10px">'
+      +  '<button ' + on(() => { S.screen = 'me'; render(); }) + ' aria-label="Back" class="pill" style="width:36px;height:36px;background:var(--sand);font-size:17px;color:var(--n800);border:none">←</button>'
+      +  '<div class="d1" style="flex:1">Kitchen queue</div>'
+      +  '<span style="font-size:11.5px;font-weight:700;color:var(--gold-700);background:var(--gold-200);border-radius:999px;padding:5px 11px;letter-spacing:.04em">STAFF</span></div>'
+      +  '<div style="font-size:13px;color:var(--n700);margin-top:6px">' + waiting + ' order' + (waiting === 1 ? '' : 's') + ' waiting · 2 carts out on course</div>';
+
+    h += '<div style="margin-top:16px;display:flex;flex-direction:column;gap:12px">';
+    all.forEach(k => {
+      h += '<div class="card" style="padding:17px 18px">'
+        +  '<div class="row" style="gap:10px"><span style="font-weight:800;font-size:14px">' + k.num + '</span>'
+        +  '<span style="flex:1;font-size:13.5px;color:var(--n700)">' + esc(k.who) + '</span>'
+        +  '<span style="font-size:11.5px;font-weight:700;color:' + K_TAGS[k.status][1] + ';background:' + K_TAGS[k.status][0] + ';border-radius:999px;padding:4px 10px">' + K_LABELS[k.status] + '</span></div>'
+        +  '<div style="font-size:14px;margin-top:9px;line-height:1.5">' + esc(k.items) + '</div>';
+      if (k.note)
+        h += '<div style="display:flex;gap:7px;align-items:flex-start;margin-top:8px;background:var(--gold-200);color:var(--gold-700);border-radius:16px;padding:9px 12px;font-size:12.5px;font-weight:600;line-height:1.4">'
+          +  '<span style="flex:none;margin-top:1px;display:flex">' + warnSvg('currentColor', 13) + '</span><span>' + esc(k.note) + '</span></div>';
+      h += '<div class="row" style="gap:8px;margin-top:12px">'
+        +  '<span class="row" style="gap:5px;font-size:12.5px;font-weight:600;color:var(--sage-800);background:var(--sage-200);border-radius:999px;padding:6px 12px">'
+        +  flagSvg(12) + ' ' + (k.hole ? 'Hole ' + k.hole : 'Halfway house') + '</span>'
+        +  '<span style="flex:1;font-size:12.5px;color:var(--n600)">' + k.placed + ' min ago</span>';
+      if (k.status < 3){
+        h += '<button ' + on(() => {
+          if (k.live){ S.order.progress = k.status === 0 ? 0.2 : k.status === 1 ? 0.5 : 1; }
+          else { S.kitchen = S.kitchen.map(x => x.num === k.num ? Object.assign({},x,{status:x.status+1}) : x); }
+          showToast(k.num + ' → ' + K_LABELS[k.status + 1]);
+        }) + ' class="pill" style="border:none;background:var(--gold);color:#fff;padding:9px 16px;font-weight:700;font-size:12.5px">' + K_BTNS[Math.min(k.status, 2)] + '</button>';
+      }
+      h += '</div></div>';
+    });
+    return h + '</div></div>';
+  }
+
+  function meScreen(){
+    const dietStr = S.diet.length ? S.diet.join(' · ') : 'No allergies set';
+    let h = '<div class="screen">';
+    h += '<div class="row" style="gap:14px">'
+      +  '<div class="avatar" style="width:56px;height:56px;background:var(--gold-200);color:var(--gold-700);font-size:20px">' + GOLFER[0] + '</div>'
+      +  '<div><div class="d1">' + GOLFER + '</div>'
+      +  '<div style="font-size:12.5px;color:var(--n700)">Fairway Club member · 14 orders</div></div></div>';
+
+    h += '<div class="row" style="margin-top:18px;background:var(--sage-200);border-radius:28px;padding:16px 18px;gap:12px">'
+      +  '<div style="flex:1"><div class="kicker" style="color:var(--sage-700)">YOUR USUAL</div>'
+      +  '<div style="font-size:14px;font-weight:600;color:#272e1b;margin-top:3px">Greek Frappe + Halloumi &amp; Egg Roll (no egg)</div></div>'
+      +  '<button ' + on(() => {
+           S.lines = [{id:'frappe',qty:1,mods:[],note:''},{id:'halou',qty:1,mods:['No egg'],note:''}];
+           S.screen = 'cart'; showToast('Your usual, added');
+         }) + ' class="pill" style="border:none;background:var(--sage);color:var(--sage-100);padding:10px 18px;font-weight:700;font-size:13px">Reorder</button></div>';
+
+    h += '<div class="row card" style="margin-top:12px;padding:14px 18px;gap:12px;box-shadow:none">'
+      +  '<div style="flex:1"><div class="kicker">ALLERGIES &amp; DIET</div>'
+      +  '<div style="font-size:13.5px;font-weight:600;margin-top:3px;color:var(--gold-700)">' + esc(dietStr) + '</div>'
+      +  '<div style="font-size:12px;color:var(--n600);margin-top:2px">Flags unsafe menu items · sent to the kitchen with every order</div></div>'
+      +  '<button ' + on(() => { S.dietSheet = true; render(); }) + ' class="pill" style="border:none;background:var(--sand);color:var(--n800);padding:8px 14px;font-weight:700;font-size:12.5px">Edit</button></div>';
+
+    h += '<div class="d3" style="font-size:17px;margin:22px 0 8px">Recent orders</div><div class="card" style="padding:4px 18px;box-shadow:none">';
+    HISTORY.forEach(ho => {
+      h += '<div class="row" style="gap:10px;padding:13px 0;border-bottom:1px solid rgba(32,30,29,.07)">'
+        +  '<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:14px">' + esc(ho.what) + '</div>'
+        +  '<div style="font-size:12px;color:var(--n600);margin-top:1px">' + esc(ho.when) + '</div></div>'
+        +  '<span style="font-size:13.5px;font-weight:600;color:var(--n700)">' + ho.total + '</span></div>';
+    });
+    h += '</div>';
+
+    h += '<div class="card" style="margin-top:16px;padding:4px 18px;box-shadow:none">'
+      +  '<div class="row" style="padding:14px 0;border-bottom:1px solid rgba(32,30,29,.07);font-size:14.5px;font-weight:500">Payment methods<span style="margin-left:auto;color:var(--n500)">›</span></div>'
+      +  '<div class="row" style="padding:14px 0;border-bottom:1px solid rgba(32,30,29,.07);font-size:14.5px;font-weight:500">Notifications<span style="margin-left:auto;color:var(--n500)">›</span></div>'
+      +  '<div ' + on(() => { S.screen = 'kitchen'; render(); }) + ' role="button" tabindex="0" class="row" style="padding:14px 0;font-size:14.5px;font-weight:500;cursor:pointer;color:var(--gold-700)">Kitchen — staff view<span style="margin-left:auto;color:var(--n500)">›</span></div></div>';
+
+    return h + '</div>';
+  }
+
+  /* ───────── chrome: cart bar, nav, sheets, toast ───────── */
+  function chrome(){
+    const o = S.order;
+    const cartCount = S.lines.reduce((a,l) => a + l.qty, 0);
+    const subtotal = S.lines.reduce((a,l) => a + findItem(l.id).price * l.qty, 0);
+    let h = '';
+
+    if (S.screen === 'menu' && cartCount > 0){
+      h += '<div class="cartbar"><button ' + on(() => { S.screen = 'cart'; render(); })
+        +  ' style="width:100%;border:none;background:var(--ink);color:var(--ground);border-radius:999px;padding:15px 22px;font-weight:700;font-size:14.5px;display:flex;justify-content:space-between;box-shadow:0 12px 32px rgba(46,43,37,.22)">'
+        +  '<span>View order · ' + cartCount + ' item' + (cartCount === 1 ? '' : 's') + '</span><span>' + fmt(subtotal) + '</span></button></div>';
+    }
+
+    h += '<div class="nav">';
+    TAB_DEFS.forEach(t => {
+      const active = S.screen === t.id || (t.id === 'me' && S.screen === 'kitchen') || (t.id === 'menu' && S.screen === 'cart');
+      const badge = t.id === 'track' && !!o && o.progress < 1;
+      h += '<button ' + on(() => { S.screen = t.id; render(); }) + ' style="color:' + (active ? 'var(--gold)' : 'var(--n600)') + '"'
+        +  (active ? ' aria-current="page"' : '') + '>'
+        +  '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+        +  '<path d="' + t.d1 + '"></path><path d="' + t.d2 + '"></path></svg>'
+        +  '<span>' + t.label + '</span>' + (badge ? '<span class="badge"></span>' : '') + '</button>';
+    });
+    h += '</div>';
+
+    /* item customise sheet */
+    if (S.itemSheet){
+      const it = findItem(S.itemSheet);
+      const conf = conflictsFor(it, S.sheetSel);
+      const hadConf = conflictsFor(it, []).length > 0;
+      const warn = conf.length
+        ? 'Contains ' + conf.join(' & ').toLowerCase() + ' — your profile flags this. Pick a swap below or skip it.'
+        : (hadConf ? 'Sorted — safe with your changes.' : '');
+
+      h += '<div class="overlay" ' + on(() => { S.itemSheet = null; render(); }) + '>'
+        +  '<div class="sheet" ' + on(e => e.stopPropagation()) + '>'
+        +  '<div class="row" style="align-items:baseline;justify-content:space-between">'
+        +  '<div class="d2">' + esc(it.name) + '</div><div style="font-weight:700;font-size:15px">' + fmt(it.price) + '</div></div>'
+        +  '<div style="font-size:13px;color:var(--n700);margin-top:3px">' + esc(it.desc) + '</div>';
+      if (warn)
+        h += '<div style="display:flex;gap:8px;align-items:flex-start;margin-top:12px;background:' + (conf.length ? 'var(--gold-200)' : 'var(--sage-200)')
+          +  ';color:' + (conf.length ? 'var(--gold-700)' : 'var(--sage-800)') + ';border-radius:16px;padding:11px 14px;font-size:13px;font-weight:600;line-height:1.4">'
+          +  '<span style="flex:none;margin-top:1px;display:flex">' + warnSvg('currentColor', 14) + '</span><span>' + esc(warn) + '</span></div>';
+
+      h += '<div class="kicker" style="margin:16px 0 8px">SWAPS &amp; REMOVALS</div><div style="display:flex;flex-wrap:wrap;gap:8px">';
+      it.mods.forEach(m => {
+        const sel = S.sheetSel.indexOf(m.l) >= 0;
+        h += '<button ' + on(() => {
+            S.sheetSel = sel ? S.sheetSel.filter(x => x !== m.l) : S.sheetSel.concat([m.l]); render();
+          }) + ' class="toggle" aria-pressed="' + sel + '" style="border:2px solid ' + (sel ? 'var(--gold)' : 'var(--n300)')
+          + ';background:' + (sel ? 'var(--gold-200)' : 'var(--surface)') + ';color:' + (sel ? 'var(--gold-700)' : 'var(--n800)') + '">' + esc(m.l) + '</button>';
+      });
+      if (!it.mods.length) h += '<div style="font-size:13px;color:var(--n600)">No swaps on this one.</div>';
+      h += '</div>';
+
+      h += '<div class="kicker" style="margin:16px 0 8px">NOTE FOR THE KITCHEN</div>'
+        +  '<input id="note" value="' + esc(S.sheetNote) + '" placeholder="e.g. severe allergy — separate prep please" '
+        +  'style="width:100%;border:1px solid var(--n300);background:#fff;border-radius:999px;padding:12px 16px;font-family:var(--body);font-size:14px;color:var(--ink);outline:none">';
+
+      h += '<div class="row" style="gap:12px;margin-top:16px">'
+        +  '<div class="stepper" style="padding:5px">'
+        +  '<button aria-label="One fewer" ' + on(() => { S.sheetQty = Math.max(1, S.sheetQty - 1); render(); }) + ' style="width:32px;height:32px;font-size:17px">−</button>'
+        +  '<span style="font-size:15px;min-width:16px">' + S.sheetQty + '</span>'
+        +  '<button aria-label="One more" ' + on(() => { S.sheetQty = S.sheetQty + 1; render(); }) + ' style="width:32px;height:32px;font-size:17px">+</button></div>'
+        +  '<button ' + on(() => {
+             const msg = conf.length
+               ? 'Still contains ' + conf.join(' & ').toLowerCase() + ' — added with a kitchen flag'
+               : (S.sheetSel.length || S.sheetNote.trim()) ? it.name + ' added — noted for the kitchen'
+               : it.name + ' added';
+             addLine(S.itemSheet, S.sheetQty, S.sheetSel, S.sheetNote.trim());
+             S.itemSheet = null;
+             showToast(msg);
+           }) + ' class="primary" style="flex:1;padding:14px;font-size:15px;box-shadow:none">Add to order · ' + fmt(it.price * S.sheetQty) + '</button></div>';
+
+      h += '</div></div>';
+    }
+
+    /* diet sheet */
+    if (S.dietSheet){
+      h += '<div class="overlay" ' + on(() => { S.dietSheet = false; render(); }) + '>'
+        +  '<div class="sheet" style="padding-bottom:44px" ' + on(e => e.stopPropagation()) + '>'
+        +  '<div class="d2" style="font-size:19px">Allergies &amp; diet</div>'
+        +  '<div style="font-size:13px;color:var(--n700);margin:5px 0 14px">Pick what applies. Menu items you can\'t eat get flagged, and the kitchen sees this with every order.</div>'
+        +  '<div style="display:flex;flex-wrap:wrap;gap:8px">';
+      DIETS.forEach(d => {
+        const sel = S.diet.indexOf(d.label) >= 0;
+        h += '<button ' + on(() => {
+            S.diet = sel ? S.diet.filter(x => x !== d.label) : S.diet.concat([d.label]); render();
+          }) + ' class="toggle" aria-pressed="' + sel + '" style="padding:9px 15px;font-size:13.5px;border:2px solid ' + (sel ? 'var(--gold)' : 'var(--n300)')
+          + ';background:' + (sel ? 'var(--gold-200)' : 'var(--surface)') + ';color:' + (sel ? 'var(--gold-700)' : 'var(--n800)') + '">' + d.label + '</button>';
+      });
+      h += '</div><button ' + on(() => { S.dietSheet = false; render(); }) + ' class="primary" style="margin-top:16px;padding:13px;font-size:14px;box-shadow:none">Done</button></div></div>';
+    }
+
+    /* hole sheet */
+    if (S.holeSheet){
+      h += '<div class="overlay" ' + on(() => { S.holeSheet = false; render(); }) + '>'
+        +  '<div class="sheet" style="padding-bottom:44px" ' + on(e => e.stopPropagation()) + '>'
+        +  '<div class="d2" style="font-size:19px">Where are you?</div>'
+        +  '<div style="font-size:13px;color:var(--n700);margin:5px 0 16px">GPS puts you on hole ' + S.gpsHole + '. Override it if we\'ve got it wrong.</div>'
+        +  '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:9px">';
+      HOLES.forEach((_, i) => {
+        const n = i + 1, sel = S.hole === n;
+        h += '<button ' + on(() => { S.hole = n; S.holeSheet = false; showToast('Position set to hole ' + n); }) + ' class="chip" style="height:44px;font-size:15px;background:'
+          + (sel ? 'var(--gold)' : 'var(--sand)') + ';color:' + (sel ? '#fff' : 'var(--n800)') + '">' + n + '</button>';
+      });
+      h += '</div><button ' + on(() => { S.hole = S.gpsHole; S.holeSheet = false; showToast('Using live GPS — hole ' + S.gpsHole); })
+        +  ' class="pill" style="margin-top:14px;width:100%;border:2px solid var(--gold);background:none;color:var(--gold-700);padding:12px;font-weight:700;font-size:14px">Use my GPS position</button>'
+        +  '</div></div>';
+    }
+
+    if (S.toast) h += '<div class="toast" role="status">' + esc(S.toast) + '</div>';
+    return h;
+  }
+
+  /* ───────── render ───────── */
+  const scrollEl = document.getElementById('scroll');
+  const chromeEl = document.getElementById('chrome');
+  const scrollTops = {};
+  let lastScreen = null;
+
+  function render(){
+    if (lastScreen === S.screen) scrollTops[S.screen] = scrollEl.scrollTop;
+
+    /* preserve the kitchen note field across re-renders */
+    const noteEl = document.getElementById('note');
+    const noteFocused = noteEl && document.activeElement === noteEl;
+    const caret = noteFocused ? noteEl.selectionStart : null;
+
+    H = {}; hid = 0;
+    const body =
+      S.screen === 'menu'   ? menuScreen()   :
+      S.screen === 'cart'   ? cartScreen()   :
+      S.screen === 'track'  ? trackScreen()  :
+      S.screen === 'course' ? courseScreen() :
+      S.screen === 'kitchen'? kitchenScreen():
+                              meScreen();
+
+    scrollEl.innerHTML = body;
+    chromeEl.innerHTML = chrome();
+
+    scrollEl.scrollTop = lastScreen === S.screen ? (scrollTops[S.screen] || 0) : 0;
+    lastScreen = S.screen;
+
+    const fresh = document.getElementById('note');
+    if (fresh && noteFocused){ fresh.focus(); try { fresh.setSelectionRange(caret, caret); } catch(e){} }
+  }
+
+  /* one delegated listener for the whole app */
+  function dispatch(e){
+    const t = e.target.closest('[data-h]');
+    if (!t) return;
+    if (e.type === 'keydown'){
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      if (t.tagName === 'BUTTON' || t.tagName === 'INPUT') return; /* native */
+      e.preventDefault();
+    }
+    const fn = H[t.getAttribute('data-h')];
+    if (fn) fn(e);
+  }
+  document.addEventListener('click', dispatch);
+  document.addEventListener('keydown', dispatch);
+  document.addEventListener('input', e => { if (e.target.id === 'note') S.sheetNote = e.target.value; });
+
+  /* order auto-advances, same cadence as the design */
+  setInterval(() => {
+    const o = S.order;
+    if (!o || o.progress >= 1) return;
+    o.progress = Math.min(1, o.progress + 0.016);
+    if (o.progress >= 1) showToast('Delivered — enjoy out there!');
+    else render();
+  }, 600);
+
+  render();
+})();
+</script>
