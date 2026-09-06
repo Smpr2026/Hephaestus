@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f6142">
+<meta name="description" content="Bistro on the Lawns — order to your table at Campsie South. Starters, grills, pasta, burgers and more.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Bistro on the Lawns">
+<title>Bistro on the Lawns</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Palette lifted from the printed menu: bottle green on white,
+       with the two green fills used for its table rows. */
+    --ink:#14311f; --paper:#ffffff; --cream:#f4f9f5;
+    --green-900:#0f3823; --green-800:#17492f; --green:#1f6142; --green-600:#2e7a54;
+    --green-400:#7fb495; --green-300:#a9cdb6; --green-200:#cfe5d7; --green-100:#e8f3eb;
+    --n700:#4a5c51; --n600:#6b7c71; --n500:#8a9a90; --n400:#b6c3bb; --n300:#d6e0d9;
+    --line:rgba(20,49,31,.13);
+    --display:'Alfa Slab One', Georgia, serif;
+    --cond:'Barlow Condensed', 'Barlow', system-ui, sans-serif;
+    --body:'Barlow', system-ui, -apple-system, sans-serif;
+    --stage:#dce9e0; --stage-ink:#4a5c51;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){ --stage:#12241a; --stage-ink:#8a9a90; }
+  }
+  :root[data-theme="dark"]{ --stage:#12241a; --stage-ink:#8a9a90; }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--stage); color:var(--ink); font-family:var(--body);
+    -webkit-font-smoothing:antialiased; min-height:100vh;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:18px; padding:28px 16px;
+  }
+  .stage-note{font-size:12.5px; color:var(--stage-ink); text-align:center; max-width:402px; line-height:1.5}
+  .stage-note b{font-weight:700}
+
+  .device{
+    width:402px; height:874px; max-width:100%; border-radius:48px; overflow:hidden;
+    position:relative; background:var(--paper); flex:none;
+    box-shadow:0 40px 80px rgba(15,56,35,.22), 0 0 0 1px rgba(15,56,35,.14);
+  }
+  @media (max-height:940px){ .device{height:min(874px, calc(100vh - 120px))} }
+  .island{position:absolute; top:11px; left:50%; transform:translateX(-50%); width:126px; height:37px; border-radius:24px; background:#000; z-index:50}
+  .statusbar{position:absolute; top:0; left:0; right:0; z-index:10; display:flex; align-items:center; justify-content:center; gap:154px; padding:21px 24px 19px; pointer-events:none}
+  .statusbar .time{flex:1; text-align:center; font-family:-apple-system,'SF Pro',system-ui; font-weight:590; font-size:17px; line-height:22px; color:#000}
+  .statusbar .icons{flex:1; display:flex; align-items:center; justify-content:center; gap:7px}
+  .homebar{position:absolute; bottom:0; left:0; right:0; z-index:60; height:34px; display:flex; justify-content:center; align-items:flex-end; padding-bottom:8px; pointer-events:none}
+  .homebar i{display:block; width:139px; height:5px; border-radius:100px; background:rgba(0,0,0,.25)}
+
+  .app{height:100%; display:flex; flex-direction:column; background:var(--paper); color:var(--ink); position:relative}
+  .scroll{flex:1; overflow:auto; min-height:0; -webkit-overflow-scrolling:touch}
+  .screen{padding:72px 18px 132px}
+
+  .d1{font-family:var(--display); font-size:21px; line-height:1.15; letter-spacing:.01em}
+  .d2{font-family:var(--display); font-size:18px; line-height:1.2}
+  .sect{
+    font-family:var(--display); font-size:17px; color:var(--green);
+    border-bottom:2.5px solid var(--green); padding-bottom:5px; margin-bottom:2px;
+    text-transform:uppercase; letter-spacing:.02em;
+  }
+  .kicker{font-family:var(--cond); font-size:12.5px; font-weight:700; letter-spacing:.09em; text-transform:uppercase; color:var(--n600)}
+
+  button{font-family:var(--body); cursor:pointer}
+  button:focus-visible, input:focus-visible, [tabindex]:focus-visible{outline:2px solid var(--green); outline-offset:2px; border-radius:8px}
+  .pill{border:none; border-radius:999px; display:inline-flex; align-items:center; justify-content:center}
+  .card{background:var(--paper); border:1.5px solid var(--green-200); border-radius:14px}
+  .row{display:flex; align-items:center}
+
+  .primary{
+    width:100%; border:none; background:var(--green); color:#fff; border-radius:10px;
+    padding:16px; font-weight:700; font-size:16px; letter-spacing:.01em;
+    box-shadow:0 3px 10px rgba(15,56,35,.2); transition:background .15s;
+  }
+  .primary:hover{background:var(--green-600)} .primary:active{background:var(--green-800)}
+
+  .item{display:flex; align-items:flex-start; gap:12px; padding:13px 0; width:100%; border:none; background:none; text-align:left; border-bottom:1px solid var(--line); cursor:pointer}
+  .item:hover{background:var(--cream)}
+  .tagpill{display:inline-block; font-family:var(--cond); font-size:11px; font-weight:700; letter-spacing:.06em; color:var(--green); border:1.5px solid var(--green-300); border-radius:4px; padding:0 5px; margin-left:5px; vertical-align:1px}
+  .addbtn{width:34px; height:34px; border-radius:8px; border:none; background:var(--green); color:#fff; font-size:20px; line-height:1; flex:none; display:flex; align-items:center; justify-content:center; padding-bottom:2px}
+  .addbtn:active{background:var(--green-800)}
+  .flag{display:inline-flex; align-items:center; gap:5px; margin-top:5px; background:var(--green-100); color:var(--green-800); border:1px solid var(--green-300); border-radius:5px; padding:3px 8px; font-size:11.5px; font-weight:700}
+  .price{font-family:var(--cond); font-weight:700; font-size:16px; font-variant-numeric:tabular-nums; text-align:right; min-width:44px}
+
+  .stepper{display:flex; align-items:center; gap:9px; background:var(--green-100); border-radius:8px; padding:4px}
+  .stepper button{width:28px; height:28px; border-radius:6px; border:none; background:var(--paper); font-size:16px; color:var(--green-800)}
+  .stepper span{font-weight:700; font-size:14px; min-width:14px; text-align:center; font-variant-numeric:tabular-nums}
+  .chip{border-radius:8px; font-weight:700; cursor:pointer; border:none; font-size:14px; font-family:var(--cond)}
+  .toggle{border-radius:8px; padding:8px 13px; font-size:13px; font-weight:600; font-family:var(--body); cursor:pointer}
+
+  .overlay{position:absolute; inset:0; background:rgba(15,56,35,.45); z-index:40; display:flex; flex-direction:column; justify-content:flex-end}
+  .sheet{background:var(--paper); border-radius:18px 18px 0 0; padding:22px 20px 38px; animation:bsheet .25s ease-out; max-height:80%; overflow:auto}
+  .toast{position:absolute; left:50%; bottom:120px; transform:translateX(-50%); background:var(--green-900); color:#fff; border-radius:8px; padding:11px 18px; font-size:13px; font-weight:600; z-index:50; max-width:88%; text-align:center; animation:btoast .22s ease-out; box-shadow:0 12px 32px rgba(15,56,35,.35)}
+  .cartbar{position:absolute; left:14px; right:14px; bottom:104px; z-index:30}
+  .nav{flex:none; display:flex; background:var(--paper); border-top:1.5px solid var(--green-200); padding:10px 6px 30px; z-index:20}
+  .nav button{flex:1; border:none; background:none; display:flex; flex-direction:column; align-items:center; gap:3px; padding:4px 0; position:relative}
+  .nav span{font-family:var(--cond); font-size:11.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase}
+  .badge{position:absolute; top:0; right:22%; width:8px; height:8px; border-radius:999px; background:var(--green)}
+
+  .floor{margin-top:12px; position:relative; height:400px; border-radius:14px; background:var(--green-100); border:1.5px solid var(--green-200); overflow:hidden}
+  .zone{position:absolute; border-radius:10px; background:var(--green-200)}
+  .tabledot{position:absolute; transform:translate(-50%,-50%); width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-family:var(--cond); font-size:13px; font-weight:700; box-shadow:0 1px 3px rgba(15,56,35,.25)}
+  .runner{transition:left .6s linear, top .6s linear}
+
+  @keyframes bpulse{0%{transform:scale(1);opacity:.5}100%{transform:scale(2.4);opacity:0}}
+  @keyframes btoast{from{transform:translate(-50%,14px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+  @keyframes bsheet{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .pulse{animation:bpulse 1.7s ease-out infinite}
+  @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important; animation-iteration-count:1!important; transition-duration:.001ms!important}}
+  ::selection{background:var(--green-200)}
+
+  @media (max-width: 700px){
+    body{display:block; padding:0; gap:0; background:var(--paper); min-height:auto}
+    .stage-note{display:none}
+    .device{width:100%; max-width:none; border-radius:0; box-shadow:none; height:100vh; height:100dvh}
+    .island, .statusbar, .homebar{display:none}
+    .screen{padding-top:calc(env(safe-area-inset-top, 0px) + 18px)}
+    .nav{padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 12px)}
+    .cartbar{bottom:calc(env(safe-area-inset-bottom, 0px) + 86px)}
+    .toast{bottom:calc(env(safe-area-inset-bottom, 0px) + 104px)}
+    .addbtn{width:42px; height:42px; font-size:23px}
+    .item{padding:15px 0}
+    .stepper button{width:34px; height:34px}
+  }
+</style>
+</head>
+<body>
+<div class="stage-note"><b>Bistro on the Lawns</b> — tap through it like a phone. Menu → add a dish → your table → watch it come out.</div>
+
+<div class="device">
+  <div class="island"></div>
+  <div class="statusbar">
+    <div class="time">9:41</div>
+    <div class="icons">
+      <svg width="19" height="12" viewBox="0 0 19 12" aria-hidden="true"><rect x="0" y="7.5" width="3.2" height="4.5" rx=".7" fill="#000"/><rect x="4.8" y="5" width="3.2" height="7" rx=".7" fill="#000"/><rect x="9.6" y="2.5" width="3.2" height="9.5" rx=".7" fill="#000"/><rect x="14.4" y="0" width="3.2" height="12" rx=".7" fill="#000"/></svg>
+      <svg width="17" height="12" viewBox="0 0 17 12" aria-hidden="true"><path d="M8.5 3.2C10.8 3.2 12.9 4.1 14.4 5.6L15.5 4.5C13.7 2.7 11.2 1.5 8.5 1.5C5.8 1.5 3.3 2.7 1.5 4.5L2.6 5.6C4.1 4.1 6.2 3.2 8.5 3.2Z" fill="#000"/><path d="M8.5 6.8C9.9 6.8 11.1 7.3 12 8.2L13.1 7.1C11.8 5.9 10.2 5.1 8.5 5.1C6.8 5.1 5.2 5.9 3.9 7.1L5 8.2C5.9 7.3 7.1 6.8 8.5 6.8Z" fill="#000"/><circle cx="8.5" cy="10.5" r="1.5" fill="#000"/></svg>
+      <svg width="27" height="13" viewBox="0 0 27 13" aria-hidden="true"><rect x=".5" y=".5" width="23" height="12" rx="3.5" stroke="#000" stroke-opacity=".35" fill="none"/><rect x="2" y="2" width="20" height="9" rx="2" fill="#000"/><path d="M25 4.5V8.5C25.8 8.2 26.5 7.2 26.5 6.5C26.5 5.8 25.8 4.8 25 4.5Z" fill="#000" fill-opacity=".4"/></svg>
+    </div>
+  </div>
+  <div class="app">
+    <div class="scroll" id="scroll"></div>
+    <div id="chrome"></div>
+  </div>
+  <div class="homebar"><i></i></div>
+</div>
+<script>
+/* Bistro on the Lawns — menu transcribed from the printed menu.
+   price: [member, non-member]. tags: V = vegetarian, GF = gluten free.
+   allergens drive the guest allergy profile; a mod carrying `clears`
+   removes that allergen when selected. */
+
+const MENU = [
+  { name:'Starters', items:[
+    { id:'pita',   name:'Pita Bread', desc:'Lightly grilled', price:[4,5], allergens:['Gluten'],
+      mods:[{l:'Extra pita'},{l:'Warm, not grilled'}] },
+    { id:'garlic', name:'Garlic Bread', desc:'4 pieces per serve', price:[8,9], allergens:['Gluten','Dairy'],
+      mods:[{l:'Extra garlic'},{l:'Cut in halves'}] },
+    { id:'cgarlic',name:'Cheesy Garlic Bread', desc:'4 pieces topped w/ garlic & cheese', price:[10,11], allergens:['Gluten','Dairy'],
+      mods:[{l:'Light on cheese'},{l:'Extra cheese'}] },
+    { id:'dips',   name:'Trio of Dips', desc:'Taramosalata, tzatziki, eggplant dip served w/ pita bread', price:[25,28], allergens:['Gluten','Dairy','Fish'],
+      mods:[{l:'No taramosalata',clears:'Fish'},{l:'No tzatziki'},{l:'Extra pita'}] },
+    { id:'halou',  name:'Haloumi Cheese', desc:'Grilled & served w/ lemon', price:[16,18], allergens:['Dairy'],
+      mods:[{l:'Extra lemon'},{l:'Well grilled'}] },
+    { id:'aranc',  name:'Arancini Balls', desc:'Arancini served w/ napoletana sauce (8)', price:[16,18], allergens:['Gluten','Dairy','Egg'],
+      mods:[{l:'Sauce on the side'}] },
+    { id:'chips',  name:'Hot Chips', desc:'Golden & salted', price:[9,10], tags:['V','GF'], allergens:[],
+      mods:[{l:'Extra salt'},{l:'No salt'},{l:'Add gravy'}] },
+    { id:'swchips',name:'Sweet Potato Chips', desc:'Served w/ aioli', price:[13,15], tags:['V','GF'], allergens:['Egg'],
+      mods:[{l:'No aioli',clears:'Egg'},{l:'Extra aioli'}] },
+    { id:'wedges', name:'Potato Wedges', desc:'Served w/ sour cream & sweet chilli sauce', price:[13,15], allergens:['Dairy'],
+      mods:[{l:'No sour cream',clears:'Dairy'},{l:'Sauces on the side'}] },
+    { id:'bcalam', name:'Baby Calamari', desc:'Lightly floured & fried served w/ tartare sauce & lemon', price:[22,25], allergens:['Gluten','Egg'],
+      mods:[{l:'No tartare',clears:'Egg'},{l:'Extra lemon'}] },
+    { id:'gocto',  name:'Grilled Octopus', desc:'Tender grilled octopus drizzled w/ lemon oil', price:[24,27], tags:['GF'], allergens:['Shellfish'],
+      mods:[{l:'Extra lemon oil'}] },
+    { id:'sagan',  name:'Saganaki Prawns', desc:'Prawns in napoletana sauce w/ crumbled feta, served w/ crusty bread', price:[24,27], allergens:['Shellfish','Dairy','Gluten'],
+      mods:[{l:'No feta',clears:'Dairy'},{l:'No bread',clears:'Gluten'}] }
+  ]},
+
+  { name:'Salads', items:[
+    { id:'caesar', name:'Caesar Salad', desc:'Cos lettuce, crispy bacon, croutons, shaved parmesan, egg & caesar dressing', price:[18,20], allergens:['Gluten','Dairy','Egg','Fish'],
+      mods:[{l:'No croutons',clears:'Gluten'},{l:'No egg'},{l:'Dressing on the side'},{l:'Add chicken (+$6/$7)'}] },
+    { id:'greeks', name:'Greek Salad', desc:'Lettuce, tomato, cucumber, capsicum, spanish onion, olives & feta w/ our greek salad dressing', price:[18,20], tags:['V','GF'], allergens:['Dairy'],
+      mods:[{l:'No feta',clears:'Dairy'},{l:'No onion'},{l:'Extra olives'}] },
+    { id:'rocket', name:'Rocket & Goats Cheese', desc:'Rocket, pear, toasted walnuts, spanish onion, goats cheese & honey mustard dressing', price:[18,20], tags:['GF'], allergens:['Dairy','Nuts'],
+      mods:[{l:'No walnuts',clears:'Nuts'},{l:'No goats cheese',clears:'Dairy'},{l:'No onion'}] },
+    { id:'thaib',  name:'Thai Beef Salad', desc:'Mixed leaf, cherry tomatoes, cucumber, red onion, coriander & lightly grilled steak fillet slice & homemade thai dressing', price:[24,27], tags:['GF'], allergens:[],
+      mods:[{l:'No coriander'},{l:'Dressing on the side'},{l:'Steak well done'}] }
+  ]},
+
+  { name:'Lawns Favourites', note:'Served w/ a choice of 2: garden salad, veggies or chips', items:[
+    { id:'cfunghi',name:'Chicken Funghi', desc:'Chicken breast fillet in a mushroom & garlic infused cream sauce served w/ mash & veggies', price:[28,31], allergens:['Dairy'],
+      mods:[{l:'Sauce on the side'},{l:'Chips instead of mash'}] },
+    { id:'cschnit',name:'Chicken Schnitzel', desc:'Parmesan & herb crumbed chicken breast fillet 300gr w/ choice of sauce', price:[23,26], allergens:['Gluten','Dairy','Egg'],
+      mods:[{l:'Gravy (+$3/$4)'},{l:'Mushroom sauce (+$3/$4)'},{l:'Diane sauce (+$3/$4)'},{l:'Pepper sauce (+$3/$4)'},{l:'No sauce'}] },
+    { id:'cparmi', name:'Chicken Parmi', desc:'Parmesan & herb crumbed chicken breast fillet & topped w/ cheese & napoletana sauce', price:[27,30], allergens:['Gluten','Dairy','Egg'],
+      mods:[{l:'Light on cheese'},{l:'Sauce on the side'}] },
+    { id:'bangers',name:'Bangers & Mash', desc:'W/ gravy & caramelised onion', price:[20,22], allergens:['Gluten','Dairy'],
+      mods:[{l:'Extra gravy'},{l:'No onion'}] },
+    { id:'wagyu',  name:'250gr Wagyu Rump', desc:'Char-grilled & cooked to your liking w/ choice of sauce', price:[33,37], tags:['GF'], allergens:[],
+      mods:[{l:'Rare'},{l:'Medium rare'},{l:'Medium'},{l:'Well done'},{l:'Gravy (+$3/$4)'},{l:'Mushroom sauce (+$3/$4)'},{l:'Diane sauce (+$3/$4)'},{l:'Pepper sauce (+$3/$4)'}] },
+    { id:'scotch', name:'250gr Scotch Fillet', desc:'Char-grilled & cooked to your liking w/ choice of sauce', price:[35,39], tags:['GF'], allergens:[],
+      mods:[{l:'Rare'},{l:'Medium rare'},{l:'Medium'},{l:'Well done'},{l:'Gravy (+$3/$4)'},{l:'Mushroom sauce (+$3/$4)'},{l:'Diane sauce (+$3/$4)'},{l:'Pepper sauce (+$3/$4)'}] }
+  ]},
+
+  { name:'From the Sea', note:'Served w/ a choice of 2: garden salad, veggies or chips', items:[
+    { id:'snapper',name:'Snapper', desc:'Grilled snapper marinated w/ a lemon oil sauce served w/ lemon', price:[35,39], tags:['GF'], allergens:['Fish'],
+      mods:[{l:'Extra lemon'},{l:'Salad instead of chips'}] },
+    { id:'fishchip',name:'Fish & Chips', desc:'Crispy battered flathead fillet served w/ tartare sauce & lemon', price:[23,26], allergens:['Fish','Gluten','Egg'],
+      mods:[{l:'No tartare',clears:'Egg'},{l:'Extra lemon'}] },
+    { id:'gocto2', name:'Grilled Octopus', desc:'Tender grilled octopus marinated in our lemon oil served w/ lemon', price:[32,36], tags:['GF'], allergens:['Shellfish'],
+      mods:[{l:'Extra lemon'}] },
+    { id:'calam',  name:'Calamari', desc:'Lightly floured & fried served w/ aioli sauce & lemon', price:[29,32], allergens:['Gluten','Egg'],
+      mods:[{l:'No aioli',clears:'Egg'},{l:'Extra lemon'}] },
+    { id:'gfish',  name:'Grilled Fish', desc:'Lightly floured & grilled perch fillet served w/ lemon', price:[29,32], allergens:['Fish','Gluten'],
+      mods:[{l:'Extra lemon'},{l:'Salad instead of chips'}] }
+  ]},
+
+  { name:'From the Grill', items:[
+    { id:'lambsouv',name:'Lamb Souvlakia', desc:'Tender pieces of lamb skewers char-grilled & served w/ greek salad, chips, pita bread & tzatziki', price:[29,32], allergens:['Gluten','Dairy'],
+      mods:[{l:'No tzatziki',clears:'Dairy'},{l:'No pita',clears:'Gluten'},{l:'No feta in salad'},{l:'Extra tzatziki'}] },
+    { id:'chicksouv',name:'Chicken Souvlakia', desc:'Soft pieces of chicken skewers char-grilled & served w/ greek salad, chips, pita bread & tzatziki', price:[26,29], allergens:['Gluten','Dairy'],
+      mods:[{l:'No tzatziki',clears:'Dairy'},{l:'No pita',clears:'Gluten'},{l:'No onion'}] },
+    { id:'porkbelly',name:'Pork Belly', desc:'Pork belly char-grilled & served w/ greek salad, chips, pita bread & tzatziki', price:[32,36], allergens:['Gluten','Dairy'],
+      mods:[{l:'No tzatziki',clears:'Dairy'},{l:'No pita',clears:'Gluten'},{l:'Extra crackling'}] },
+    { id:'mixgrill',name:'Nicks Mixed Grill', desc:'Mixed grill for 1: 1 lamb souvlaki, 1 chicken souvlaki, 1 pork belly char-grilled & served w/ greek salad, chips, pita bread & tzatziki', price:[35,39], allergens:['Gluten','Dairy'],
+      mods:[{l:'No tzatziki',clears:'Dairy'},{l:'No pita',clears:'Gluten'},{l:'Extra chips'}] }
+  ]},
+
+  { name:'Pasta', note:'Choice of penne or linguine · GF pasta +$3/$4', items:[
+    { id:'bolog',  name:'Bolognese', desc:'Lean beef mince cooked in our traditional aromatic napoletana sauce & served w/ parmesan cheese', price:[20,22], allergens:['Gluten','Dairy'],
+      mods:[{l:'GF pasta (+$3/$4)',clears:'Gluten'},{l:'No parmesan',clears:'Dairy'},{l:'Penne'},{l:'Linguine'}] },
+    { id:'boscai', name:'Boscaiola', desc:'Bacon, mushroom, shallots, garlic in our velvety parmesan cream sauce', price:[22,25], allergens:['Gluten','Dairy'],
+      mods:[{l:'GF pasta (+$3/$4)',clears:'Gluten'},{l:'No bacon'},{l:'Penne'},{l:'Linguine'}] },
+    { id:'tortel', name:'Tortelini Boscaiola', desc:'Beef filled pasta parcels in our velvety boscaiola sauce', price:[23,26], allergens:['Gluten','Dairy','Egg'],
+      mods:[{l:'Sauce on the side'},{l:'No bacon'}] },
+    { id:'marin',  name:'Marinara', desc:'Our selection of fresh seafood in our traditional napoletana sauce served w/ parmesan cheese', price:[30,33], allergens:['Gluten','Dairy','Shellfish','Fish'],
+      mods:[{l:'GF pasta (+$3/$4)',clears:'Gluten'},{l:'No parmesan',clears:'Dairy'},{l:'Extra chilli'}] },
+    { id:'napol',  name:'Napoletana', desc:'Traditional herb & spice infused w/ crushed tomato sauce', price:[17,19], tags:['V'], allergens:['Gluten'],
+      mods:[{l:'GF pasta (+$3/$4)',clears:'Gluten'},{l:'Add parmesan'},{l:'Extra chilli'}] },
+    { id:'garprawn',name:'Garlic & Chilli Prawn Linguine', desc:'Australian green prawns cooked in garlic & chilli oil, tossed in linguine pasta', price:[29,32], allergens:['Gluten','Shellfish'],
+      mods:[{l:'GF pasta (+$3/$4)',clears:'Gluten'},{l:'Mild — less chilli'},{l:'Extra chilli'}] }
+  ]},
+
+  { name:'Burgers', note:'All served w/ chips', items:[
+    { id:'lawnsb', name:'Lawns Burger', desc:'Char-grilled beef patty, cheese, lettuce, tomato, beetroot, caramelised onion & our special burger sauce on a toasted milk bun', price:[19,21], allergens:['Gluten','Dairy','Egg'],
+      mods:[{l:'Gluten free bun (+$2/$3)',clears:'Gluten'},{l:'No cheese'},{l:'No beetroot'},{l:'Add bacon (+$4/$5)'},{l:'Add egg (+$2/$3)'}] },
+    { id:'sfc',    name:'Southern Fried Chicken', desc:'Chicken breast fillet coated in southern fried flour, fried & served w/ slaw, cheese and chilli mayo on a toasted milk bun', price:[19,21], allergens:['Gluten','Dairy','Egg'],
+      mods:[{l:'Gluten free bun (+$2/$3)',clears:'Gluten'},{l:'No chilli mayo'},{l:'No cheese'},{l:'Add bacon (+$4/$5)'}] },
+    { id:'haloub', name:'Haloumi Burger', desc:'Grilled haloumi, char-grilled capsicum, caramelised onion, rocket, tomato, drizzled w/ aioli served on a toasted milk bun', price:[19,21], tags:['V'], allergens:['Gluten','Dairy','Egg'],
+      mods:[{l:'Gluten free bun (+$2/$3)',clears:'Gluten'},{l:'No aioli'},{l:'No onion'}] },
+    { id:'steaksan',name:'Steak Sandwich', desc:'Char-grilled scotch fillet with lettuce, tomato, caramelised onion & bbq mayo sauce served on toasted turkish bread', price:[22,25], allergens:['Gluten','Egg'],
+      mods:[{l:'No bbq mayo',clears:'Egg'},{l:'Add cheese (+$2/$3)'},{l:'Add bacon (+$4/$5)'}] },
+    { id:'veganb', name:'Vegan Burger', desc:'Plant based patty, avocado, caramelised onion, mixed leaf, tomato, drizzled w/ tomato relish served on a toasted potato bun', price:[19,21], tags:['V'], allergens:['Gluten'],
+      mods:[{l:'Gluten free bun (+$2/$3)',clears:'Gluten'},{l:'No onion'},{l:'Extra avocado'}] }
+  ]},
+
+  { name:'Add ons & sides', items:[
+    { id:'sdmash', name:'Side of Mash',        desc:'Creamy mash', price:[4,5],  allergens:['Dairy'], mods:[{l:'Extra gravy'}] },
+    { id:'sdveg',  name:'Side of Vegetables',  desc:'Seasonal veggies', price:[8,9], tags:['V','GF'], allergens:[], mods:[{l:'No butter'}] },
+    { id:'sdgard', name:'Side Garden Salad',   desc:'Mixed leaf garden salad', price:[4,5], tags:['V','GF'], allergens:[], mods:[{l:'Dressing on the side'}] },
+    { id:'sdgreek',name:'Side Greek Salad',    desc:'Tomato, cucumber, olives & feta', price:[5,6], tags:['V','GF'], allergens:['Dairy'], mods:[{l:'No feta',clears:'Dairy'}] },
+    { id:'addlamb',name:'Lamb Souvlaki Piece', desc:'One extra skewer', price:[7,8], tags:['GF'], allergens:[], mods:[] },
+    { id:'addchick',name:'Chicken Souvlaki Piece', desc:'One extra skewer', price:[6,7], tags:['GF'], allergens:[], mods:[] },
+    { id:'addpork',name:'Pork Belly Piece',    desc:'One extra piece', price:[8,9], tags:['GF'], allergens:[], mods:[] }
+  ]}
+];
+
+const LUNCH_MENU = [
+  { name:'Senior & lunch menu', note:'Available at lunch — smaller serves', items:[
+    { id:'lbangers',name:'Bangers and Mash', desc:'W/ gravy & caramelised onion', price:[17,21], allergens:['Gluten','Dairy'], mods:[{l:'Extra gravy'},{l:'No onion'}] },
+    { id:'lfish',   name:'Fish and Chips', desc:'Battered flathead w/ tartare & lemon', price:[17,21], allergens:['Fish','Gluten','Egg'], mods:[{l:'No tartare',clears:'Egg'}] },
+    { id:'lschnit', name:'Chicken Schnitzel and Chips', desc:'Parmesan & herb crumbed breast fillet', price:[17,21], allergens:['Gluten','Dairy','Egg'], mods:[{l:'Gravy (+$3/$4)'},{l:'No sauce'}] },
+    { id:'lburger', name:'The Lawns Burger and Chips', desc:'Beef patty, cheese, salad & burger sauce', price:[17,21], allergens:['Gluten','Dairy','Egg'], mods:[{l:'Gluten free bun (+$2/$3)',clears:'Gluten'},{l:'No cheese'}] },
+    { id:'lcalam',  name:'Calamari and Chips', desc:'Lightly floured & fried w/ aioli & lemon', price:[17,21], allergens:['Gluten','Egg'], mods:[{l:'No aioli',clears:'Egg'}] }
+  ]}
+];
+
+const KIDS_MENU = [
+  { name:'Kids menu', note:'Under 12 · includes ice cream w/ chocolate or strawberry topping', items:[
+    { id:'kschnit', name:'Chicken Schnitzel & Chips', desc:'Crumbed breast fillet', price:[13,15], allergens:['Gluten','Dairy','Egg'], mods:[{l:'Chocolate topping'},{l:'Strawberry topping'},{l:'No ice cream'}] },
+    { id:'kcalam',  name:'Calamari & Chips', desc:'Lightly floured & fried', price:[13,15], allergens:['Gluten','Egg'], mods:[{l:'Chocolate topping'},{l:'Strawberry topping'}] },
+    { id:'kfish',   name:'Fish Cocktails & Chips', desc:'Crumbed fish bites', price:[13,15], allergens:['Fish','Gluten'], mods:[{l:'Chocolate topping'},{l:'Strawberry topping'}] },
+    { id:'kbolog',  name:'Bolognese Pasta', desc:'Beef mince in napoletana sauce', price:[13,15], allergens:['Gluten','Dairy'], mods:[{l:'No parmesan',clears:'Dairy'},{l:'Chocolate topping'},{l:'Strawberry topping'}] },
+    { id:'knugg',   name:'Chicken Nuggets & Chips', desc:'Six nuggets', price:[13,15], allergens:['Gluten'], mods:[{l:'Chocolate topping'},{l:'Strawberry topping'}] },
+    { id:'kcheese', name:'Cheeseburger & Chips', desc:'Beef patty & cheese on a milk bun', price:[13,15], allergens:['Gluten','Dairy'], mods:[{l:'No cheese',clears:'Dairy'},{l:'Chocolate topping'}] },
+    { id:'ksouv',   name:'Chicken or Lamb Souvlaki w/ Chips', desc:'One skewer w/ chips', price:[13,15], allergens:[], tags:['GF'], mods:[{l:'Chicken'},{l:'Lamb'},{l:'Chocolate topping'}] },
+    { id:'knapol',  name:'Napoletana Pasta', desc:'Crushed tomato sauce', price:[13,15], tags:['V'], allergens:['Gluten'], mods:[{l:'Add parmesan'},{l:'Strawberry topping'}] }
+  ]}
+];
+
+const DIETS = [
+  {label:'Gluten free', avoid:['Gluten']},
+  {label:'Dairy free',  avoid:['Dairy']},
+  {label:'Egg allergy', avoid:['Egg']},
+  {label:'Nut allergy', avoid:['Nuts']},
+  {label:'Shellfish allergy', avoid:['Shellfish']},
+  {label:'Fish allergy', avoid:['Fish']},
+  {label:'Vegetarian',  avoid:['Meat']}
+];
+
+(function(){
+  'use strict';
+
+  const TABLES = [
+    {n:1,x:16,y:16,zone:'Dining'},  {n:2,x:38,y:14,zone:'Dining'},  {n:3,x:60,y:14,zone:'Dining'},
+    {n:4,x:82,y:17,zone:'Dining'},  {n:5,x:15,y:34,zone:'Dining'},  {n:6,x:37,y:33,zone:'Dining'},
+    {n:7,x:60,y:33,zone:'Dining'},  {n:8,x:83,y:36,zone:'Dining'},  {n:9,x:18,y:55,zone:'Terrace'},
+    {n:10,x:40,y:56,zone:'Terrace'},{n:11,x:62,y:55,zone:'Terrace'},{n:12,x:84,y:58,zone:'Terrace'},
+    {n:13,x:28,y:73,zone:'Terrace'},{n:14,x:66,y:74,zone:'Terrace'}
+  ];
+  const PASS = {x:50, y:93};
+
+  const MODE_DEFS = [
+    {id:'table',    title:'Bring it to my table',    sub:'We run each dish out as it comes off the pass'},
+    {id:'lawns',    title:'We’re out on the lawns', sub:'Pick your table on the terrace and we’ll find you'},
+    {id:'counter',  title:'I’ll collect from the counter', sub:'We’ll call your name when it’s up'},
+    {id:'takeaway', title:'Takeaway',                 sub:'Packed to go, ready at the front counter'}
+  ];
+  const STEP_LABELS = ['Order received','Kitchen is cooking','On its way to you','Served'];
+  const K_LABELS = ['New','Cooking','Running it out','Done'];
+  const K_TAGS = [['#e8f3eb','#17492f'],['#e8f3eb','#17492f'],['#cfe5d7','#0f3823'],['#f1f4f2','#6b7c71']];
+  const K_BTNS = ['Accept','Send it out','Mark served'];
+  const TAB_DEFS = [
+    {id:'menu',  label:'Menu',   d1:'M5 4v7a2 2 0 0 0 2 2h1v7', d2:'M8 4v6M11 4v6M16 4c-1.5 2-2 4-2 7h4V4z'},
+    {id:'floor', label:'Tables', d1:'M4 10h16', d2:'M6 10V6h12v4M8 10v10M16 10v10'},
+    {id:'track', label:'Orders', d1:'M6 4h12v16H6z', d2:'M9 9h6M9 13h4'},
+    {id:'me',    label:'Me',     d1:'M12 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z', d2:'M5.5 20a6.5 6.5 0 0 1 13 0'}
+  ];
+  const GUEST = 'Alex';
+  const HISTORY = [
+    {what:'Chicken Parmi, Greek Salad', when:'Sat · table 7',  total:'$45.00'},
+    {what:'Lamb Souvlakia ×2',      when:'Last Fri · terrace 11', total:'$58.00'},
+    {what:'Fish & Chips, Hot Chips',     when:'12 Aug · table 3', total:'$32.00'}
+  ];
+
+  const S = {
+    screen:'menu', section:'main', lines:[], table:7,
+    member:false, memberNo:'', memberSheet:false, memberInput:'',
+    tableSheet:false, mode:'table', pay:'card', order:null, toast:null,
+    itemSheet:null, sheetSel:[], sheetNote:'', sheetQty:1, editLine:null,
+    dietSheet:false, diet:[],
+    kitchen:[
+      {num:'#48', who:'Table 3 · party of 4', table:3, items:'2× Chicken Schnitzel · 1× Greek Salad · 1× Hot Chips', note:'One schnitzel gluten free — coeliac', status:1, placed:6},
+      {num:'#49', who:'Table 11 · terrace',   table:11, items:'1× Nicks Mixed Grill · 2× Pita Bread', note:'', status:0, placed:2},
+      {num:'#47', who:'Table 6 · party of 2', table:6, items:'1× Marinara · 1× Garlic & Chilli Prawn Linguine', note:'No parmesan — dairy free', status:2, placed:14}
+    ]
+  };
+
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const P  = it => S.member ? it.price[0] : it.price[1];
+  const fmt = n => '$' + n.toFixed(2);
+  const sections = () => S.section === 'lunch' ? LUNCH_MENU : S.section === 'kids' ? KIDS_MENU : MENU;
+  const allItems = () => [].concat(MENU, LUNCH_MENU, KIDS_MENU).reduce((a,c)=>a.concat(c.items),[]);
+  const findItem = id => allItems().find(i => i.id === id);
+  const avoided = () => S.diet.reduce((a,d)=>a.concat((DIETS.find(x=>x.label===d)||{avoid:[]}).avoid),[]);
+  function conflictsFor(item, mods){
+    const av = avoided();
+    const cleared = (mods||[]).map(m => { const md = item.mods.find(x=>x.l===m); return md && md.clears; }).filter(Boolean);
+    return (item.allergens||[]).filter(a => av.indexOf(a)>=0 && cleared.indexOf(a)<0);
+  }
+  const statusIdx = p => p>=1 ? 3 : p>0.45 ? 2 : p>0.15 ? 1 : 0;
+  const tableOf = n => TABLES.find(t => t.n === n) || TABLES[0];
+  function destLabel(){
+    const o = S.order; if (!o) return '';
+    return o.mode==='counter' ? 'the counter' : o.mode==='takeaway' ? 'the front counter' : 'table ' + o.table;
+  }
+  const maskNo = no => no ? '••' + String(no).slice(-4) : '';
+  const initials = n => (n.split(' ').map(w=>w[0]).join('').replace(/[^A-Za-z]/g,'').slice(0,2)).toUpperCase();
+
+  let toastTimer = null;
+  function showToast(msg){
+    clearTimeout(toastTimer);
+    S.toast = msg; render();
+    toastTimer = setTimeout(()=>{ S.toast = null; render(); }, 2600);
+  }
+  function addLine(id, qty, mods, note){
+    const key = mods.join('|') + '::' + note;
+    const same = S.lines.findIndex(l => l.id===id && l.mods.join('|')+'::'+l.note === key);
+    if (same >= 0) S.lines[same] = Object.assign({}, S.lines[same], {qty:S.lines[same].qty+qty});
+    else S.lines.push({id, qty, mods, note});
+  }
+
+  let H = {}, hid = 0;
+  const on = fn => { const k='h'+(++hid); H[k]=fn; return 'data-h="'+k+'"'; };
+  const warnSvg = (stroke,size) => '<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="'+stroke+'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 17H3z"></path><path d="M12 10v4M12 17.5v.5"></path></svg>';
+  const tableSvg = size => '<svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M4 10h16"></path><path d="M6 10V6h12v4M8 10v10M16 10v10"></path></svg>';
+  const cloche = (w, colour) =>
+    '<svg width="'+w+'" height="'+(w*0.78)+'" viewBox="0 0 64 50" fill="none" aria-hidden="true">'
+    + '<circle cx="32" cy="7" r="3.4" fill="'+colour+'"/>'
+    + '<path d="M32 10.5v3" stroke="'+colour+'" stroke-width="3" stroke-linecap="round"/>'
+    + '<path d="M7 38a25 24 0 0 1 50 0z" fill="'+colour+'"/>'
+    + '<rect x="2" y="40" width="60" height="4.6" rx="2.3" fill="'+colour+'"/></svg>';
+
+  /* ── menu ─────────────────────────────────────────────── */
+  function menuScreen(){
+    let h = '<div class="screen">';
+
+    h += '<div class="row" style="gap:11px;align-items:flex-start">'
+      +  '<div style="flex:none;padding-top:2px">' + cloche(38,'var(--green)') + '</div>'
+      +  '<div style="flex:1;min-width:0">'
+      +  '<div class="d1">Bistro on the Lawns</div>'
+      +  '<div style="font-family:var(--cond);font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--n600);margin-top:1px">Campsie South</div></div>'
+      +  '<button ' + on(()=>{ S.tableSheet = true; render(); }) + ' class="pill" style="gap:6px;background:var(--green-100);border:1.5px solid var(--green-300);color:var(--green-800);padding:8px 12px;font-family:var(--cond);font-size:14px;font-weight:700">'
+      +  tableSvg(14) + ' Table ' + S.table + '</button></div>';
+
+    /* member pricing unlocks with a membership number */
+    h += '<button ' + on(()=>{ S.memberSheet = true; S.memberInput = S.memberNo; render(); })
+      +  ' class="row" style="margin-top:13px;width:100%;gap:10px;text-align:left;border:1.5px solid '
+      +  (S.member ? 'var(--green)' : 'var(--green-200)') + ';background:' + (S.member ? 'var(--green-100)' : 'var(--paper)')
+      +  ';border-radius:9px;padding:11px 14px">'
+      +  '<div style="width:30px;height:30px;border-radius:7px;flex:none;display:flex;align-items:center;justify-content:center;background:'
+      +  (S.member?'var(--green)':'var(--green-100)') + ';color:' + (S.member?'#fff':'var(--green)') + '">'
+      +  '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2.5"></rect><path d="M2.5 10h19M6 14.5h4"></path></svg></div>'
+      +  '<div style="flex:1;min-width:0">'
+      +  '<div style="font-weight:700;font-size:13.5px;color:' + (S.member?'var(--green-900)':'var(--ink)') + '">'
+      +  (S.member ? 'Member pricing · ' + esc(maskNo(S.memberNo)) : 'Guest pricing') + '</div>'
+      +  '<div style="font-size:12px;color:var(--n600);margin-top:1px">'
+      +  (S.member ? 'Member rates applied to every dish' : 'Enter your member number for member prices') + '</div></div>'
+      +  '<span style="font-family:var(--cond);font-size:13px;font-weight:700;color:var(--green);text-transform:uppercase">'
+      +  (S.member ? 'Change' : 'Enter') + '</span></button>';
+
+    /* section switcher */
+    h += '<div class="row" style="margin-top:12px;gap:7px">';
+    [['main','Main menu'],['lunch','Lunch & senior'],['kids','Kids']].forEach(([id,label]) => {
+      const sel = S.section === id;
+      h += '<button ' + on(()=>{ S.section = id; render(); }) + ' style="flex:1;border:1.5px solid ' + (sel?'var(--green)':'var(--green-200)')
+        + ';border-radius:8px;padding:9px 4px;background:' + (sel?'var(--green)':'var(--paper)') + ';color:' + (sel?'#fff':'var(--n700)')
+        + ';font-family:var(--cond);font-weight:700;font-size:13.5px;letter-spacing:.03em;text-transform:uppercase">' + label + '</button>';
+    });
+    h += '</div>';
+
+    h += '<div class="row" style="margin-top:13px;background:var(--green-100);border-radius:10px;padding:13px 15px;gap:11px">'
+      +  '<div style="width:9px;height:9px;border-radius:999px;background:var(--green);position:relative;flex:none">'
+      +  '<div class="pulse" style="position:absolute;inset:0;border-radius:999px;background:var(--green)"></div></div>'
+      +  '<div style="font-size:13.5px;line-height:1.45;color:var(--green-800)"><strong>You’re at table ' + S.table
+      +  '.</strong> Order here and we’ll bring it out — no need to queue at the counter.</div></div>';
+
+    const dietStr = S.diet.length ? S.diet.join(' · ') : 'No allergies set';
+    h += '<button ' + on(()=>{ S.dietSheet = true; render(); }) + ' class="row" style="margin-top:9px;width:100%;gap:9px;border:1.5px solid var(--green-200);background:var(--paper);border-radius:9px;padding:11px 14px;text-align:left">'
+      +  warnSvg('#1f6142',15)
+      +  '<span style="flex:1;font-size:13px;color:var(--n700)"><strong style="color:var(--green-800)">' + esc(dietStr) + '</strong> — tell us and we’ll flag dishes</span>'
+      +  '<span style="font-family:var(--cond);font-size:13px;font-weight:700;color:var(--green);text-transform:uppercase">Edit</span></button>';
+
+    sections().forEach(cat => {
+      h += '<div style="margin-top:24px"><div class="sect">' + esc(cat.name) + '</div>';
+      if (cat.note) h += '<div style="font-size:12px;color:var(--n600);margin:6px 0 2px;line-height:1.4">' + esc(cat.note) + '</div>';
+      cat.items.forEach(it => {
+        const conflicts = conflictsFor(it, []);
+        const fixable = conflicts.length>0 && conflicts.every(a => it.mods.some(m => m.clears===a));
+        const open = () => { S.itemSheet = it.id; S.sheetSel=[]; S.sheetNote=''; S.sheetQty=1; S.editLine=null; render(); };
+        h += '<div ' + on(open) + ' class="item" role="button" tabindex="0">'
+          +  '<div style="flex:1;min-width:0">'
+          +  '<div style="font-weight:700;font-size:15px;line-height:1.25">' + esc(it.name)
+          +  (it.tags||[]).map(t=>'<span class="tagpill">'+t+'</span>').join('') + '</div>'
+          +  '<div style="font-size:12.5px;color:var(--n600);margin-top:2px;line-height:1.4">' + esc(it.desc) + '</div>';
+        if (conflicts.length)
+          h += '<div class="flag">' + warnSvg('currentColor',11) + ' Contains ' + esc(conflicts.join(' & ').toLowerCase()) + '</div>';
+        if (fixable)
+          h += '<div style="font-size:11.5px;color:var(--green-600);font-weight:700;margin-top:3px">Can be made safe — tap to change</div>';
+        h += '</div><div class="price">' + fmt(P(it)) + '</div>'
+          +  '<button aria-label="Add ' + esc(it.name) + '" ' + on(e => {
+               e.stopPropagation();
+               addLine(it.id,1,[],'');
+               showToast(conflicts.length
+                 ? it.name + ' added — contains ' + conflicts.join(' & ').toLowerCase() + ', kitchen flagged'
+                 : it.name + ' added');
+             }) + ' class="addbtn" style="margin-top:2px">+</button></div>';
+      });
+      h += '</div>';
+    });
+
+    h += '<div style="margin-top:26px;border-top:1.5px solid var(--green-200);padding-top:12px;font-size:12px;color:var(--n600);line-height:1.6">'
+      +  '<strong style="color:var(--green-800)">Food allergies:</strong> please tell us when ordering. '
+      +  '<span class="tagpill" style="margin-left:0">GF</span> gluten free options · <span class="tagpill" style="margin-left:0">V</span> vegetarian.<br>'
+      +  'All dishes are prepared fresh and customised to your order — please allow extra time during busy hours.<br>'
+      +  'bistro@campsiesouth.com.au · 0414 906 371</div>';
+
+    return h + '</div>';
+  }
+
+  /* ── cart ─────────────────────────────────────────────── */
+  function cartScreen(){
+    const count = S.lines.reduce((a,l)=>a+l.qty,0);
+    const subtotal = S.lines.reduce((a,l)=>a+P(findItem(l.id))*l.qty,0);
+    let h = '<div class="screen">';
+    h += '<div class="row" style="gap:10px">'
+      +  '<button ' + on(()=>{ S.screen='menu'; render(); }) + ' aria-label="Back to menu" class="pill" style="width:36px;height:36px;border-radius:8px;background:var(--green-100);font-size:17px;color:var(--green-800);border:none">←</button>'
+      +  '<div class="d1">Your order</div></div>';
+
+    h += '<div class="card" style="margin-top:14px;padding:2px 15px">';
+    S.lines.forEach((l,li) => {
+      const it = findItem(l.id);
+      const modsStr = l.mods.concat([l.note]).filter(Boolean).join(' · ');
+      const edit = () => { S.itemSheet=l.id; S.sheetSel=l.mods.slice(); S.sheetNote=l.note; S.sheetQty=l.qty; S.editLine=li; render(); };
+      h += '<div class="row" style="gap:10px;padding:13px 0;border-bottom:1px solid var(--line)">'
+        +  '<div ' + on(edit) + ' role="button" tabindex="0" style="flex:1;min-width:0;cursor:pointer">'
+        +  '<div style="font-weight:700;font-size:14.5px">' + esc(it.name) + '</div>'
+        +  (modsStr ? '<div style="font-size:12px;color:var(--green-600);font-weight:600;margin-top:1px">' + esc(modsStr) + '</div>' : '')
+        +  '<div style="font-size:12.5px;color:var(--n600)">' + fmt(P(it)) + ' each</div>'
+        +  '<span style="display:inline-flex;align-items:center;gap:4px;margin-top:5px;font-family:var(--cond);font-size:12.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--green)">'
+        +  '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4l10-10-4-4L4 16z"></path></svg>Change this</span></div>'
+        +  '<div class="stepper">'
+        +  '<button aria-label="One fewer" ' + on(()=>{ S.lines = S.lines.map((x,i)=>i===li?Object.assign({},x,{qty:x.qty-1}):x).filter(x=>x.qty>0); render(); }) + '>−</button>'
+        +  '<span>' + l.qty + '</span>'
+        +  '<button aria-label="One more" ' + on(()=>{ S.lines = S.lines.map((x,i)=>i===li?Object.assign({},x,{qty:x.qty+1}):x); render(); }) + '>+</button>'
+        +  '</div></div>';
+    });
+    if (!count) h += '<div style="padding:22px 0;font-size:14px;color:var(--n600);text-align:center">Nothing here yet — back to the menu.</div>';
+    h += '</div>';
+
+    h += '<div class="sect" style="margin:22px 0 10px">Where’s it going?</div><div style="display:flex;flex-direction:column;gap:8px">';
+    MODE_DEFS.forEach(m => {
+      const sel = S.mode === m.id;
+      h += '<button ' + on(()=>{ S.mode = m.id; render(); }) + ' style="display:flex;gap:11px;align-items:flex-start;text-align:left;border:2px solid '
+        + (sel?'var(--green)':'var(--green-200)') + ';background:' + (sel?'var(--green-100)':'var(--paper)')
+        + ';border-radius:10px;padding:12px 14px;width:100%">'
+        + '<div style="width:18px;height:18px;border-radius:999px;border:2px solid ' + (sel?'var(--green)':'var(--n400)')
+        + ';background:' + (sel?'var(--green)':'var(--paper)') + ';flex:none;margin-top:2px;box-shadow:inset 0 0 0 3px #fff"></div>'
+        + '<div style="flex:1"><div style="font-weight:700;font-size:14.5px">' + esc(m.title) + '</div>'
+        + '<div style="font-size:12.5px;color:var(--n600);margin-top:2px;line-height:1.4">' + esc(m.sub) + '</div></div></button>';
+    });
+    h += '</div>';
+
+    if (S.mode === 'table' || S.mode === 'lawns'){
+      const pool = S.mode === 'lawns' ? TABLES.filter(t=>t.zone==='Terrace') : TABLES;
+      h += '<div style="font-family:var(--cond);font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--n600);margin:13px 0 7px">Table number</div>'
+        +  '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:7px">';
+      pool.forEach(t => {
+        const sel = S.table === t.n;
+        h += '<button ' + on(()=>{ S.table = t.n; render(); }) + ' class="chip" style="height:40px;background:'
+          + (sel?'var(--green)':'var(--green-100)') + ';color:' + (sel?'#fff':'var(--green-800)') + '">' + t.n + '</button>';
+      });
+      h += '</div>';
+    }
+
+    h += '<div class="sect" style="margin:22px 0 10px">Payment</div><div style="display:flex;gap:8px">'
+      +  '<button ' + on(()=>{ S.pay='card'; render(); }) + ' class="pill" style="flex:1;border-radius:9px;border:2px solid '
+      +  (S.pay==='card'?'var(--green)':'var(--green-200)') + ';background:var(--paper);color:var(--ink);padding:12px;font-weight:700;font-size:14px">Card ·· 4021</button>'
+      +  '<button ' + on(()=>{ S.pay='tab'; render(); }) + ' class="pill" style="flex:1;border-radius:9px;border:2px solid '
+      +  (S.pay==='tab'?'var(--green)':'var(--green-200)') + ';background:var(--paper);color:var(--ink);padding:12px;font-weight:700;font-size:14px">Put it on my tab</button></div>';
+
+    h += '<div style="margin-top:20px;border-top:1.5px solid var(--green-200);padding-top:13px;font-size:14px;display:flex;flex-direction:column;gap:7px;font-variant-numeric:tabular-nums">'
+      +  '<div class="row" style="justify-content:space-between;color:var(--n600)"><span>' + count + ' item' + (count===1?'':'s') + '</span><span>' + fmt(subtotal) + '</span></div>'
+      +  '<div class="row" style="justify-content:space-between;color:var(--n600)"><span>' + (S.member?'Member pricing · ' + esc(maskNo(S.memberNo)):'Guest pricing') + '</span><span>' + (S.member?'Applied':'—') + '</span></div>'
+      +  '<div class="row" style="justify-content:space-between;font-weight:700;font-size:17px"><span>Total</span><span>' + fmt(subtotal) + '</span></div></div>';
+
+    h += '<button ' + on(()=>{
+      if (!count){ showToast('Add something first'); return; }
+      const oi = S.lines.map(l => { const it=findItem(l.id); return {
+        name:it.name, qty:l.qty,
+        modsStr:l.mods.concat([l.note]).filter(Boolean).join(' · '),
+        lineStr:fmt(P(it)*l.qty) }; });
+      S.order = {num:'#50', items:oi, total:subtotal, mode:S.mode, table:S.table, progress:0,
+                 member:S.member, memberNo:S.memberNo};
+      S.lines = []; S.screen='track';
+      showToast('Order in — the kitchen has it');
+    }) + ' class="primary" style="margin-top:15px">Place order · ' + fmt(subtotal) + '</button>';
+    return h + '</div>';
+  }
+
+  /* ── tracking ─────────────────────────────────────────── */
+  function trackScreen(){
+    const o = S.order;
+    let h = '<div class="screen"><div class="d1">Your order</div>';
+    if (!o){
+      h += '<div style="margin-top:56px;text-align:center">'
+        +  '<div style="margin:0 auto 14px;opacity:.5">' + cloche(56,'var(--n400)') + '</div>'
+        +  '<div style="font-weight:700;font-size:15px">No order yet</div>'
+        +  '<div style="font-size:13px;color:var(--n600);margin:6px 0 18px">Order from the menu and follow it here.</div>'
+        +  '<button ' + on(()=>{ S.screen='menu'; render(); }) + ' class="pill" style="border:none;border-radius:9px;background:var(--green);color:#fff;padding:12px 24px;font-weight:700;font-size:14px">See the menu</button></div>';
+      return h + '</div>';
+    }
+    const idx = statusIdx(o.progress);
+    const mins = Math.max(1, Math.round((1-o.progress)*18));
+    const out = idx === 2;
+    const big = o.progress>=1 ? 'Served'
+      : o.mode==='counter' || o.mode==='takeaway' ? 'Ready in ~' + mins + ' min'
+      : 'With you in ~' + mins + ' min';
+
+    h += '<div class="card" style="margin-top:13px;padding:18px;border-color:var(--green-300)">'
+      +  '<div class="row" style="justify-content:space-between;align-items:baseline">'
+      +  '<span class="kicker" style="color:var(--green)">Order ' + o.num + '</span>'
+      +  '<span style="font-size:12px;color:var(--n600)">' + esc(MODE_DEFS.find(m=>m.id===o.mode).title) + '</span></div>'
+      +  '<div class="d1" style="font-size:27px;margin-top:7px;color:' + (o.progress>=1?'var(--green)':'var(--ink)') + '">' + big + '</div>'
+      +  '<div style="font-size:13.5px;color:var(--n600);margin-top:3px">'
+      +  (o.progress>=1 ? 'Enjoy — dropped at ' + destLabel() + '.' : STEP_LABELS[idx] + ' · heading for ' + destLabel()) + '</div>'
+      +  '<div style="margin-top:16px;height:7px;border-radius:4px;background:var(--green-100);overflow:hidden">'
+      +  '<div style="height:100%;border-radius:4px;background:var(--green);transition:width .5s;width:' + Math.round(o.progress*100) + '%"></div></div>'
+      +  '<div style="margin-top:15px;display:flex;flex-direction:column">';
+    STEP_LABELS.forEach((label,i) => {
+      h += '<div style="display:flex;gap:11px;align-items:flex-start">'
+        +  '<div style="display:flex;flex-direction:column;align-items:center">'
+        +  '<div style="width:13px;height:13px;border-radius:999px;background:' + (i<=idx?'var(--green)':'var(--green-100)')
+        +  ';border:2px solid ' + (i<=idx?'var(--green)':'var(--n300)') + ';flex:none"></div>'
+        +  (i<3 ? '<div style="width:2px;height:21px;background:var(--n300)"></div>' : '')
+        +  '</div><div style="font-size:13.5px;font-weight:' + (i===idx?700:500) + ';color:' + (i<=idx?'var(--ink)':'var(--n500)') + '">' + label + '</div></div>';
+    });
+    h += '</div></div>';
+
+    if (out && (o.mode==='table'||o.mode==='lawns')){
+      h += '<div class="row" style="margin-top:11px;background:var(--green-100);border-radius:11px;padding:15px;gap:12px">'
+        +  '<div style="width:42px;height:42px;border-radius:9px;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:15px;flex:none">M</div>'
+        +  '<div style="flex:1"><div style="font-weight:700;font-size:14px;color:var(--green-900)">Maria · floor staff</div>'
+        +  '<div style="font-size:12.5px;color:var(--green-800)">Bringing it to table ' + o.table + ' now</div></div>'
+        +  '<button ' + on(()=>{ S.screen='floor'; render(); }) + ' class="pill" style="border:none;border-radius:8px;background:var(--paper);color:var(--green-800);padding:9px 13px;font-family:var(--cond);font-weight:700;font-size:13px;text-transform:uppercase">See floor</button></div>';
+    }
+
+    h += '<div class="card" style="margin-top:11px;padding:14px 16px">'
+      +  '<div class="kicker" style="margin-bottom:7px">Your dishes</div>';
+    o.items.forEach(oi => {
+      h += '<div style="padding:4px 0"><div class="row" style="justify-content:space-between;font-size:14px">'
+        +  '<span>' + oi.qty + '× ' + esc(oi.name) + '</span><span style="color:var(--n600)">' + oi.lineStr + '</span></div>'
+        +  (oi.modsStr ? '<div style="font-size:12px;color:var(--green-600);font-weight:600">' + esc(oi.modsStr) + '</div>' : '') + '</div>';
+    });
+    h += '<div class="row" style="justify-content:space-between;font-weight:700;font-size:14.5px;border-top:1px solid var(--line);margin-top:8px;padding-top:9px">'
+      +  '<span>Total</span><span>' + fmt(o.total) + '</span></div></div>';
+    return h + '</div>';
+  }
+
+  /* ── floor plan ───────────────────────────────────────── */
+  function floorScreen(){
+    const o = S.order;
+    const idx = o ? statusIdx(o.progress) : 0;
+    const out = !!o && idx===2 && (o.mode==='table'||o.mode==='lawns');
+    const mins = o ? Math.max(1, Math.round((1-o.progress)*18)) : 0;
+    const mine = tableOf(o && (o.mode==='table'||o.mode==='lawns') ? o.table : S.table);
+    const dp = o ? Math.min(1, Math.max(0,(o.progress-0.45)/0.45)) : 0;
+    const run = {x:PASS.x+(mine.x-PASS.x)*dp, y:PASS.y+(mine.y-PASS.y)*dp};
+
+    let h = '<div class="screen">';
+    h += '<div class="row" style="align-items:baseline;justify-content:space-between">'
+      +  '<div class="d1">The floor</div>'
+      +  '<span class="kicker" style="color:var(--green);background:var(--green-100);border-radius:6px;padding:5px 9px">' + esc(mine.zone) + '</span></div>';
+
+    h += '<div class="floor">'
+      +  '<div class="zone" style="left:5%;top:5%;width:90%;height:40%"></div>'
+      +  '<div class="zone" style="left:8%;top:48%;width:84%;height:36%;background:var(--green-300);opacity:.45"></div>'
+      +  '<div style="position:absolute;left:8%;top:47%;font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--green-800);opacity:.75">Terrace</div>'
+      +  '<div style="position:absolute;left:5%;top:4%;font-family:var(--cond);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--green-800);opacity:.75">Dining room</div>';
+    TABLES.forEach(t => {
+      const sel = t.n === mine.n;
+      h += '<div class="tabledot" style="left:' + t.x + '%;top:' + t.y + '%;background:'
+        + (sel?'var(--green)':'var(--paper)') + ';color:' + (sel?'#fff':'var(--green-800)')
+        + ';border:1.5px solid ' + (sel?'var(--green)':'var(--green-300)') + '">' + t.n + '</div>';
+    });
+    h += '<div style="position:absolute;left:' + mine.x + '%;top:' + mine.y + '%;transform:translate(-50%,-50%);pointer-events:none">'
+      +  '<div class="pulse" style="position:absolute;inset:-7px;border-radius:10px;background:var(--green)"></div></div>';
+    if (out){
+      h += '<div class="runner" style="position:absolute;left:' + run.x + '%;top:' + run.y + '%;transform:translate(-50%,-50%)">'
+        +  '<div style="width:17px;height:17px;border-radius:999px;background:var(--green-900);border:3px solid #fff;box-shadow:0 2px 7px rgba(15,56,35,.4)"></div></div>';
+    }
+    h += '<div style="position:absolute;left:50%;bottom:9px;transform:translateX(-50%);background:var(--green-900);color:#fff;border-radius:7px;padding:6px 13px;font-family:var(--cond);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap">Kitchen pass &amp; bar</div>';
+    h += '</div>';
+
+    h += '<div class="row card" style="margin-top:11px;padding:14px 16px;gap:12px">'
+      +  '<div style="width:11px;height:11px;border-radius:3px;background:var(--green);flex:none"></div>'
+      +  '<div style="flex:1;font-size:13.5px"><strong>Table ' + mine.n + '</strong><span style="color:var(--n600)"> · ' + esc(mine.zone) + '</span></div>'
+      +  '<button ' + on(()=>{ S.tableSheet = true; render(); }) + ' class="pill" style="border:none;border-radius:8px;background:var(--green-100);color:var(--green-800);padding:8px 13px;font-family:var(--cond);font-weight:700;font-size:13px;text-transform:uppercase">Change</button></div>';
+
+    if (out){
+      h += '<div class="row card" style="margin-top:9px;padding:14px 16px;gap:12px">'
+        +  '<div style="width:11px;height:11px;border-radius:999px;background:var(--green-900);flex:none"></div>'
+        +  '<div style="flex:1;font-size:13.5px"><strong>Maria — floor staff</strong><span style="color:var(--n600)"> · your order, ~' + mins + ' min</span></div></div>';
+    }
+    return h + '</div>';
+  }
+
+  /* ── kitchen ──────────────────────────────────────────── */
+  function kitchenScreen(){
+    const o = S.order;
+    const live = o ? [{
+      num:o.num, who:(o.mode==='counter'||o.mode==='takeaway') ? GUEST + ' · ' + (o.mode==='takeaway'?'takeaway':'counter') : GUEST + ' · table ' + o.table,
+      table:(o.mode==='counter'||o.mode==='takeaway') ? 0 : o.table,
+      items:o.items.map(i=>i.qty+'× '+i.name).join(' · '),
+      note:[ o.items.filter(i=>i.modsStr).map(i=>i.name+': '+i.modsStr).join(' · '),
+             S.diet.length ? 'Guest profile: ' + S.diet.join(', ') : '' ].filter(Boolean).join(' — '),
+      badge: o.member ? 'Member ' + maskNo(o.memberNo) : 'Non-member',
+      status:statusIdx(o.progress), placed:2, live:true
+    }] : [];
+    const all = live.concat(S.kitchen);
+    const waiting = all.filter(k=>k.status<2).length;
+
+    let h = '<div class="screen">';
+    h += '<div class="row" style="gap:10px">'
+      +  '<button ' + on(()=>{ S.screen='me'; render(); }) + ' aria-label="Back" class="pill" style="width:36px;height:36px;border-radius:8px;background:var(--green-100);font-size:17px;color:var(--green-800);border:none">←</button>'
+      +  '<div class="d1" style="flex:1">Kitchen pass</div>'
+      +  '<span class="kicker" style="color:#fff;background:var(--green);border-radius:6px;padding:5px 9px">Staff</span></div>'
+      +  '<div style="font-size:13px;color:var(--n600);margin-top:6px">' + waiting + ' order' + (waiting===1?'':'s') + ' on · 2 staff on the floor</div>';
+
+    h += '<div style="margin-top:14px;display:flex;flex-direction:column;gap:10px">';
+    all.forEach(k => {
+      h += '<div class="card" style="padding:15px 16px">'
+        +  '<div class="row" style="gap:9px"><span style="font-family:var(--display);font-size:15px">' + k.num + '</span>'
+        +  '<span style="flex:1;font-size:13.5px;color:var(--n600)">' + esc(k.who)
+        +  (k.badge ? ' · <strong style="color:var(--green)">' + esc(k.badge) + '</strong>' : '') + '</span>'
+        +  '<span style="font-family:var(--cond);font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:' + K_TAGS[k.status][1] + ';background:' + K_TAGS[k.status][0] + ';border-radius:5px;padding:4px 8px">' + K_LABELS[k.status] + '</span></div>'
+        +  '<div style="font-size:14px;margin-top:8px;line-height:1.5">' + esc(k.items) + '</div>';
+      if (k.note)
+        h += '<div style="display:flex;gap:7px;align-items:flex-start;margin-top:8px;background:var(--green-100);border:1px solid var(--green-300);color:var(--green-800);border-radius:7px;padding:8px 11px;font-size:12.5px;font-weight:600;line-height:1.4">'
+          +  '<span style="flex:none;margin-top:1px;display:flex">' + warnSvg('currentColor',13) + '</span><span>' + esc(k.note) + '</span></div>';
+      h += '<div class="row" style="gap:8px;margin-top:11px">'
+        +  '<span class="row" style="gap:5px;font-family:var(--cond);font-size:13px;font-weight:700;text-transform:uppercase;color:var(--green-800);background:var(--green-100);border-radius:6px;padding:6px 10px">'
+        +  tableSvg(12) + ' ' + (k.table ? 'Table ' + k.table : 'Counter') + '</span>'
+        +  '<span style="flex:1;font-size:12.5px;color:var(--n500)">' + k.placed + ' min ago</span>';
+      if (k.status < 3)
+        h += '<button ' + on(()=>{
+          if (k.live){ S.order.progress = k.status===0?0.2:k.status===1?0.5:1; }
+          else { S.kitchen = S.kitchen.map(x=>x.num===k.num?Object.assign({},x,{status:x.status+1}):x); }
+          showToast(k.num + ' → ' + K_LABELS[k.status+1]);
+        }) + ' class="pill" style="border:none;border-radius:8px;background:var(--green);color:#fff;padding:9px 14px;font-family:var(--cond);font-weight:700;font-size:13px;text-transform:uppercase">' + K_BTNS[Math.min(k.status,2)] + '</button>';
+      h += '</div></div>';
+    });
+    return h + '</div></div>';
+  }
+
+  /* ── me ───────────────────────────────────────────────── */
+  function meScreen(){
+    const dietStr = S.diet.length ? S.diet.join(' · ') : 'No allergies set';
+    let h = '<div class="screen">';
+    h += '<div class="row" style="gap:13px">'
+      +  '<div style="width:54px;height:54px;border-radius:11px;background:var(--green-100);color:var(--green);display:flex;align-items:center;justify-content:center;font-family:var(--display);font-size:19px">' + initials(GUEST) + '</div>'
+      +  '<div><div class="d1">' + GUEST + '</div>'
+      +  '<div style="font-size:12.5px;color:var(--n600)">' + (S.member ? 'Club member · member pricing' : 'Guest · non-member pricing') + '</div></div></div>';
+
+    h += '<div class="row" style="margin-top:16px;background:var(--green-100);border-radius:11px;padding:15px;gap:12px">'
+      +  '<div style="flex:1"><div class="kicker" style="color:var(--green)">Membership</div>'
+      +  '<div style="font-size:14px;font-weight:600;color:var(--green-900);margin-top:3px">'
+      +  (S.member ? 'Member ' + esc(maskNo(S.memberNo)) + ' · member pricing' : 'No member number saved') + '</div></div>'
+      +  '<button ' + on(()=>{ S.memberSheet = true; S.memberInput = S.memberNo; render(); }) + ' class="pill" style="border:none;border-radius:8px;background:var(--green);color:#fff;padding:10px 15px;font-family:var(--cond);font-weight:700;font-size:13px;text-transform:uppercase">'
+      +  (S.member?'Change':'Add') + '</button></div>';
+
+    h += '<div class="row card" style="margin-top:10px;padding:14px 16px;gap:12px">'
+      +  '<div style="flex:1"><div class="kicker">Allergies &amp; diet</div>'
+      +  '<div style="font-size:13.5px;font-weight:600;margin-top:3px;color:var(--green-800)">' + esc(dietStr) + '</div>'
+      +  '<div style="font-size:12px;color:var(--n500);margin-top:2px">Flags dishes and goes to the kitchen with every order</div></div>'
+      +  '<button ' + on(()=>{ S.dietSheet = true; render(); }) + ' class="pill" style="border:none;border-radius:8px;background:var(--green-100);color:var(--green-800);padding:9px 13px;font-family:var(--cond);font-weight:700;font-size:13px;text-transform:uppercase">Edit</button></div>';
+
+    h += '<div class="sect" style="margin:20px 0 8px">Recent visits</div><div class="card" style="padding:2px 15px">';
+    HISTORY.forEach(ho => {
+      h += '<div class="row" style="gap:10px;padding:12px 0;border-bottom:1px solid var(--line)">'
+        +  '<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:14px">' + esc(ho.what) + '</div>'
+        +  '<div style="font-size:12px;color:var(--n500);margin-top:1px">' + esc(ho.when) + '</div></div>'
+        +  '<span style="font-size:13.5px;font-weight:700;color:var(--n600);font-variant-numeric:tabular-nums">' + ho.total + '</span></div>';
+    });
+    h += '</div>';
+
+    h += '<div class="card" style="margin-top:14px;padding:2px 15px">'
+      +  '<div class="row" style="padding:14px 0;border-bottom:1px solid var(--line);font-size:14.5px;font-weight:500">Payment methods<span style="margin-left:auto;color:var(--n400)">›</span></div>'
+      +  '<div class="row" style="padding:14px 0;border-bottom:1px solid var(--line);font-size:14.5px;font-weight:500">Notifications<span style="margin-left:auto;color:var(--n400)">›</span></div>'
+      +  '<div ' + on(()=>{ S.screen='kitchen'; render(); }) + ' role="button" tabindex="0" class="row" style="padding:14px 0;font-size:14.5px;font-weight:600;cursor:pointer;color:var(--green)">Kitchen pass — staff view<span style="margin-left:auto;color:var(--n400)">›</span></div></div>';
+    return h + '</div>';
+  }
+
+  /* ── chrome ───────────────────────────────────────────── */
+  function chrome(){
+    const o = S.order;
+    const count = S.lines.reduce((a,l)=>a+l.qty,0);
+    const subtotal = S.lines.reduce((a,l)=>a+P(findItem(l.id))*l.qty,0);
+    let h = '';
+
+    if (S.screen==='menu' && count>0){
+      h += '<div class="cartbar"><button ' + on(()=>{ S.screen='cart'; render(); })
+        +  ' style="width:100%;border:none;background:var(--green-900);color:#fff;border-radius:10px;padding:15px 20px;font-weight:700;font-size:14.5px;display:flex;justify-content:space-between;box-shadow:0 10px 28px rgba(15,56,35,.3)">'
+        +  '<span>View order · ' + count + ' item' + (count===1?'':'s') + '</span><span>' + fmt(subtotal) + '</span></button></div>';
+    }
+
+    h += '<div class="nav">';
+    TAB_DEFS.forEach(t => {
+      const active = S.screen===t.id || (t.id==='me'&&S.screen==='kitchen') || (t.id==='menu'&&S.screen==='cart');
+      const badge = t.id==='track' && !!o && o.progress<1;
+      h += '<button ' + on(()=>{ S.screen=t.id; render(); }) + ' style="color:' + (active?'var(--green)':'var(--n500)') + '"'
+        +  (active?' aria-current="page"':'') + '>'
+        +  '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="' + t.d1 + '"></path><path d="' + t.d2 + '"></path></svg>'
+        +  '<span>' + t.label + '</span>' + (badge?'<span class="badge"></span>':'') + '</button>';
+    });
+    h += '</div>';
+
+    if (S.itemSheet){
+      const it = findItem(S.itemSheet);
+      const editing = S.editLine !== null;
+      const conf = conflictsFor(it, S.sheetSel);
+      const had = conflictsFor(it, []).length > 0;
+      const warn = conf.length
+        ? 'Contains ' + conf.join(' & ').toLowerCase() + ' — your profile flags this. Pick a change below or skip it.'
+        : (had ? 'Sorted — safe with your changes.' : '');
+      h += '<div class="overlay" ' + on(()=>{ S.itemSheet=null; S.editLine=null; render(); }) + '>'
+        +  '<div class="sheet" ' + on(e=>e.stopPropagation()) + '>'
+        +  '<div class="row" style="align-items:baseline;justify-content:space-between;gap:10px">'
+        +  '<div class="d2" style="flex:1">' + esc(it.name) + '</div><div class="price" style="font-size:17px">' + fmt(P(it)) + '</div></div>'
+        +  '<div style="font-size:13px;color:var(--n600);margin-top:3px;line-height:1.45">' + esc(it.desc) + '</div>';
+      if (warn)
+        h += '<div style="display:flex;gap:8px;align-items:flex-start;margin-top:11px;background:var(--green-100);border:1px solid ' + (conf.length?'var(--green-400)':'var(--green-300)')
+          +  ';color:var(--green-800);border-radius:8px;padding:10px 12px;font-size:13px;font-weight:600;line-height:1.4">'
+          +  '<span style="flex:none;margin-top:1px;display:flex">' + warnSvg('currentColor',14) + '</span><span>' + esc(warn) + '</span></div>';
+
+      h += '<div class="kicker" style="margin:15px 0 8px">Changes</div><div style="display:flex;flex-wrap:wrap;gap:7px">';
+      it.mods.forEach(m => {
+        const sel = S.sheetSel.indexOf(m.l) >= 0;
+        h += '<button ' + on(()=>{ S.sheetSel = sel ? S.sheetSel.filter(x=>x!==m.l) : S.sheetSel.concat([m.l]); render(); })
+          +  ' class="toggle" aria-pressed="' + sel + '" style="border:2px solid ' + (sel?'var(--green)':'var(--green-200)')
+          +  ';background:' + (sel?'var(--green-100)':'var(--paper)') + ';color:' + (sel?'var(--green-800)':'var(--n700)') + '">' + esc(m.l) + '</button>';
+      });
+      if (!it.mods.length) h += '<div style="font-size:13px;color:var(--n600)">No changes on this one — add a note below.</div>';
+      h += '</div>';
+
+      h += '<div class="kicker" style="margin:15px 0 8px">Note for the kitchen</div>'
+        +  '<input id="note" value="' + esc(S.sheetNote) + '" placeholder="e.g. severe allergy — separate prep please" '
+        +  'style="width:100%;border:1.5px solid var(--green-200);background:var(--paper);border-radius:8px;padding:12px 14px;font-family:var(--body);font-size:14px;color:var(--ink);outline:none">';
+
+      h += '<div class="row" style="gap:11px;margin-top:15px">'
+        +  '<div class="stepper" style="padding:5px">'
+        +  '<button aria-label="One fewer" ' + on(()=>{ S.sheetQty = Math.max(1,S.sheetQty-1); render(); }) + ' style="width:32px;height:32px;font-size:17px">−</button>'
+        +  '<span style="font-size:15px;min-width:16px">' + S.sheetQty + '</span>'
+        +  '<button aria-label="One more" ' + on(()=>{ S.sheetQty = S.sheetQty+1; render(); }) + ' style="width:32px;height:32px;font-size:17px">+</button></div>'
+        +  '<button ' + on(()=>{
+             const mods = S.sheetSel.slice(), note = S.sheetNote.trim();
+             let msg;
+             if (editing){
+               S.lines[S.editLine] = {id:S.itemSheet, qty:S.sheetQty, mods:mods, note:note};
+               msg = it.name + ' updated';
+             } else {
+               addLine(S.itemSheet, S.sheetQty, mods, note);
+               msg = conf.length ? 'Added — contains ' + conf.join(' & ').toLowerCase() + ', kitchen flagged'
+                 : (mods.length||note) ? it.name + ' added — noted for the kitchen' : it.name + ' added';
+             }
+             S.itemSheet=null; S.editLine=null; showToast(msg);
+           }) + ' class="primary" style="flex:1;padding:14px;font-size:15px;box-shadow:none">'
+        +  (editing?'Save changes · ':'Add to order · ') + fmt(P(it)*S.sheetQty) + '</button></div>'
+        +  (editing ? '<button ' + on(()=>{ S.lines.splice(S.editLine,1); S.itemSheet=null; S.editLine=null; showToast(it.name + ' removed'); })
+             + ' style="margin-top:10px;width:100%;border:none;background:none;color:var(--n600);font-size:13.5px;font-weight:700;padding:10px;text-decoration:underline">Remove from order</button>' : '');
+      h += '</div></div>';
+    }
+
+    if (S.dietSheet){
+      h += '<div class="overlay" ' + on(()=>{ S.dietSheet=false; render(); }) + '>'
+        +  '<div class="sheet" ' + on(e=>e.stopPropagation()) + '>'
+        +  '<div class="d2">Allergies &amp; diet</div>'
+        +  '<div style="font-size:13px;color:var(--n600);margin:5px 0 13px;line-height:1.45">Pick what applies. Dishes that clash get flagged on the menu, and the kitchen sees this with every order.</div>'
+        +  '<div style="display:flex;flex-wrap:wrap;gap:7px">';
+      DIETS.forEach(d => {
+        const sel = S.diet.indexOf(d.label) >= 0;
+        h += '<button ' + on(()=>{ S.diet = sel ? S.diet.filter(x=>x!==d.label) : S.diet.concat([d.label]); render(); })
+          +  ' class="toggle" aria-pressed="' + sel + '" style="padding:9px 14px;font-size:13.5px;border:2px solid ' + (sel?'var(--green)':'var(--green-200)')
+          +  ';background:' + (sel?'var(--green-100)':'var(--paper)') + ';color:' + (sel?'var(--green-800)':'var(--n700)') + '">' + d.label + '</button>';
+      });
+      h += '</div><button ' + on(()=>{ S.dietSheet=false; render(); }) + ' class="primary" style="margin-top:15px;padding:13px;font-size:14px;box-shadow:none">Done</button></div></div>';
+    }
+
+    if (S.memberSheet){
+      const typed = String(S.memberInput || '').replace(/[^0-9]/g,'');
+      const valid = typed.length >= 4;
+      h += '<div class="overlay" ' + on(()=>{ S.memberSheet=false; render(); }) + '>'
+        +  '<div class="sheet" ' + on(e=>e.stopPropagation()) + '>'
+        +  '<div class="d2">Member number</div>'
+        +  '<div style="font-size:13px;color:var(--n600);margin:5px 0 14px;line-height:1.45">Enter your Campsie South membership number to get member pricing. It’s on the front of your card.</div>'
+        +  '<input id="memberno" inputmode="numeric" autocomplete="off" value="' + esc(S.memberInput) + '" placeholder="e.g. 104882" '
+        +  'style="width:100%;border:1.5px solid ' + (typed.length && !valid ? 'var(--green-400)' : 'var(--green-200)')
+        +  ';background:var(--paper);border-radius:8px;padding:14px 15px;font-family:var(--cond);font-size:20px;font-weight:700;letter-spacing:.12em;color:var(--ink);outline:none">'
+        +  (typed.length && !valid ? '<div style="font-size:12.5px;color:var(--green-800);font-weight:600;margin-top:7px">Member numbers are at least 4 digits.</div>' : '')
+        +  '<button ' + on(()=>{
+             const v = String(S.memberInput||'').replace(/[^0-9]/g,'');
+             if (v.length < 4){ showToast('Enter at least 4 digits'); return; }
+             S.memberNo = v; S.member = true; S.memberSheet = false;
+             showToast('Member pricing applied · ' + maskNo(v));
+           }) + ' class="primary" style="margin-top:14px;padding:14px;font-size:15px;box-shadow:none">Apply member pricing</button>'
+        +  '<button ' + on(()=>{
+             S.member = false; S.memberNo = ''; S.memberInput = ''; S.memberSheet = false;
+             showToast('Showing guest pricing');
+           }) + ' style="margin-top:9px;width:100%;border:none;background:none;color:var(--n600);font-size:13.5px;font-weight:700;padding:11px;text-decoration:underline">'
+        +  (S.member ? 'Remove my number — show guest pricing' : 'Continue as a guest') + '</button>'
+        +  '</div></div>';
+    }
+
+    if (S.tableSheet){
+      h += '<div class="overlay" ' + on(()=>{ S.tableSheet=false; render(); }) + '>'
+        +  '<div class="sheet" ' + on(e=>e.stopPropagation()) + '>'
+        +  '<div class="d2">Which table are you on?</div>'
+        +  '<div style="font-size:13px;color:var(--n600);margin:5px 0 14px;line-height:1.45">It’s on the little stand in the middle of your table.</div>';
+      ['Dining','Terrace'].forEach(zone => {
+        h += '<div class="kicker" style="margin:10px 0 7px">' + (zone==='Dining'?'Dining room':'Terrace') + '</div>'
+          +  '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:7px">';
+        TABLES.filter(t=>t.zone===zone).forEach(t => {
+          const sel = S.table === t.n;
+          h += '<button ' + on(()=>{ S.table=t.n; S.tableSheet=false; showToast('Set to table ' + t.n); }) + ' class="chip" style="height:42px;background:'
+            + (sel?'var(--green)':'var(--green-100)') + ';color:' + (sel?'#fff':'var(--green-800)') + '">' + t.n + '</button>';
+        });
+        h += '</div>';
+      });
+      h += '</div></div>';
+    }
+
+    if (S.toast) h += '<div class="toast" role="status">' + esc(S.toast) + '</div>';
+    return h;
+  }
+
+  /* ── render ───────────────────────────────────────────── */
+  const scrollEl = document.getElementById('scroll');
+  const chromeEl = document.getElementById('chrome');
+  const tops = {};
+  let last = null;
+
+  function render(){
+    if (last === S.screen) tops[S.screen] = scrollEl.scrollTop;
+    const act = document.activeElement;
+    const focusedId = act && act.tagName === 'INPUT' ? act.id : null;
+    const caret = focusedId ? act.selectionStart : null;
+
+    H = {}; hid = 0;
+    const body =
+      S.screen==='menu'    ? menuScreen()    :
+      S.screen==='cart'    ? cartScreen()    :
+      S.screen==='track'   ? trackScreen()   :
+      S.screen==='floor'   ? floorScreen()   :
+      S.screen==='kitchen' ? kitchenScreen() :
+                             meScreen();
+    scrollEl.innerHTML = body;
+    chromeEl.innerHTML = chrome();
+    scrollEl.scrollTop = last === S.screen ? (tops[S.screen]||0) : 0;
+    last = S.screen;
+
+    if (focusedId){
+      const fresh = document.getElementById(focusedId);
+      if (fresh){ fresh.focus(); try { fresh.setSelectionRange(caret,caret); } catch(e){} }
+    }
+  }
+
+  function dispatch(e){
+    const t = e.target.closest && e.target.closest('[data-h]');
+    if (!t) return;
+    if (e.type === 'keydown'){
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      if (t.tagName === 'BUTTON' || t.tagName === 'INPUT') return;
+      e.preventDefault();
+    }
+    const fn = H[t.getAttribute('data-h')];
+    if (fn) fn(e);
+  }
+  document.addEventListener('click', dispatch);
+  document.addEventListener('keydown', dispatch);
+  document.addEventListener('input', e => {
+    if (e.target.id === 'note') S.sheetNote = e.target.value;
+    if (e.target.id === 'memberno') S.memberInput = e.target.value;
+  });
+
+  setInterval(() => {
+    const o = S.order;
+    if (!o || o.progress >= 1) return;
+    o.progress = Math.min(1, o.progress + 0.014);
+    const done = o.progress >= 1;
+    if (S.itemSheet || S.dietSheet || S.tableSheet || S.memberSheet) return;
+    if (done){ showToast('Served — enjoy!'); return; }
+    if (S.screen==='track' || S.screen==='floor' || S.screen==='kitchen') render();
+  }, 600);
+
+  render();
+})();
+</script>
+</body>
+</html>
