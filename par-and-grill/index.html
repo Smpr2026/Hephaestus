@@ -1,8 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f5ead8">
+<meta name="description" content="Par &amp; Grill — order Mediterranean breakfast, lunch and coffee from the course and we'll bring it to you.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Par & Grill">
 <title>Par &amp; Grill</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Caprasimo&family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
+</head>
+<body>
 <style>
   :root{
     /* Organic design system — gold-shifted. Brand-constant inside the phone. */
@@ -173,6 +184,28 @@
     *,*::before,*::after{animation-duration:.001ms!important; animation-iteration-count:1!important; transition-duration:.001ms!important}
   }
   ::selection{background:var(--gold-200)}
+
+  /* ── Real phones: drop the mockup, be the app ──────────────
+     The device frame is a presentation device for desktop. On a
+     handset the app should own the whole screen, so the bezel,
+     fake status bar and home indicator all come off. */
+  @media (max-width: 700px){
+    body{
+      display:block; padding:0; gap:0;
+      background:var(--ground); min-height:auto;
+    }
+    .stage-note{display:none}
+    .device{
+      width:100%; max-width:none; border-radius:0; box-shadow:none;
+      height:100vh; height:100dvh;
+    }
+    .island, .statusbar, .homebar{display:none}
+    /* 72px of top padding existed to clear the fake status bar. */
+    .screen{padding-top:calc(env(safe-area-inset-top, 0px) + 18px)}
+    .nav{padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 12px)}
+    .cartbar{bottom:calc(env(safe-area-inset-bottom, 0px) + 86px)}
+    .toast{bottom:calc(env(safe-area-inset-bottom, 0px) + 104px)}
+  }
 </style>
 
 <div class="stage-note">
@@ -881,3 +914,6 @@
   render();
 })();
 </script>
+
+</body>
+</html>
