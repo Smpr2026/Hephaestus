@@ -180,27 +180,24 @@
   @keyframes pgtoast{from{transform:translate(-50%,14px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
   @keyframes pgsheet{from{transform:translateY(40px);opacity:0}to{transform:translateY(0);opacity:1}}
   .pulse{animation:pgpulse 1.6s ease-out infinite}
+  /* Comfortable touch targets on a handset. */
+  @media (max-width: 700px){
+    .addbtn{width:42px; height:42px; font-size:23px}
+    .item{padding:15px 0}
+    .stepper button{width:34px; height:34px}
+    .nav button{padding:8px 0}
+  }
   @media (prefers-reduced-motion:reduce){
     *,*::before,*::after{animation-duration:.001ms!important; animation-iteration-count:1!important; transition-duration:.001ms!important}
   }
   ::selection{background:var(--gold-200)}
 
-  /* ── Real phones: drop the mockup, be the app ──────────────
-     The device frame is a presentation device for desktop. On a
-     handset the app should own the whole screen, so the bezel,
-     fake status bar and home indicator all come off. */
+  /* ── Real phones: drop the mockup, be the app ────────────── */
   @media (max-width: 700px){
-    body{
-      display:block; padding:0; gap:0;
-      background:var(--ground); min-height:auto;
-    }
+    body{display:block; padding:0; gap:0; background:var(--ground); min-height:auto}
     .stage-note{display:none}
-    .device{
-      width:100%; max-width:none; border-radius:0; box-shadow:none;
-      height:100vh; height:100dvh;
-    }
+    .device{width:100%; max-width:none; border-radius:0; box-shadow:none; height:100vh; height:100dvh}
     .island, .statusbar, .homebar{display:none}
-    /* 72px of top padding existed to clear the fake status bar. */
     .screen{padding-top:calc(env(safe-area-inset-top, 0px) + 18px)}
     .nav{padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 12px)}
     .cartbar{bottom:calc(env(safe-area-inset-bottom, 0px) + 86px)}
@@ -349,7 +346,7 @@
   const S = {
     screen:'menu', meal:'breakfast', lines:[], hole:6, gpsHole:6, holeSheet:false,
     mode:'come', targetHole:8, pay:'apple', order:null, toast:null,
-    itemSheet:null, sheetSel:[], sheetNote:'', sheetQty:1,
+    itemSheet:null, sheetSel:[], sheetNote:'', sheetQty:1, editLine:null,
     dietSheet:false, diet:['Egg allergy'],
     kitchen:[
       {num:'#212', who:'Dave P. · single rider', hole:3, items:'2× Greek Frappe · 1× Tiropita', note:'Frappe with oat milk — dairy allergy', status:1, placed:4},
@@ -441,9 +438,9 @@
         const tint = tints[(ti++) % 3];
         const conflicts = conflictsFor(it, []);
         const fixable = conflicts.length > 0 && conflicts.every(a => it.mods.some(m => m.clears === a));
-        const openSheet = () => { S.itemSheet = it.id; S.sheetSel = []; S.sheetNote = ''; S.sheetQty = 1; render(); };
+        const openSheet = () => { S.itemSheet = it.id; S.sheetSel = []; S.sheetNote = ''; S.sheetQty = 1; S.editLine = null; render(); };
 
-        h += '<div ' + on(openSheet) + ' class="item" role="button" tabindex="0" style="opacity:' + (conflicts.length ? '.88' : '1') + '">'
+        h += '<div ' + on(openSheet) + ' class="item" role="button" tabindex="0">'
           +  '<div class="avatar" style="background:' + tint[0] + ';color:' + tint[1] + '">' + esc(initials(it.name)) + '</div>'
           +  '<div style="flex:1;min-width:0">'
           +  '<div style="font-weight:600;font-size:15px">' + esc(it.name) + '</div>'
@@ -455,9 +452,11 @@
         h += '</div><div style="font-weight:600;font-size:14px">' + fmt(it.price) + '</div>'
           +  '<button aria-label="Add ' + esc(it.name) + '" ' + on(e => {
                e.stopPropagation();
-               if (conflicts.length){ openSheet(); showToast('Check the allergy flag first'); return; }
-               addLine(it.id, 1, [], ''); showToast(it.name + ' added');
-             }) + ' class="addbtn" style="background:' + (conflicts.length ? 'var(--n400)' : 'var(--gold)') + '">+</button></div>';
+               addLine(it.id, 1, [], '');
+               showToast(conflicts.length
+                 ? it.name + ' added — contains ' + conflicts.join(' & ').toLowerCase() + ', kitchen flagged'
+                 : it.name + ' added');
+             }) + ' class="addbtn" style="background:var(--gold)">+</button></div>';
       });
       h += '</div>';
     });
@@ -478,10 +477,15 @@
     S.lines.forEach((l, li) => {
       const it = findItem(l.id);
       const modsStr = l.mods.concat([l.note]).filter(Boolean).join(' · ');
-      h += '<div class="row" style="gap:12px;padding:13px 0;border-bottom:1px solid rgba(32,30,29,.07)">'
-        +  '<div style="flex:1;min-width:0"><div style="font-weight:600;font-size:14.5px">' + esc(it.name) + '</div>'
+      const editLine = () => { S.itemSheet = l.id; S.sheetSel = l.mods.slice(); S.sheetNote = l.note; S.sheetQty = l.qty; S.editLine = li; render(); };
+      h += '<div class="row" style="gap:10px;padding:13px 0;border-bottom:1px solid rgba(32,30,29,.07)">'
+        +  '<div ' + on(editLine) + ' role="button" tabindex="0" style="flex:1;min-width:0;cursor:pointer">'
+        +  '<div style="font-weight:600;font-size:14.5px">' + esc(it.name) + '</div>'
         +  (modsStr ? '<div style="font-size:12px;color:var(--gold-700);font-weight:600;margin-top:1px">' + esc(modsStr) + '</div>' : '')
-        +  '<div style="font-size:12.5px;color:var(--n700)">' + fmt(it.price) + ' each</div></div>'
+        +  '<div style="font-size:12.5px;color:var(--n700)">' + fmt(it.price) + ' each</div>'
+        +  '<span style="display:inline-flex;align-items:center;gap:4px;margin-top:5px;font-size:12px;font-weight:700;color:var(--gold-700)">'
+        +  '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4l10-10-4-4L4 16z"></path></svg>'
+        +  'Change this</span></div>'
         +  '<div class="stepper">'
         +  '<button aria-label="One fewer" ' + on(() => { S.lines = S.lines.map((x,i) => i === li ? Object.assign({},x,{qty:x.qty-1}) : x).filter(x => x.qty > 0); render(); }) + '>−</button>'
         +  '<span>' + l.qty + '</span>'
@@ -766,13 +770,14 @@
     /* item customise sheet */
     if (S.itemSheet){
       const it = findItem(S.itemSheet);
+      const editing = S.editLine !== null;
       const conf = conflictsFor(it, S.sheetSel);
       const hadConf = conflictsFor(it, []).length > 0;
       const warn = conf.length
         ? 'Contains ' + conf.join(' & ').toLowerCase() + ' — your profile flags this. Pick a swap below or skip it.'
         : (hadConf ? 'Sorted — safe with your changes.' : '');
 
-      h += '<div class="overlay" ' + on(() => { S.itemSheet = null; render(); }) + '>'
+      h += '<div class="overlay" ' + on(() => { S.itemSheet = null; S.editLine = null; render(); }) + '>'
         +  '<div class="sheet" ' + on(e => e.stopPropagation()) + '>'
         +  '<div class="row" style="align-items:baseline;justify-content:space-between">'
         +  '<div class="d2">' + esc(it.name) + '</div><div style="font-weight:700;font-size:15px">' + fmt(it.price) + '</div></div>'
@@ -803,14 +808,29 @@
         +  '<span style="font-size:15px;min-width:16px">' + S.sheetQty + '</span>'
         +  '<button aria-label="One more" ' + on(() => { S.sheetQty = S.sheetQty + 1; render(); }) + ' style="width:32px;height:32px;font-size:17px">+</button></div>'
         +  '<button ' + on(() => {
-             const msg = conf.length
-               ? 'Still contains ' + conf.join(' & ').toLowerCase() + ' — added with a kitchen flag'
-               : (S.sheetSel.length || S.sheetNote.trim()) ? it.name + ' added — noted for the kitchen'
-               : it.name + ' added';
-             addLine(S.itemSheet, S.sheetQty, S.sheetSel, S.sheetNote.trim());
-             S.itemSheet = null;
+             const mods = S.sheetSel.slice(), note = S.sheetNote.trim();
+             let msg;
+             if (editing){
+               S.lines[S.editLine] = { id:S.itemSheet, qty:S.sheetQty, mods:mods, note:note };
+               msg = it.name + ' updated';
+             } else {
+               addLine(S.itemSheet, S.sheetQty, mods, note);
+               msg = conf.length
+                 ? 'Still contains ' + conf.join(' & ').toLowerCase() + ' — added with a kitchen flag'
+                 : (mods.length || note) ? it.name + ' added — noted for the kitchen'
+                 : it.name + ' added';
+             }
+             S.itemSheet = null; S.editLine = null;
              showToast(msg);
-           }) + ' class="primary" style="flex:1;padding:14px;font-size:15px;box-shadow:none">Add to order · ' + fmt(it.price * S.sheetQty) + '</button></div>';
+           }) + ' class="primary" style="flex:1;padding:14px;font-size:15px;box-shadow:none">'
+        +  (editing ? 'Save changes · ' : 'Add to order · ') + fmt(it.price * S.sheetQty) + '</button></div>'
+        +  (editing
+             ? '<button ' + on(() => {
+                 S.lines.splice(S.editLine, 1);
+                 S.itemSheet = null; S.editLine = null;
+                 showToast(it.name + ' removed');
+               }) + ' style="margin-top:10px;width:100%;border:none;background:none;color:var(--n700);font-size:13.5px;font-weight:700;padding:10px;text-decoration:underline">Remove from order</button>'
+             : '');
 
       h += '</div></div>';
     }
@@ -902,13 +922,18 @@
   document.addEventListener('keydown', dispatch);
   document.addEventListener('input', e => { if (e.target.id === 'note') S.sheetNote = e.target.value; });
 
-  /* order auto-advances, same cadence as the design */
+  /* Order auto-advances, same cadence as the design. Re-rendering replaces
+     the whole screen, so only do it when the visible screen actually shows
+     order progress and no sheet is open — otherwise a redraw landing between
+     finger-down and finger-up swallows the tap. */
   setInterval(() => {
     const o = S.order;
     if (!o || o.progress >= 1) return;
     o.progress = Math.min(1, o.progress + 0.016);
-    if (o.progress >= 1) showToast('Delivered — enjoy out there!');
-    else render();
+    const done = o.progress >= 1;
+    if (S.itemSheet || S.dietSheet || S.holeSheet) return;
+    if (done) { showToast('Delivered — enjoy out there!'); return; }
+    if (S.screen === 'track' || S.screen === 'course' || S.screen === 'kitchen') render();
   }, 600);
 
   render();
