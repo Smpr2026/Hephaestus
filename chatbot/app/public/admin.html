@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMPR chatbot — knowledge base</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,-apple-system,sans-serif;background:#F3F4F6;color:#111827;line-height:1.55}
+  header{background:#fff;border-bottom:1px solid #E5E7EB;padding:16px 24px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:5}
+  header h1{font-size:16px;margin:0;font-weight:600}
+  .pill{font-size:11px;font-weight:600;padding:4px 10px;border-radius:999px;background:#E8F0FB;color:#083B78}
+  .pill.local{background:#FEF3C7;color:#92400E}
+  .save{margin-left:auto;padding:9px 18px;border:0;border-radius:9px;background:#0A4FA0;color:#fff;font:600 14px Inter,sans-serif;cursor:pointer}
+  .save:disabled{background:#9CA3AF;cursor:default}
+  .saved{font-size:13px;color:#0F7B43;font-weight:600}
+  main{max-width:1080px;margin:0 auto;padding:24px}
+  .tabs{display:flex;gap:6px;margin-bottom:18px}
+  .tabs button{font:inherit;font-size:13px;padding:8px 16px;border-radius:999px;border:1px solid #E5E7EB;background:#fff;color:#4B5563;cursor:pointer}
+  .tabs button.on{background:#0A4FA0;border-color:#0A4FA0;color:#fff}
+  .panel{background:#fff;border:1px solid #E5E7EB;border-radius:12px;overflow:hidden}
+  .panel[hidden]{display:none}
+  .hint{padding:14px 18px;border-bottom:1px solid #E5E7EB;font-size:13px;color:#4B5563;background:#FCFCFD}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#9CA3AF;padding:10px 14px;border-bottom:1px solid #E5E7EB}
+  td{padding:7px 14px;border-bottom:1px solid #F3F4F6}
+  td input[type=number]{width:82px}
+  td.quoted{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;white-space:nowrap;color:#0A4FA0;font-weight:600}
+  input[type=text],input[type=number],textarea{font:inherit;font-size:13px;padding:7px 9px;border:1px solid #E5E7EB;border-radius:7px;width:100%;outline:none}
+  input:focus,textarea:focus{border-color:#0A4FA0}
+  .blank{background:#FEF3C7}
+  .search{padding:12px 14px;border-bottom:1px solid #E5E7EB}
+  .intent{padding:14px 18px;border-bottom:1px solid #F3F4F6}
+  .intent .q{font-size:13px;font-weight:600;margin-bottom:2px}
+  .intent .cat{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:#9CA3AF;margin-bottom:6px}
+  .intent textarea{min-height:66px;resize:vertical}
+  .try{display:flex;gap:8px;padding:14px 18px}
+  .try input{flex:1}
+  .try button{padding:8px 16px;border:0;border-radius:8px;background:#111827;color:#fff;font:600 13px Inter,sans-serif;cursor:pointer}
+  .out{padding:0 18px 18px;font-size:13px}
+  .out .ans{background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:12px 14px;white-space:pre-wrap}
+  .out .via{font-size:11px;color:#9CA3AF;margin-top:6px}
+  .grid2{display:grid;grid-template-columns:180px 1fr;gap:10px 16px;padding:18px;align-items:center;font-size:13px}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>SMPR chatbot — knowledge base</h1>
+  <span class="pill" id="engine">…</span>
+  <span class="pill" id="counts"></span>
+  <span class="saved" id="saved" hidden>Saved ✓</span>
+  <button class="save" id="saveBtn" disabled>Save changes</button>
+</header>
+
+<main>
+  <div class="tabs">
+    <button data-tab="prices" class="on">Prices</button>
+    <button data-tab="answers">Answers</button>
+    <button data-tab="business">Shop details</button>
+    <button data-tab="try">Try it</button>
+    <button data-tab="gaps">Gaps</button>
+  </div>
+
+  <div class="panel" id="tab-prices">
+    <div class="hint">
+      Enter what the <strong>part costs you, ex GST</strong>. The retail price is worked out for you:
+      <code>(cost + <span id="labourVal"></span>) &times; <span id="gstVal"></span></code>, rounded <strong>up</strong> to the nearest $5.
+      Highlighted rows have no cost yet, so the bot tells the customer to call rather than guessing.
+    </div>
+    <table><thead><tr>
+      <th>Model</th><th>Repair</th>
+      <th>Soft cost</th><th>Diagnostic cost</th><th>Genuine cost</th>
+      <th>Quoted</th><th>Checked</th>
+    </tr></thead>
+    <tbody id="priceRows"></tbody></table>
+  </div>
+
+  <div class="panel" id="tab-answers" hidden>
+    <div class="hint">Edit what the bot says. <code>{{phone}}</code>, <code>{{addressShort}}</code>, <code>{{hoursSummary}}</code> and <code>{{warranty}}</code> get filled in automatically.</div>
+    <div class="search"><input type="text" id="filter" placeholder="Filter answers…"></div>
+    <div id="intentList"></div>
+  </div>
+
+  <div class="panel" id="tab-business" hidden>
+    <div class="hint">The details every answer is built from. Change them here and every answer updates.</div>
+    <div class="grid2" id="bizGrid"></div>
+  </div>
+
+  <div class="panel" id="tab-gaps" hidden>
+    <div class="hint">
+      Questions customers asked that the bot couldn't answer, most-asked first.
+      This list is how it learns: each row is either a price to fill in, an answer to add,
+      or a product to stock. Clear a row by fixing the thing it points at.
+    </div>
+    <div id="gapList"></div>
+  </div>
+
+  <div class="panel" id="tab-try" hidden>
+    <div class="hint">Ask the bot anything, exactly as a customer would type it.</div>
+    <div class="try">
+      <input type="text" id="tryInput" placeholder="how much for an iphone 13 screen">
+      <button id="tryBtn">Ask</button>
+    </div>
+    <div class="out" id="tryOut"></div>
+  </div>
+</main>
+
+<script>
+let KB = null, dirty = false;
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+function markDirty(){ dirty = true; $('#saveBtn').disabled = false; $('#saved').hidden = true; }
+
+async function boot(){
+  KB = await (await fetch('/api/kb')).json();
+  const st = await (await fetch('/api/status')).json();
+  $('#engine').textContent = st.engine === 'claude' ? 'Claude · ' + st.model : 'Local matcher';
+  $('#engine').className = 'pill' + (st.engine === 'claude' ? '' : ' local');
+  $('#counts').textContent = st.intents + ' answers · ' + st.pricesFilled + '/' + st.pricesTotal + ' prices filled';
+  renderPrices(); renderIntents(); renderBusiness();
+}
+
+const TIERS = ['soft', 'diagnostic', 'genuine'];
+
+function retail(cost){
+  if (cost == null || cost === '') return null;
+  const f = KB.pricing.formula;
+  const raw = (Number(cost) + f.labour) * f.gstMultiplier;
+  return f.roundUpTo ? Math.ceil(raw / f.roundUpTo) * f.roundUpTo : Math.round(raw * 100) / 100;
+}
+function money(n){ return n == null ? '—' : '$' + (n % 1 === 0 ? n : n.toFixed(2)); }
+
+function quotedText(row){
+  const prices = TIERS.map(t => retail(row.costs?.[t])).filter(v => v != null);
+  return prices.length ? prices.map(money).join(' / ') : '—';
+}
+
+function hasCost(row){ return TIERS.some(t => row.costs?.[t] != null); }
+
+function renderPrices(){
+  $('#labourVal').textContent = '$' + KB.pricing.formula.labour;
+  $('#gstVal').textContent = KB.pricing.formula.gstMultiplier;
+
+  const tb = $('#priceRows');
+  tb.innerHTML = '';
+  KB.pricing.repairs.forEach((r, i) => {
+    r.costs = r.costs || {};
+    const tr = document.createElement('tr');
+    if (!hasCost(r)) tr.className = 'blank';
+    tr.innerHTML =
+      '<td>' + esc(r.model) + '</td><td>' + esc(r.repair) + '</td>' +
+      TIERS.map(t => '<td><input type="number" step="0.01" data-i="' + i + '" data-t="' + t +
+                     '" value="' + (r.costs[t] ?? '') + '"></td>').join('') +
+      '<td class="quoted">' + quotedText(r) + '</td>' +
+      '<td><input type="checkbox" data-i="' + i + '" data-f="verified"' + (r.verified ? ' checked' : '') + '></td>';
+    tb.appendChild(tr);
+  });
+
+  tb.querySelectorAll('input').forEach(inp => inp.addEventListener('input', e => {
+    const { i, t, f } = e.target.dataset;
+    const row = KB.pricing.repairs[i];
+    if (f === 'verified') row.verified = e.target.checked;
+    else if (e.target.value === '') delete row.costs[t];
+    else row.costs[t] = Number(e.target.value);
+
+    const tr = e.target.closest('tr');
+    tr.className = hasCost(row) ? '' : 'blank';
+    tr.querySelector('.quoted').textContent = quotedText(row);
+    markDirty();
+  }));
+}
+
+function renderIntents(filter=''){
+  const list = $('#intentList');
+  const q = filter.toLowerCase();
+  list.innerHTML = '';
+  KB.intents.forEach((it, i) => {
+    if (q && !(it.q + ' ' + it.answer + ' ' + it.category).toLowerCase().includes(q)) return;
+    const d = document.createElement('div');
+    d.className = 'intent';
+    d.innerHTML = '<div class="cat">' + esc(it.category) + '</div><div class="q">' + esc(it.q) + '</div>' +
+                  '<textarea data-i="' + i + '">' + esc(it.answer) + '</textarea>';
+    list.appendChild(d);
+  });
+  list.querySelectorAll('textarea').forEach(t => t.addEventListener('input', e => {
+    KB.intents[e.target.dataset.i].answer = e.target.value;
+    markDirty();
+  }));
+}
+
+function renderBusiness(){
+  const fields = ['name','phone','phoneDial','email','address','addressShort','hoursSummary','warranty','website'];
+  const g = $('#bizGrid');
+  g.innerHTML = '';
+  fields.forEach(f => {
+    g.insertAdjacentHTML('beforeend',
+      '<label for="biz-' + f + '">' + f + '</label>' +
+      '<input type="text" id="biz-' + f + '" data-f="' + f + '" value="' + esc(KB.business[f] ?? '') + '">');
+  });
+  g.querySelectorAll('input').forEach(inp => inp.addEventListener('input', e => {
+    KB.business[e.target.dataset.f] = e.target.value;
+    markDirty();
+  }));
+}
+
+$('#filter').addEventListener('input', e => renderIntents(e.target.value));
+
+document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.tabs button').forEach(x => x.className = '');
+  b.className = 'on';
+  ['prices','answers','business','try','gaps'].forEach(t => {
+    document.getElementById('tab-' + t).hidden = (t !== b.dataset.tab);
+  });
+}));
+
+$('#saveBtn').addEventListener('click', async () => {
+  $('#saveBtn').disabled = true;
+  const r = await fetch('/api/kb', {
+    method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify(KB)
+  });
+  if (r.ok) { dirty = false; $('#saved').hidden = false; boot(); }
+  else { alert('Save failed: ' + (await r.text())); $('#saveBtn').disabled = false; }
+});
+
+async function loadGaps(){
+  const rows = await (await fetch('/api/gaps')).json();
+  const el = $('#gapList');
+  if (!rows.length) { el.innerHTML = '<div class="intent">Nothing yet — every question so far got an answer.</div>'; return; }
+  el.innerHTML = rows.map(r =>
+    '<div class="intent"><div class="cat">asked ' + r.n + ' time' + (r.n === 1 ? '' : 's') +
+    ' · ' + esc(r.intent || '') + '</div><div class="q">' + esc(r.q) + '</div></div>').join('');
+}
+document.querySelector('[data-tab=gaps]').addEventListener('click', loadGaps);
+
+async function tryIt(){
+  const q = $('#tryInput').value.trim();
+  if (!q) return;
+  $('#tryOut').innerHTML = '<div class="ans">…</div>';
+  const res = await (await fetch('/api/chat', {
+    method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ message: q })
+  })).json();
+  let html = '<div class="ans">' + esc(res.text);
+  if (res.card) {
+    html += '\n\n' + esc(res.card.title);
+    res.card.rows.forEach(r => { html += '\n  ' + esc(r[0]) + ': ' + esc(r[1]); });
+  }
+  html += '</div><div class="via">via ' + esc(res.engine) + (res.intent ? ' · ' + esc(res.intent) : '') + '</div>';
+  $('#tryOut').innerHTML = html;
+}
+$('#tryBtn').addEventListener('click', tryIt);
+$('#tryInput').addEventListener('keydown', e => { if (e.key === 'Enter') tryIt(); });
+
+window.addEventListener('beforeunload', e => { if (dirty) e.preventDefault(); });
+boot();
+</script>
+</body>
+</html>
